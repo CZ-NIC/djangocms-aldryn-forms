@@ -1,6 +1,6 @@
 import logging
 
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from .action_backends_base import BaseAction
 
@@ -15,6 +15,7 @@ class DefaultAction(BaseAction):
         recipients = cmsplugin.send_notifications(instance, form)
         form.instance.set_recipients(recipients)
         form.save()
+        cmsplugin.send_success_message(instance, request)
 
 
 class EmailAction(BaseAction):
@@ -22,7 +23,7 @@ class EmailAction(BaseAction):
 
     def form_valid(self, cmsplugin, instance, request, form):
         recipients = cmsplugin.send_notifications(instance, form)
-        logger.info('Sent email notifications to {} recipients.'.format(len(recipients)))
+        logger.info(f'Sent email notifications to {len(recipients)} recipients.')
         cmsplugin.send_success_message(instance, request)
 
 
@@ -31,4 +32,4 @@ class NoAction(BaseAction):
 
     def form_valid(self, cmsplugin, instance, request, form):
         form_id = form.form_plugin.id
-        logger.info('Not persisting data for "{}" since action_backend is set to "none"'.format(form_id))
+        logger.info(f'Not persisting data for "{form_id}" since action_backend is set to "none"')

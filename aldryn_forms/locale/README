@@ -1,0 +1,1 @@
+msgattrib --sort-output --no-location --no-obsolete --no-fuzzy $FILE_PO > $FILE_MO

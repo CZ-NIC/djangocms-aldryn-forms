@@ -1,14 +1,10 @@
 import operator
 import re
-import sys
 
 from django.conf import settings
 from django.utils import formats
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
-
-if sys.version_info >= (3, 0):
-    xrange = range
 
 SIZEFIELD_FORMAT = getattr(settings, 'SIZEFIELD_FORMAT', '{value}{unit}')
 
@@ -45,7 +41,7 @@ def filesizeformat(bytes, decimals=1):
 
     value = unit = None
     len_unints_list = len(units_list)
-    for i in xrange(1, len_unints_list):
+    for i in range(1, len_unints_list):
         if bytes < units_list[i][1]:
             prev_unit = units_list[i - 1]
             value = filesize_number_format(bytes / prev_unit[1])

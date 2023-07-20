@@ -1,22 +1,22 @@
+from distutils.command.build import build
+
 from setuptools import find_packages, setup
 
 from aldryn_forms import __version__
 
 
 REQUIREMENTS = [
-    'django>=2.0.0,<3.0.0',
-    'aldryn-boilerplates>=0.7.5',
-    'django-cms>=3.5',
+    'django-cms>=3.11',
     'django-emailit',
     'djangocms-text-ckeditor',
     'djangocms-attributes-field>=1.0.0',
     'django-tablib',
     'tablib',
-    'pillow',
     'django-filer',
     'django-sizefield',
-    'six>=1.0',
     'markdown',
+    'Pillow',
+    'Babel',
 ]
 
 
@@ -27,12 +27,14 @@ CLASSIFIERS = [
     'License :: OSI Approved :: BSD License',
     'Operating System :: OS Independent',
     'Framework :: Django',
-    'Framework :: Django :: 2.2',
+    'Framework :: Django :: 3.2',
+    'Framework :: Django :: 4.0',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.4',
-    'Programming Language :: Python :: 3.5',
-    'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
     'Topic :: Internet :: WWW/HTTP',
     'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     'Topic :: Software Development',
@@ -40,15 +42,20 @@ CLASSIFIERS = [
 ]
 
 
+class CustomBuild(build):
+    sub_commands = [('compile_catalog', lambda x: True)] + build.sub_commands
+
+
 setup(
-    name='aldryn-forms',
+    name='djangocms-aldryn-forms',
     version=__version__,
     author='Divio AG',
     author_email='info@divio.ch',
-    url='https://github.com/aldryn/aldryn-forms',
+    url='https://github.com/CZ-NIC/djangocms-aldryn-forms',
     license='BSD',
-    description='Create forms and embed them on CMS pages',
+    description='Create forms and embed them on CMS pages.',
     long_description=open('README.rst').read(),
+    long_description_content_type='text/x-rst',
     packages=find_packages(exclude=['tests']),
     include_package_data=True,
     zip_safe=False,
@@ -56,6 +63,7 @@ setup(
     extras_require={
         'captcha': ['django-simple-captcha'],
     },
+    cmdclass={'build': CustomBuild},
     classifiers=CLASSIFIERS,
     test_suite='tests.settings.run',
 )

@@ -29,12 +29,7 @@
                 <p>{% blocktrans %}Thank you for submitting your information.{% endblocktrans %}</p>
             {% endif %}
         </div>
-        {% if form_success_url %}
-        <p class="aldryn-form-redirected-shortly">
-            {% blocktrans %}You will be <a href="{{ form_success_url }}">redirected shortly</a>.{% endblocktrans %}
-        </p>
-    {% endif %}
-{% else %}
+    {% else %}
         {% csrf_token %}
         {% for plugin in instance.child_plugin_instances %}
             {% render_plugin plugin %}

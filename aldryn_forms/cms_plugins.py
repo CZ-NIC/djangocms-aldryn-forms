@@ -1,7 +1,6 @@
-from typing import Dict
 import re
+from typing import Dict
 
-from PIL import Image
 from django import forms
 from django.conf import settings
 from django.contrib import messages
@@ -10,8 +9,8 @@ from django.core.validators import MinLengthValidator
 from django.db.models import query
 from django.template.loader import select_template
 from django.utils.safestring import mark_safe
-from django.utils.translation import get_language, ugettext
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import get_language, gettext
+from django.utils.translation import gettext_lazy as _
 
 from cms.plugin_base import CMSPluginBase
 from cms.plugin_pool import plugin_pool
@@ -20,24 +19,21 @@ import markdown
 from emailit.api import send_mail
 from emailit.utils import get_template_names
 from filer.models import filemodels, imagemodels
+from PIL import Image
 
 from . import models
 from .forms import (
-    BooleanFieldForm, CaptchaFieldForm, DateFieldForm, DateTimeFieldForm,
-    EmailFieldForm, FileFieldForm, FormPluginForm, FormSubmissionBaseForm,
-    HiddenFieldForm, ImageFieldForm, MultipleSelectFieldForm, RadioFieldForm,
-    RestrictedFileField, RestrictedImageField, RestrictedMultipleFilesField,
-    SelectFieldForm, TextAreaFieldForm, TextFieldForm, TimeFieldForm,
+    BooleanFieldForm, CaptchaFieldForm, DateFieldForm, DateTimeFieldForm, EmailFieldForm, FileFieldForm, FormPluginForm,
+    FormSubmissionBaseForm, HiddenFieldForm, ImageFieldForm, MultipleSelectFieldForm, RadioFieldForm,
+    RestrictedFileField, RestrictedImageField, RestrictedMultipleFilesField, SelectFieldForm, TextAreaFieldForm,
+    TextFieldForm, TimeFieldForm,
 )
 from .helpers import get_user_name
 from .models import SerializedFormField
-from .signals import form_post_save
-from .signals import form_pre_save
+from .signals import form_post_save, form_pre_save
 from .sizefield.utils import filesizeformat
 from .utils import get_action_backends
-from .validators import MaxChoicesValidator
-from .validators import MinChoicesValidator
-from .validators import is_valid_recipient
+from .validators import MaxChoicesValidator, MinChoicesValidator, is_valid_recipient
 
 
 class FormElement(CMSPluginBase):
@@ -82,7 +78,7 @@ class FormPlugin(FieldContainer):
     )
 
     def render(self, context, instance, placeholder):
-        context = super(FormPlugin, self).render(context, instance, placeholder)
+        context = super().render(context, instance, placeholder)
         request = context['request']
 
         form = self.process_form(instance, request)
@@ -200,7 +196,7 @@ class FormPlugin(FieldContainer):
         if instance.success_message:
             message = markdown.markdown(instance.success_message)
         else:
-            message = ugettext('The form has been sent.')
+            message = gettext('The form has been sent.')
         messages.success(request, mark_safe(message))
 
     def send_notifications(self, instance, form):
@@ -224,7 +220,7 @@ class FormPlugin(FieldContainer):
                     break
 
         subject_template_base = getattr(settings, 'ALDRYN_FORMS_EMAIL_SUBJECT_TEMPLATES_BASE',
-            getattr(settings, 'ALDRYN_FORMS_EMAIL_TEMPLATES_BASE', None))
+                                        getattr(settings, 'ALDRYN_FORMS_EMAIL_TEMPLATES_BASE', None))
         if subject_template_base:
             language = instance.language or get_language()
             subject_templates = get_template_names(language, subject_template_base, 'subject', 'txt')
@@ -278,7 +274,7 @@ class Fieldset(FieldContainer):
         template_names = ['aldryn_forms/fieldset.html']
 
         if form_plugin:
-            template = 'aldryn_forms/{}/fieldset.html'.format(form_plugin.plugin_type.lower())
+            template = f'aldryn_forms/{form_plugin.plugin_type.lower()}/fieldset.html'
             template_names.insert(0, template)
         return template_names
 
@@ -318,7 +314,7 @@ class Field(FormElement):
 
     def serialize_value(self, instance, value, is_confirmation=False):
         if isinstance(value, query.QuerySet):
-            value = u', '.join(map(str, value))
+            value = ', '.join(map(str, value))
         elif value is None:
             value = '-'
         return str(value)
@@ -395,7 +391,7 @@ class Field(FormElement):
         return {}
 
     def render(self, context, instance, placeholder):
-        context = super(Field, self).render(context, instance, placeholder)
+        context = super().render(context, instance, placeholder)
 
         form = context.get('form')
 
@@ -422,7 +418,7 @@ class Field(FormElement):
             # declaring all fields you want on the form!
             # This ends up having the same behaviour as declared_fieldsets in
             # Django <1.9 had.
-            return super(Field, self).get_fieldsets(request, obj=obj)
+            return super().get_fieldsets(request, obj=obj)
 
         fieldsets = [
             (None, {'fields': list(self.fieldset_general_fields)}),
@@ -454,7 +450,7 @@ class Field(FormElement):
 
     def get_template_names(self, instance, form_plugin=None):
         template_names = [
-            'aldryn_forms/fields/{0}.html'.format(instance.field_type),
+            f'aldryn_forms/fields/{instance.field_type}.html',
             'aldryn_forms/field.html',
         ]
 
@@ -499,7 +495,7 @@ class BaseTextField(Field):
         return validators
 
     def get_form_field_widget_attrs(self, instance):
-        attrs = super(BaseTextField, self).get_form_field_widget_attrs(instance)
+        attrs = super().get_form_field_widget_attrs(instance)
         attrs['type'] = self.form_field_widget_input_type
         return attrs
 
@@ -528,7 +524,7 @@ class TextAreaField(BaseTextField):
     ]
 
     def get_form_field_widget(self, instance):
-        widget = super(TextAreaField, self).get_form_field_widget(instance)
+        widget = super().get_form_field_widget(instance)
 
         # django adds the cols and rows attributes by default.
         # remove them if the user did not specify a value for them.
@@ -540,7 +536,7 @@ class TextAreaField(BaseTextField):
         return widget
 
     def get_form_field_widget_attrs(self, instance):
-        attrs = super(TextAreaField, self).get_form_field_widget_attrs(instance)
+        attrs = super().get_form_field_widget_attrs(instance)
 
         if instance.text_area_columns:
             attrs['cols'] = instance.text_area_columns
@@ -581,7 +577,7 @@ class DateField(BaseTextField):
     ]
 
     def get_form_field_widget_attrs(self, instance):
-        attrs = super(DateField, self).get_form_field_widget_attrs(instance)
+        attrs = super().get_form_field_widget_attrs(instance)
         if instance.earliest_date is not None:
             attrs['min'] = instance.earliest_date.isoformat()
         if instance.latest_date is not None:
@@ -610,7 +606,7 @@ class DateTimeLocalField(BaseTextField):
     ]
 
     def get_form_field_widget_attrs(self, instance):
-        attrs = super(DateTimeLocalField, self).get_form_field_widget_attrs(instance)
+        attrs = super().get_form_field_widget_attrs(instance)
         if instance.earliest_datetime is not None:
             attrs['min'] = instance.earliest_datetime.replace(tzinfo=None).isoformat(timespec='minutes')
         if instance.latest_datetime is not None:
@@ -636,7 +632,7 @@ class TimeField(BaseTextField):
     ]
 
     def get_form_field_widget_attrs(self, instance):
-        attrs = super(TimeField, self).get_form_field_widget_attrs(instance)
+        attrs = super().get_form_field_widget_attrs(instance)
         if instance.earliest_time is not None:
             attrs['min'] = instance.earliest_time.isoformat(timespec='minutes')
         if instance.latest_time is not None:
@@ -722,7 +718,7 @@ class FileField(Field):
     ]
 
     def get_form_field_widget_attrs(self, instance):
-        attrs = super(FileField, self).get_form_field_widget_attrs(instance)
+        attrs = super().get_form_field_widget_attrs(instance)
         if hasattr(instance, 'accepted_types') and instance.accepted_types:
             attrs['accept'] = ",".join(re.split(r"\s+", instance.accepted_types))
         if instance.max_size:
@@ -732,7 +728,7 @@ class FileField(Field):
         return attrs
 
     def get_form_field_kwargs(self, instance):
-        kwargs = super(FileField, self).get_form_field_kwargs(instance)
+        kwargs = super().get_form_field_kwargs(instance)
         if instance.max_size:
             if 'help_text' in kwargs:
                 kwargs['help_text'] = kwargs['help_text'].replace(
@@ -804,14 +800,14 @@ class MultipleFilesField(FileField):
     ]
 
     def get_form_field_widget_attrs(self, instance):
-        attrs = super(MultipleFilesField, self).get_form_field_widget_attrs(instance)
+        attrs = super().get_form_field_widget_attrs(instance)
         attrs['multiple'] = True
         if instance.max_files:
             attrs['data-max_files'] = instance.max_files
         return attrs
 
     def get_form_field_kwargs(self, instance):
-        kwargs = super(MultipleFilesField, self).get_form_field_kwargs(instance)
+        kwargs = super().get_form_field_kwargs(instance)
         if instance.max_files:
             kwargs['max_files'] = instance.max_files
         return kwargs
@@ -836,7 +832,7 @@ class ImageField(FileField):
     ]
 
     def get_form_field_kwargs(self, instance):
-        kwargs = super(ImageField, self).get_form_field_kwargs(instance)
+        kwargs = super().get_form_field_kwargs(instance)
 
         if instance.max_width:
             if 'help_text' in kwargs:
@@ -880,7 +876,7 @@ class BooleanField(Field):
     ]
 
     def serialize_value(self, instance, value, is_confirmation=False):
-        return ugettext('Yes') if value else ugettext('No')
+        return gettext('Yes') if value else gettext('No')
 
 
 class SelectOptionInline(TabularInline):
@@ -914,7 +910,7 @@ class SelectField(Field):
     inlines = [SelectOptionInline]
 
     def get_form_field_kwargs(self, instance):
-        kwargs = super(SelectField, self).get_form_field_kwargs(instance)
+        kwargs = super().get_form_field_kwargs(instance)
         kwargs['queryset'] = instance.option_set.all()
         for opt in kwargs['queryset']:
             if opt.default_value:
@@ -954,7 +950,7 @@ class MultipleSelectField(SelectField):
         return validators
 
     def get_form_field_kwargs(self, instance):
-        kwargs = super(MultipleSelectField, self).get_form_field_kwargs(instance)
+        kwargs = super().get_form_field_kwargs(instance)
         if hasattr(instance, 'min_value') and instance.min_value == 0:
             kwargs['required'] = False
 
@@ -993,7 +989,7 @@ class RadioSelectField(Field):
     inlines = [SelectOptionInline]
 
     def get_form_field_kwargs(self, instance):
-        kwargs = super(RadioSelectField, self).get_form_field_kwargs(instance)
+        kwargs = super().get_form_field_kwargs(instance)
         kwargs['queryset'] = instance.option_set.all()
         kwargs['empty_label'] = None
         for opt in kwargs['queryset']:
@@ -1035,6 +1031,7 @@ class SubmitButton(FormElement):
     model = models.FormButtonPlugin
 
 
+plugin_pool.register_plugin(FormPlugin)
 plugin_pool.register_plugin(BooleanField)
 plugin_pool.register_plugin(EmailField)
 plugin_pool.register_plugin(EmailIntoFromField)

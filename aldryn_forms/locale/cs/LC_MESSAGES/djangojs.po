@@ -11,41 +11,35 @@ msgstr ""
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Zdeněk Böhm <zdenek.bohm@nic.cz>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 
-#: static/aldryn_forms/js/aldryn_forms.js:1 static/aldryn_forms/js/main.js:1
-#: static/aldryn_forms/js/src/form.js:62
-msgid "Please wait. Submitting form..."
-msgstr "Prosím čekejte. Formulář se odesílá..."
-
-#: static/aldryn_forms/js/aldryn_forms.js:1 static/aldryn_forms/js/main.js:1
-#: static/aldryn_forms/js/src/form.js:71
 msgid "Correct the errors first, please."
 msgstr "Prosím, nejdříve opravte chyby."
-
-#: static/aldryn_forms/js/aldryn_forms.js:1
-msgid "This field is required."
-msgstr "Toto pole je povinné."
-
-#: static/aldryn_forms/js/main.js:1 static/aldryn_forms/js/src/form.js:50
-msgid "You have to choose at least %(value)s options (chosen %(chosen)s)."
-msgstr "Musíte vybrat nejméně %(value)s položek (vybráno %(chosen)s)."
 
 msgid "Ctrl-click to select multiple files."
 msgstr "Více souborů vyberete se stisknutou klávesou Ctrl."
 
-msgid "The file type is not among the accpeted types."
-msgstr "Typ souboru není mezi povolenými typy."
+msgid "Please wait. Submitting form..."
+msgstr "Prosím čekejte. Formulář se odesílá..."
 
 msgid "The file is larger than allowed."
 msgstr "Soubor je větší než je povoleno."
 
-msgid "This file exceeds the uploaded files limit."
-msgstr "Tento soubor překračuje limit souborů pro nahrání."
+msgid "The file type is not among the accpeted types."
+msgstr "Typ souboru není mezi povolenými typy."
 
 msgid "The total file size has exceeded the specified limit."
 msgstr "Celková velikost souborů přesáhla stanovený limit."
+
+msgid "This field is required."
+msgstr "Toto pole je povinné."
+
+msgid "This file exceeds the uploaded files limit."
+msgstr "Tento soubor překračuje limit souborů pro nahrání."
+
+msgid "You have to choose at least %(value)s options (chosen %(chosen)s)."
+msgstr "Musíte vybrat nejméně %(value)s položek (vybráno %(chosen)s)."

@@ -13,7 +13,7 @@ import aldryn_forms.sizefield.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('aldryn_forms', '0012_auto_20190104_1242'),
+        ('aldryn_forms', '0013_add_field_is_enable_autofill_from_url_params'),
     ]
 
     operations = [

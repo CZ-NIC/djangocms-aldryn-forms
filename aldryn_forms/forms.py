@@ -4,8 +4,8 @@ from django import forms
 from django.conf import settings
 from django.forms.forms import NON_FIELD_ERRORS
 from django.forms.utils import ErrorDict
-from django.utils.translation import ugettext
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext
+from django.utils.translation import gettext_lazy as _
 
 from PIL import Image
 
@@ -14,16 +14,16 @@ from .sizefield.utils import filesizeformat
 from .utils import add_form_error, get_action_backends, get_user_model
 
 
-class FileSizeCheckMixin(object):
+class FileSizeCheckMixin:
 
     def __init__(self, *args, **kwargs):
         self.files = []  # This is set in FormPlugin.process_form() in cms_plugins.py
         self.max_size = kwargs.pop('max_size', None)
         self.accepted_types = kwargs.pop('accepted_types', [])
-        super(FileSizeCheckMixin, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def clean(self, *args, **kwargs):
-        super(FileSizeCheckMixin, self).clean(*args, **kwargs)
+        super().clean(*args, **kwargs)
 
         if not self.files:
             return []
@@ -38,16 +38,15 @@ class FileSizeCheckMixin(object):
                 match = re.search(r'(\.\w+)$', file_in_memory.name.lower())
                 extension = match.group(1) if match else None  # '.csv'
                 if not (
-                        extension in self.accepted_types
-                        or file_in_memory.content_type in self.accepted_types
-                        or file_in_memory.content_type.split("/")[0] in main_mimetypes
-                        ):
-                    errors.append(ugettext('"%(file_name)s" is not of accepted file type.') % {
-                        'file_name': file_in_memory.name,
-                    })
+                    extension in self.accepted_types
+                    or file_in_memory.content_type in self.accepted_types  # noqa: W503 line break before bin operator
+                    or file_in_memory.content_type.split("/")[0] in main_mimetypes  # noqa: W503
+                ):
+                    errors.append(gettext('"%(file_name)s" is not of accepted file type.') % {
+                        'file_name': file_in_memory.name})
             if errors:
                 all_errors.append(
-                    " ".join(errors) + " " + ugettext("Accepted file types are") + ": " + ", ".join(
+                    " ".join(errors) + " " + gettext("Accepted file types are") + ": " + ", ".join(
                         self.accepted_types) + ".")
 
         # Check files size summary.
@@ -58,9 +57,9 @@ class FileSizeCheckMixin(object):
                 files_size_summary += file_in_memory.size
             if files_size_summary > self.max_size:
                 if len(self.files) > 1:
-                    msg = ugettext('The total file size has exceeded the specified limit %(size)s.')
+                    msg = gettext('The total file size has exceeded the specified limit %(size)s.')
                 else:
-                    msg = ugettext('File size exceeded the specified limit %(size)s.')
+                    msg = gettext('File size exceeded the specified limit %(size)s.')
                 all_errors.append(msg % {'size': filesizeformat(self.max_size)})
 
         if all_errors:
@@ -88,15 +87,15 @@ class RestrictedMultipleFilesField(FileSizeCheckMixin, forms.FileField):
 
     def __init__(self, *args, **kwargs):
         self.max_files = kwargs.pop('max_files', None)
-        super(RestrictedMultipleFilesField, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def clean(self, *args, **kwargs):
-        super(RestrictedMultipleFilesField, self).clean(*args, **kwargs)
+        super().clean(*args, **kwargs)
         if not self.files:
             return []
         if self.max_files is not None and len(self.files) > self.max_files:
             raise forms.ValidationError(
-                ugettext("The number of uploaded files exceeded the set limit of %(limit)s.") % {
+                gettext("The number of uploaded files exceeded the set limit of %(limit)s.") % {
                     'limit': self.max_files
                 })
         return self.files
@@ -107,10 +106,10 @@ class RestrictedImageField(FileSizeCheckMixin, forms.ImageField):
     def __init__(self, *args, **kwargs):
         self.max_width = kwargs.pop('max_width', None)
         self.max_height = kwargs.pop('max_height', None)
-        super(RestrictedImageField, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def clean(self, *args, **kwargs):
-        data = super(RestrictedImageField, self).clean(*args, **kwargs)
+        data = super().clean(*args, **kwargs)
 
         if data is None or not any([self.max_width, self.max_height]):
             return data
@@ -125,7 +124,7 @@ class RestrictedImageField(FileSizeCheckMixin, forms.ImageField):
 
         if self.max_width and width > self.max_width:
             raise forms.ValidationError(
-                ugettext(
+                gettext(
                     'Image width must be under %(max_size)s pixels. '
                     'Current width is %(actual_size)s pixels.'
                 ) % {
@@ -135,7 +134,7 @@ class RestrictedImageField(FileSizeCheckMixin, forms.ImageField):
 
         if self.max_height and height > self.max_height:
             raise forms.ValidationError(
-                ugettext(
+                gettext(
                     'Image height must be under %(max_size)s pixels. '
                     'Current height is %(actual_size)s pixels.'
                 ) % {
@@ -159,7 +158,7 @@ class FormSubmissionBaseForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.form_plugin = kwargs.pop('form_plugin')
         self.request = kwargs.pop('request')
-        super(FormSubmissionBaseForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         language = self.form_plugin.language
 
         self.instance = FormSubmission(
@@ -202,7 +201,7 @@ class FormSubmissionBaseForm(forms.Form):
 
     def get_cleaned_data(self, is_confirmation=False):
         fields = self.get_serialized_fields(is_confirmation)
-        form_data = dict((field.name, field.value) for field in fields)
+        form_data = {field.name: field.value for field in fields}
         return form_data
 
     def save(self, commit=False):
@@ -219,7 +218,7 @@ class ExtandableErrorForm(forms.ModelForm):
 class FormPluginForm(ExtandableErrorForm):
 
     def __init__(self, *args, **kwargs):
-        super(FormPluginForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         if getattr(settings, 'ALDRYN_FORMS_SHOW_ALL_RECIPIENTS', False) and 'recipients' in self.fields:
             self.fields['recipients'].queryset = get_user_model().objects.all()
@@ -258,7 +257,7 @@ class BooleanFieldForm(forms.ModelForm):
             initial = kwargs.pop('initial', {})
             initial['required'] = False
             kwargs['initial'] = initial
-        super(BooleanFieldForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     class Meta:
         fields = ['label', 'help_text', 'required', 'required_message', 'custom_classes']
@@ -289,22 +288,23 @@ class MinMaxValueForm(ExtandableErrorForm):
         min_value = self.cleaned_data.get('min_value')
         max_value = self.cleaned_data.get('max_value')
         if min_value and max_value and min_value > max_value:
-            self.append_to_errors('min_value', _(u'Min value can not be greater than max value.'))
+            self.append_to_errors('min_value', _('Min value can not be greater than max value.'))
         if self.cleaned_data.get('required') and min_value is not None and min_value < 1:
-            self.append_to_errors('min_value', _('If checkbox "Field is required" is set, "Min choices" must be at least 1.'))
+            self.append_to_errors(
+                'min_value', _('If checkbox "Field is required" is set, "Min choices" must be at least 1.'))
         return self.cleaned_data
 
 
 class TextFieldForm(MinMaxValueForm):
 
     def __init__(self, *args, **kwargs):
-        super(TextFieldForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
-        self.fields['min_value'].label = _(u'Min length')
-        self.fields['min_value'].help_text = _(u'Required number of characters to type.')
+        self.fields['min_value'].label = _('Min length')
+        self.fields['min_value'].help_text = _('Required number of characters to type.')
 
-        self.fields['max_value'].label = _(u'Max length')
-        self.fields['max_value'].help_text = _(u'Maximum number of characters to type.')
+        self.fields['max_value'].label = _('Max length')
+        self.fields['max_value'].help_text = _('Maximum number of characters to type.')
         self.fields['max_value'].required = False
 
     class Meta:
@@ -323,7 +323,7 @@ class NoRequiredFieldsModelForm(forms.ModelForm):
     no_required_fields = []
 
     def __init__(self, *args, **kwargs):
-        super(NoRequiredFieldsModelForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         for name in self.no_required_fields:
             self.fields[name].required = False
 
@@ -349,7 +349,7 @@ class TimeFieldForm(NoRequiredFieldsModelForm):
 class EmailFieldForm(TextFieldForm):
 
     def __init__(self, *args, **kwargs):
-        super(EmailFieldForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['min_value'].required = False
         self.fields['max_value'].required = False
 
@@ -380,7 +380,7 @@ class EmailFieldForm(TextFieldForm):
 
 class FileFieldForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        super(FileFieldForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['help_text'].help_text = _(
             'Explanatory text displayed next to input field. Just like this '
             'one. You can use MAXSIZE as a placeholder for the maximum size '
@@ -393,7 +393,7 @@ class FileFieldForm(forms.ModelForm):
 
 class ImageFieldForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        super(ImageFieldForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['help_text'].help_text = _(
             'Explanatory text displayed next to input field. Just like this '
             'one. You can use MAXSIZE, MAXWIDTH, MAXHEIGHT as a placeholders '
@@ -406,7 +406,7 @@ class ImageFieldForm(forms.ModelForm):
 class TextAreaFieldForm(TextFieldForm):
 
     def __init__(self, *args, **kwargs):
-        super(TextAreaFieldForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['max_value'].required = False
 
     class Meta:
@@ -417,13 +417,13 @@ class TextAreaFieldForm(TextFieldForm):
 class MultipleSelectFieldForm(MinMaxValueForm):
 
     def __init__(self, *args, **kwargs):
-        super(MultipleSelectFieldForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
-        self.fields['min_value'].label = _(u'Min choices')
-        self.fields['min_value'].help_text = _(u'Required amount of elements to chose.')
+        self.fields['min_value'].label = _('Min choices')
+        self.fields['min_value'].help_text = _('Required amount of elements to chose.')
 
-        self.fields['max_value'].label = _(u'Max choices')
-        self.fields['max_value'].help_text = _(u'Maximum amount of elements to chose.')
+        self.fields['max_value'].label = _('Max choices')
+        self.fields['max_value'].help_text = _('Maximum amount of elements to chose.')
 
     class Meta:
         # 'required' and 'required_message' depend on min_value field validator

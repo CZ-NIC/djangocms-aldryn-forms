@@ -4,8 +4,8 @@ from django.dispatch import Signal, receiver
 from .models import EmailFieldPlugin
 
 
-form_pre_save = Signal(providing_args=['instance', 'form', 'request'])
-form_post_save = Signal(providing_args=['instance', 'form', 'request'])
+form_pre_save = Signal()
+form_post_save = Signal()
 
 
 @receiver(pre_delete, sender=EmailFieldPlugin, dispatch_uid='aldryn_forms_pre_delete_field')

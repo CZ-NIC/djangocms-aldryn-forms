@@ -1,8 +1,7 @@
-from django import VERSION as DJANGO_VERSION
 from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import redirect
-from django.utils.translation import get_language_from_request, ugettext
+from django.utils.translation import get_language_from_request, gettext
 
 from ..compat import SessionWizardView
 from .exporter import Exporter
@@ -67,7 +66,7 @@ class FormExportWizardView(SessionWizardView):
 
         if next_step == self.steps.last and not form.get_queryset().exists():
             self.storage.reset()
-            self.admin.message_user(self.request, ugettext("No records found"), level=messages.WARNING)
+            self.admin.message_user(self.request, gettext("No records found"), level=messages.WARNING)
             export_url = 'admin:{}'.format(self.admin.get_admin_url('export'))
             return redirect(export_url)
         return super(FormExportWizardView, self).render_next_step(form, **kwargs)
@@ -91,19 +90,8 @@ class FormExportWizardView(SessionWizardView):
         queryset = step_1_form.get_queryset()
 
         dataset = Exporter(queryset=queryset).get_dataset(fields=fields)
-
         filename = step_1_form.get_filename(extension=self.file_type)
 
-        content_type = self.get_content_type()
-
-        response_kwargs = {}
-
-        if DJANGO_VERSION <= (1, 6):
-            # Django <= 1.6 compatibility
-            response_kwargs['mimetype'] = content_type
-        else:
-            response_kwargs['content_type'] = content_type
-
-        response = HttpResponse(getattr(dataset, self.file_type), **response_kwargs)
+        response = HttpResponse(getattr(dataset, self.file_type), content_type=self.get_content_type())
         response['Content-Disposition'] = 'attachment; filename=%s' % filename
         return response

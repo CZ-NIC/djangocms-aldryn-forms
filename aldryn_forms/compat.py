@@ -11,5 +11,4 @@ except ImportError:
 try:
     from cms.utils.plugins import build_plugin_tree
 except ImportError:
-    from cms.utils.plugins import \
-        get_plugins_as_layered_tree as build_plugin_tree  # noqa
+    from cms.utils.plugins import get_plugins_as_layered_tree as build_plugin_tree  # noqa

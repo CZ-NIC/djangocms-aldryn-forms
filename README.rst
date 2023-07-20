@@ -1,12 +1,10 @@
-**Deprecated**
-
-This project is no longer supported.
-
-Divio will undertake no further development or maintenance of this project. If you are interested in continuing to develop it, use the fork functionality from GitHub. We are not able to transfer ownership of the repository to another party.
+|Project continuation| |Pypi package| |Pypi status| |Python versions| |License|
 
 ================
 Aldryn Forms App
 ================
+
+Continuation of the deprecated project `Divio Aldryn search <https://github.com/divio/aldryn-translation-tools>`_.
 
 Aldryn Forms allows you to build flexible HTML forms for your `Aldryn <http://aldryn.com>`_ and `django CMS
 <http://www.django-cms.org>`_ projects, and to integrate them directly in your pages.
@@ -49,25 +47,17 @@ Although the ``FormData`` model's data is still accessible through the admin, al
 Manuall Installation
 --------------------
 
-Run ``pip install aldryn-forms``.
+Run ``pip install djangocms-aldryn-forms``.
 
 Update ``INSTALLED_APPS`` with ::
 
     INSTALLED_APPS = [
         ...
-        'absolute',
         'aldryn_forms',
         'aldryn_forms.contrib.email_notifications',
-        'emailit',
-        'filer',
+        'captcha',
         ...
     ]
-
-Configure ``aldryn-boilerplates`` (https://pypi.python.org/pypi/aldryn-boilerplates/).
-
-To use the old templates, set ``ALDRYN_BOILERPLATE_NAME='legacy'``.
-To use https://github.com/aldryn/aldryn-boilerplate-standard (recommended, will be renamed to
-``aldryn-boilerplate-bootstrap3``) set ``ALDRYN_BOILERPLATE_NAME='bootstrap3'``.
 
 Also ensure you define an `e-mail backend <https://docs.djangoproject.com/en/dev/topics/email/#dummy-backend>`_ for your app.
 
@@ -87,20 +77,40 @@ The above CMS site has become a forms POST landing page - a place where submissi
 Available Plug-ins
 ==================
 
-``Form`` plugin lets you embed certain forms on a CMS page.
+- ``FormPlugin`` plugin lets you embed certain forms on a CMS page.
+- ``Fieldset`` groups fields.
+- ``TextField`` renders text input.
+- ``TextAreaField`` renders text input.
+- ``HiddenField``
+- ``PhoneField``
+- ``DateField``
+- ``DateTimeLocalField``
+- ``TimeField``
+- ``NumberField``
+- ``EmailField``
+- ``EmailIntoFromField``
+- ``FileField`` renders a file upload input.
+- ``MultipleFilesField``
+- ``ImageField`` same as ``FileField`` but validates that the uploaded file is an image.
+- ``BooleanField`` renders checkbox.
+- ``SelectField`` renders single select input.
+- ``MultipleSelectField``
+- ``MultipleCheckboxSelectField`` renders multiple checkboxes.
+- ``CaptchaField``
 
-``Fieldset`` groups fields.
 
-``Text Field`` renders text input.
-
-``Text Area Field`` renders text input.
-
-``Yes/No Field`` renders checkbox.
-
-``Select Field`` renders single select input.
-
-``Multiple Select Field`` renders multiple checkboxes.
-
-``File field`` renders a file upload input.
-
-``Image field`` same as ``file field`` but validates that the uploaded file is an image.
+.. |Project continuation| image:: https://img.shields.io/badge/Continuation-Divio_Aldryn_Search-blue
+    :target: https://github.com/CZ-NIC/djangocms-aldryn-forms
+    :alt: Continuation of the deprecated project "Divio Aldryn forms"
+.. |Pypi package| image:: https://img.shields.io/pypi/v/djangocms-aldryn-forms.svg
+    :target: https://pypi.python.org/pypi/djangocms-aldryn-forms/
+    :alt: Pypi package
+.. |Pypi status| image:: https://img.shields.io/pypi/status/djangocms-aldryn-forms.svg
+   :target: https://pypi.python.org/pypi/djangocms-aldryn-forms
+   :alt: status
+.. |Python versions| image:: https://img.shields.io/pypi/pyversions/djangocms-aldryn-forms.svg
+   :target: https://pypi.python.org/pypi/djangocms-aldryn-forms
+   :alt: Python versions
+.. |License| image:: https://img.shields.io/pypi/l/djangocms-aldryn-forms.svg
+    :target: https://pypi.python.org/pypi/djangocms-aldryn-forms/
+    :alt: license

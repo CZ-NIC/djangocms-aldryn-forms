@@ -1,5 +1,3 @@
-from __future__ import division, print_function, unicode_literals
-
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.test import TestCase
@@ -31,16 +29,16 @@ class OptionTestCase(TestCase):
 
         option1, option2, option3, option4, option5 = self.field.option_set.all()
 
-        self.assertEquals(option1.value, 'one')
-        self.assertEquals(option1.position, 10)
-        self.assertEquals(option2.value, 'two')
-        self.assertEquals(option2.position, 20)
-        self.assertEquals(option3.value, 'three')
-        self.assertEquals(option3.position, 30)
-        self.assertEquals(option4.value, 'four')
-        self.assertEquals(option4.position, 40)
-        self.assertEquals(option5.value, 'five')
-        self.assertEquals(option5.position, 50)
+        self.assertEqual(option1.value, 'one')
+        self.assertEqual(option1.position, 10)
+        self.assertEqual(option2.value, 'two')
+        self.assertEqual(option2.position, 20)
+        self.assertEqual(option3.value, 'three')
+        self.assertEqual(option3.position, 30)
+        self.assertEqual(option4.value, 'four')
+        self.assertEqual(option4.position, 40)
+        self.assertEqual(option5.value, 'five')
+        self.assertEqual(option5.position, 50)
 
     def test_position_manual_ordering(self):
         self.field.option_set.create(position=100, value='below $10')
@@ -51,16 +49,16 @@ class OptionTestCase(TestCase):
 
         option1, option2, option3, option4, option5 = self.field.option_set.all()
 
-        self.assertEquals(option1.value, 'items for free (but they are broken - sorry)')
-        self.assertEquals(option1.position, 1)
-        self.assertEquals(option2.value, 'super promo: below $1!')
-        self.assertEquals(option2.position, 10)
-        self.assertEquals(option3.value, 'below $10')
-        self.assertEquals(option3.position, 100)
-        self.assertEquals(option4.value, 'between $10 and $50')
-        self.assertEquals(option4.position, 200)
-        self.assertEquals(option5.value, '$50+ because you are rich')
-        self.assertEquals(option5.position, 300)
+        self.assertEqual(option1.value, 'items for free (but they are broken - sorry)')
+        self.assertEqual(option1.position, 1)
+        self.assertEqual(option2.value, 'super promo: below $1!')
+        self.assertEqual(option2.position, 10)
+        self.assertEqual(option3.value, 'below $10')
+        self.assertEqual(option3.position, 100)
+        self.assertEqual(option4.value, 'between $10 and $50')
+        self.assertEqual(option4.position, 200)
+        self.assertEqual(option5.value, '$50+ because you are rich')
+        self.assertEqual(option5.position, 300)
 
     def test_hybrid_ordering(self):
         self.field.option_set.create(position=31415, value='But after a while I got lazy')
@@ -71,16 +69,16 @@ class OptionTestCase(TestCase):
 
         option1, option2, option3, option4, option5 = self.field.option_set.all()
 
-        self.assertEquals(option1.value, 'I started this ordering manually')
-        self.assertEquals(option1.position, 42)
-        self.assertEquals(option2.value, 'But after a while I got lazy')
-        self.assertEquals(option2.position, 31415)
-        self.assertEquals(option3.value, 'and so I didnt wanna')
-        self.assertEquals(option3.position, 31425)
-        self.assertEquals(option4.value, 'set this ordering')
-        self.assertEquals(option4.position, 31435)
-        self.assertEquals(option5.value, 'anymore')
-        self.assertEquals(option5.position, 31445)
+        self.assertEqual(option1.value, 'I started this ordering manually')
+        self.assertEqual(option1.position, 42)
+        self.assertEqual(option2.value, 'But after a while I got lazy')
+        self.assertEqual(option2.position, 31415)
+        self.assertEqual(option3.value, 'and so I didnt wanna')
+        self.assertEqual(option3.position, 31425)
+        self.assertEqual(option4.value, 'set this ordering')
+        self.assertEqual(option4.position, 31435)
+        self.assertEqual(option5.value, 'anymore')
+        self.assertEqual(option5.position, 31445)
 
     def test_position_is_not_nullable(self):
         self.field.option_set.create(position=950, value='950')
@@ -92,7 +90,7 @@ class OptionTestCase(TestCase):
         option1 = self.field.option_set.create(position=1, value='test')
         option1.position = None
         option1.save()
-        self.assertEquals(option1.position, 960)  # We force a value for it on Option.save
+        self.assertEqual(option1.position, 960)  # We force a value for it on Option.save
 
         self.assertRaises(IntegrityError, Option.objects.update, position=None)  # See? Not nullable
 

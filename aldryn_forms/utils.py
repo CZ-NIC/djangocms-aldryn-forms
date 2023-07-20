@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.forms.forms import NON_FIELD_ERRORS
@@ -10,10 +8,7 @@ from cms.utils.plugins import downcast_plugins
 
 from .action_backends_base import BaseAction
 from .compat import build_plugin_tree
-from .constants import (
-    ALDRYN_FORMS_ACTION_BACKEND_KEY_MAX_SIZE,
-    DEFAULT_ALDRYN_FORMS_ACTION_BACKENDS,
-)
+from .constants import ALDRYN_FORMS_ACTION_BACKEND_KEY_MAX_SIZE, DEFAULT_ALDRYN_FORMS_ACTION_BACKENDS
 
 
 def get_action_backends():
@@ -28,11 +23,11 @@ def get_action_backends():
     try:
         backends = {k: import_string(v) for k, v in backends.items()}
     except ImportError as e:
-        raise ImproperlyConfigured('{} {}'.format(base_error_msg, e))
+        raise ImproperlyConfigured(f'{base_error_msg} {e}')
 
     if any(len(key) > max_key_size for key in backends):
         raise ImproperlyConfigured(
-            '{} Ensure all keys are no longer than {} characters.'.format(base_error_msg, max_key_size)
+            f'{base_error_msg} Ensure all keys are no longer than {max_key_size} characters.'
         )
 
     if not all(issubclass(klass, BaseAction) for klass in backends.values()):
@@ -42,12 +37,12 @@ def get_action_backends():
         )
 
     if 'default' not in backends.keys():
-        raise ImproperlyConfigured('{} Key "default" is missing.'.format(base_error_msg))
+        raise ImproperlyConfigured(f'{base_error_msg} Key "default" is missing.')
 
     try:
         [x() for x in backends.values()]  # check abstract base classes sanity
     except TypeError as e:
-        raise ImproperlyConfigured('{} {}'.format(base_error_msg, e))
+        raise ImproperlyConfigured(f'{base_error_msg} {e}')
     return backends
 
 

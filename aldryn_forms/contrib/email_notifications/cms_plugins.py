@@ -5,7 +5,7 @@ from typing import List
 from django.contrib import admin
 from django.core.mail import get_connection
 from django.template.defaultfilters import safe
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from cms.plugin_pool import plugin_pool
 
@@ -49,6 +49,7 @@ class ExistingEmailNotificationInline(admin.StackedInline):
             )
         }),
         (_('Recipients'), {
+            'classes': ('collapse',),
             'fields': (
                 'text_variables',
                 'to_user',

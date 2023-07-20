@@ -32,12 +32,12 @@ def render_form_widget(field, **kwargs):
 
 @register.filter()
 def force_text(val):
-    return encoding.force_text(val)
+    return encoding.force_str(val)
 
 
 @register.filter()
 def force_text_list(val):
-    return [encoding.force_text(v) for v in val]
+    return [encoding.force_str(v) for v in val]
 
 
 @register.filter()

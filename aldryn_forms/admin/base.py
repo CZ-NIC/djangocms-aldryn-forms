@@ -3,8 +3,8 @@ from email.utils import formataddr
 from django.contrib import admin
 from django.template.loader import render_to_string
 from django.urls import reverse
-from django.utils.encoding import force_text
-from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import force_str
+from django.utils.translation import gettext_lazy as _
 
 from import_export.fields import Field
 from import_export.resources import Resource
@@ -84,16 +84,11 @@ class BaseFormSubmissionAdmin(admin.ModelAdmin):
     get_recipients_for_display.short_description = _('people notified')
 
     def get_urls(self):
-        from django.conf.urls import url
-
-        def pattern(regex, fn, name):
-            args = [regex, self.admin_site.admin_view(fn)]
-            return url(*args, name=self.get_admin_url(name))
+        from django.urls import path
 
         url_patterns = [
-            pattern(r'export/$', self.get_form_export_view(), 'export'),
+            path('export/', self.admin_site.admin_view(self.get_form_export_view()), name=self.get_admin_url('export')),
         ]
-
         return url_patterns + super(BaseFormSubmissionAdmin, self).get_urls()
 
     def get_admin_url(self, name):
@@ -192,14 +187,14 @@ class BaseFormSubmissionAdmin(admin.ModelAdmin):
             if json_data:
                 for code, label in extra_field_labels.get(name, {}).items():
                     fields.append(AldrynFormExportField(attribute=code))
-                    headers.append(force_text(label))
+                    headers.append(force_str(label))
             else:
                 fields.append(AldrynFormExportField(attribute=name))
-                headers.append(force_text(label))
+                headers.append(force_str(label))
 
         resource = Resource()
         resource.get_export_headers = lambda: headers
         for field in fields:
-            resource.fields[field.attribute] = field
+            resource.fields[force_str(field.attribute)] = field
 
         return getattr(resource.export(dataset), export_type)

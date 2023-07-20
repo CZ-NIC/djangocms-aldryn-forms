@@ -1,9 +1,7 @@
 import abc
 
-import six
 
-
-class BaseAction(six.with_metaclass(abc.ABCMeta)):
+class BaseAction(metaclass=abc.ABCMeta):
 
     @abc.abstractproperty
     def verbose_name(self):

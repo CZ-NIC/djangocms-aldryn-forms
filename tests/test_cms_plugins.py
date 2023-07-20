@@ -11,7 +11,7 @@ from aldryn_forms.models import FormSubmission
 
 class FormPluginTestCase(CMSTestCase):
     def setUp(self):
-        super(FormPluginTestCase, self).setUp()
+        super().setUp()
 
         self.page = create_page('test page', 'test_page.html', 'en', published=True)
         try:
@@ -37,9 +37,9 @@ class FormPluginTestCase(CMSTestCase):
 
         response = self.client.post(self.page.get_absolute_url('en'), {})
 
-        self.assertEquals(response.status_code, 200)
-        self.assertEquals(FormSubmission.objects.count(), 0)
-        self.assertEquals(len(mail.outbox), 0)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(FormSubmission.objects.count(), 0)
+        self.assertEqual(len(mail.outbox), 0)
 
     def test_form_submission_email_action(self):
         self.form_plugin.action_backend = 'email_only'
@@ -49,9 +49,9 @@ class FormPluginTestCase(CMSTestCase):
 
         response = self.client.post(self.page.get_absolute_url('en'), {})
 
-        self.assertEquals(response.status_code, 200)
-        self.assertEquals(FormSubmission.objects.count(), 0)
-        self.assertEquals(len(mail.outbox), 0)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(FormSubmission.objects.count(), 0)
+        self.assertEqual(len(mail.outbox), 0)
 
     def test_form_submission_no_action(self):
         self.form_plugin.action_backend = 'none'
@@ -61,14 +61,14 @@ class FormPluginTestCase(CMSTestCase):
 
         response = self.client.post(self.page.get_absolute_url('en'), {})
 
-        self.assertEquals(response.status_code, 200)
-        self.assertEquals(FormSubmission.objects.count(), 0)
-        self.assertEquals(len(mail.outbox), 0)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(FormSubmission.objects.count(), 0)
+        self.assertEqual(len(mail.outbox), 0)
 
 
 class EmailNotificationFormPluginTestCase(CMSTestCase):
     def setUp(self):
-        super(EmailNotificationFormPluginTestCase, self).setUp()
+        super().setUp()
 
         self.page = create_page('test page', 'test_page.html', 'en', published=True)
         try:
@@ -94,9 +94,9 @@ class EmailNotificationFormPluginTestCase(CMSTestCase):
 
         response = self.client.post(self.page.get_absolute_url('en'), {})
 
-        self.assertEquals(response.status_code, 200)
-        self.assertEquals(FormSubmission.objects.count(), 0)
-        self.assertEquals(len(mail.outbox), 0)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(FormSubmission.objects.count(), 0)
+        self.assertEqual(len(mail.outbox), 0)
 
     def test_form_submission_email_action(self):
         self.form_plugin.action_backend = 'email_only'
@@ -106,9 +106,9 @@ class EmailNotificationFormPluginTestCase(CMSTestCase):
 
         response = self.client.post(self.page.get_absolute_url('en'), {})
 
-        self.assertEquals(response.status_code, 200)
-        self.assertEquals(FormSubmission.objects.count(), 0)
-        self.assertEquals(len(mail.outbox), 0)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(FormSubmission.objects.count(), 0)
+        self.assertEqual(len(mail.outbox), 0)
 
     def test_form_submission_no_action(self):
         self.form_plugin.action_backend = 'none'
@@ -118,6 +118,6 @@ class EmailNotificationFormPluginTestCase(CMSTestCase):
 
         response = self.client.post(self.page.get_absolute_url('en'), {})
 
-        self.assertEquals(response.status_code, 200)
-        self.assertEquals(FormSubmission.objects.count(), 0)
-        self.assertEquals(len(mail.outbox), 0)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(FormSubmission.objects.count(), 0)
+        self.assertEqual(len(mail.outbox), 0)

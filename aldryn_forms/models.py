@@ -1,8 +1,7 @@
 import json
 import re
 import warnings
-from collections import defaultdict
-from collections import namedtuple
+from collections import defaultdict, namedtuple
 from functools import partial
 from typing import List
 
@@ -11,7 +10,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.functions import Coalesce
 from django.utils.functional import cached_property
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from cms.cms_plugins import AliasPlugin
 from cms.models.fields import PageField
@@ -24,10 +23,7 @@ from filer.fields.folder import FilerFolderField
 from .compat import build_plugin_tree
 from .helpers import is_form_element
 from .sizefield.models import FileSizeField
-from .utils import (
-    ALDRYN_FORMS_ACTION_BACKEND_KEY_MAX_SIZE, action_backend_choices,
-    get_action_backends,
-)
+from .utils import ALDRYN_FORMS_ACTION_BACKEND_KEY_MAX_SIZE, action_backend_choices, get_action_backends
 
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
@@ -81,10 +77,10 @@ class SerializedFormField(BaseSerializedFormField):
         field_label = self.label.strip()
 
         if field_label:
-            field_as_string = u'{}-{}'.format(field_label, self.field_type)
+            field_as_string = f'{field_label}-{self.field_type}'
         else:
             field_as_string = self.name
-        field_id = u'{}:{}'.format(field_as_string, self.field_occurrence)
+        field_id = f'{field_as_string}:{self.field_occurrence}'
         return field_id
 
     @property
@@ -277,10 +273,10 @@ class BaseFormPlugin(CMSPlugin):
             if field_plugin.name:
                 field_name = field_plugin.name
             else:
-                field_name = u'{0}_{1}'.format(field_type, field_type_occurrence)
+                field_name = f'{field_type}_{field_type_occurrence}'
 
             if field_label:
-                field_id = u'{0}_{1}'.format(field_type, field_label)
+                field_id = f'{field_type}_{field_label}'
             else:
                 field_id = field_name
 
@@ -521,7 +517,7 @@ class FileFieldPluginBase(FieldPluginBase):
         help_text=_('The maximum size of all files to upload, in bytes. You can '
                     'use common size suffixes (kB, MB, GB, ...).')
     )
-    enable_js = models.NullBooleanField(
+    enable_js = models.BooleanField(
         verbose_name=_('Enable js'),
         null=True, blank=True,
         help_text=_('Enable javascript to view files for upload.')
@@ -651,7 +647,7 @@ class Option(models.Model):
 
     def save(self, *args, **kwargs):
         self.set_position()
-        return super(Option, self).save(*args, **kwargs)
+        return super().save(*args, **kwargs)
 
 
 class FormButtonPlugin(CMSPlugin):
@@ -706,7 +702,7 @@ class FormSubmissionBase(models.Model):
 
         if field_label:
             field_type = data['name'].rpartition('_')[0]
-            field_id = u'{}_{}'.format(field_type, field_label)
+            field_id = f'{field_type}_{field_label}'
         else:
             field_id = data['name']
 

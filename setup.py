@@ -1,5 +1,3 @@
-from distutils.command.build import build
-
 from setuptools import find_packages, setup
 
 from aldryn_forms import __version__
@@ -16,7 +14,6 @@ REQUIREMENTS = [
     'django-sizefield',
     'markdown',
     'Pillow',
-    'Babel',
 ]
 
 
@@ -42,10 +39,6 @@ CLASSIFIERS = [
 ]
 
 
-class CustomBuild(build):
-    sub_commands = [('compile_catalog', lambda x: True)] + build.sub_commands
-
-
 setup(
     name='djangocms-aldryn-forms',
     version=__version__,
@@ -63,7 +56,6 @@ setup(
     extras_require={
         'captcha': ['django-simple-captcha'],
     },
-    cmdclass={'build': CustomBuild},
     classifiers=CLASSIFIERS,
     test_suite='tests.settings.run',
 )

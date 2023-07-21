@@ -1,9 +1,12 @@
 APP = aldryn_forms
 LANG_CODE ?= cs
-TRANSLATIONS = ${APP}/locale/${LANG_CODE}/LC_MESSAGES/django.po
-TRANSLATIONS_JS = ${APP}/locale/${LANG_CODE}/LC_MESSAGES/djangojs.po
+FILEPATH = ${APP}/locale/${LANG_CODE}/LC_MESSAGES/django
+TRANSLATIONS = ${FILEPATH}.po
+TRANSLATIONS_JS = ${FILEPATH}js.po
+COMPILATIONS = ${FILEPATH}.mo
+COMPILATIONS_JS = ${FILEPATH}js.mo
 
-.PHONY: default msg msg-py msg-make-py msg-sort-py msg-js msg-make-js msg-sort-js test isort check-css
+.PHONY: default msg msg-compile msg-py msg-make-py msg-sort-py msg-js msg-make-js msg-sort-js test isort check-css
 
 default: test
 
@@ -25,6 +28,10 @@ msg-make-js:
 
 msg-sort-js:
 	msgattrib --sort-output --no-location --no-obsolete -o ${TRANSLATIONS_JS} ${TRANSLATIONS_JS}
+
+msg-compile:
+	msgfmt ${TRANSLATIONS} -o ${COMPILATIONS}
+	msgfmt ${TRANSLATIONS_JS} -o ${COMPILATIONS_JS}
 
 test:
 	tox --parallel all --parallel-live

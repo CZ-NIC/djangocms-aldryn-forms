@@ -1,12 +1,6 @@
-import logging
-import smtplib
-import socket
-from typing import Tuple
-
 from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured, ValidationError
+from django.core.exceptions import ImproperlyConfigured
 from django.forms.forms import NON_FIELD_ERRORS
-from django.utils.encoding import force_str
 from django.utils.module_loading import import_string
 
 from cms.cms_plugins import AliasPlugin
@@ -16,9 +10,6 @@ from cms.utils.plugins import downcast_plugins
 from .action_backends_base import BaseAction
 from .compat import build_plugin_tree
 from .constants import ALDRYN_FORMS_ACTION_BACKEND_KEY_MAX_SIZE, DEFAULT_ALDRYN_FORMS_ACTION_BACKENDS
-
-
-logger = logging.getLogger(__name__)
 
 
 def get_action_backends():
@@ -127,29 +118,3 @@ def add_form_error(form, message, field=NON_FIELD_ERRORS):
         form._errors[field].append(message)
     except KeyError:
         form._errors[field] = form.error_class([message])
-
-
-ACTION_OK = 250  # Requested mail action okay, completed.
-
-class ActionIsNoOkResponse(Exception):
-    """Action si not OK response."""
-
-
-def check_smtp_response(response: Tuple[int, str]) -> None:
-    """Check if response is valid."""
-    if response[0] != ACTION_OK:
-        raise ActionIsNoOkResponse(force_str(response[1]))
-
-
-def smtp_server_accepts_email_address(address: str) -> None:
-    """SMTP server accepts email address. Raise ValidationError if not."""
-    if settings.EMAIL_HOST:
-        try:
-            with smtplib.SMTP(settings.EMAIL_HOST, timeout=5) as smtp:
-                check_smtp_response(smtp.docmd('HELO', settings.EMAIL_HOST))
-                check_smtp_response(smtp.docmd('MAIL FROM:<>'))
-                code, message = smtp.docmd(f'RCPT TO:{address}')
-                if code != ACTION_OK:
-                    raise ValidationError(force_str(message), code="invalid")
-        except (ActionIsNoOkResponse, OSError, socket.gaierror, smtplib.SMTPException) as error:
-            logger.error(error)

@@ -5,7 +5,7 @@ Changelog
 7.2.0 (2024-06-19)
 ==================
 
-* Add smtp_server_accepts_email_address.
+* Add ALDRYN_FORMS_EMAIL_AVAILABILITY_CHECKER for checking email availability.
 
 7.1.0 (2024-06-18)
 ==================

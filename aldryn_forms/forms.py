@@ -1,5 +1,6 @@
 import re
 
+from django.utils.module_loading import import_string
 from django import forms
 from django.conf import settings
 from django.core import validators
@@ -15,7 +16,7 @@ from PIL import Image
 
 from .models import FormPlugin, FormSubmission
 from .sizefield.utils import filesizeformat
-from .utils import add_form_error, get_action_backends, get_user_model, smtp_server_accepts_email_address
+from .utils import add_form_error, get_action_backends, get_user_model
 
 
 class FileSizeCheckMixin:
@@ -218,6 +219,19 @@ class RestrictedImageField(FileSizeCheckMixin, forms.ImageField):
         return new_data
 
 
+def get_email_availability_checker_fnc():
+    """Get function to check email availability."""
+    try:
+        location = settings.ALDRYN_FORMS_EMAIL_AVAILABILITY_CHECKER
+    except AttributeError:
+        return None
+    try:
+        return import_string(location)
+    except ImportError:
+        pass
+    return None
+
+
 class FormSubmissionBaseForm(forms.Form):
 
     # these fields are internal.
@@ -233,6 +247,7 @@ class FormSubmissionBaseForm(forms.Form):
         self.request = kwargs.pop('request')
         super().__init__(*args, **kwargs)
         language = self.form_plugin.language
+        self.email_availability_checker_fnc = get_email_availability_checker_fnc()
 
         self.instance = FormSubmission(
             name=self.form_plugin.name,
@@ -277,6 +292,20 @@ class FormSubmissionBaseForm(forms.Form):
         form_data = {field.name: field.value for field in fields}
         return form_data
 
+    def clean(self):
+        if self.errors:
+            return self.cleaned_data
+        for field in self.form_plugin.get_form_fields():
+            plugin = field.plugin_instance.get_plugin_class_instance()
+            if hasattr(plugin, "send_notification_email") and plugin.send_notification_email:
+                serialized_field = plugin.serialize_field(self, field)
+                if serialized_field.value and self.email_availability_checker_fnc is not None:
+                    try:
+                        self.email_availability_checker_fnc(serialized_field.value)
+                    except ValidationError:
+                        self._add_error(_("This email is unavailable."), serialized_field.name)
+        return self.cleaned_data
+
     def save(self, commit=False):
         self.instance.set_form_data(self)
         self.instance.save()
@@ -292,16 +321,17 @@ class FormPluginForm(ExtandableErrorForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.email_availability_checker_fnc = get_email_availability_checker_fnc()
 
         if getattr(settings, 'ALDRYN_FORMS_SHOW_ALL_RECIPIENTS', False) and 'recipients' in self.fields:
             self.fields['recipients'].queryset = get_user_model().objects.all()
 
     def clean_recipients(self):
         recipients = self.cleaned_data["recipients"]
-        if (settings.ALDRYN_FORMS_CHECK_RECIPIENTS if hasattr(settings, 'ALDRYN_FORMS_CHECK_RECIPIENTS') else True):
+        if self.email_availability_checker_fnc is not None:
             for user in recipients:
                 if user.email:
-                    smtp_server_accepts_email_address(user.email)
+                    self.email_availability_checker_fnc(user.email)
         return recipients
 
     def clean(self):

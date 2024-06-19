@@ -501,6 +501,9 @@ msgstr "Počet nahraných souborů překročil stanovený limit %(limit)s."
 msgid "The total file size has exceeded the specified limit %(size)s."
 msgstr "Celková velikost souborů přesáhla stanovený limit %(size)s."
 
+msgid "This email is unavailable."
+msgstr "Tento e-mail je nedostupný."
+
 msgid "Time Field"
 msgstr "Pole Čas"
 

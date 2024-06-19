@@ -96,6 +96,7 @@ Available Plug-ins
 - ``MultipleSelectField``
 - ``MultipleCheckboxSelectField`` renders multiple checkboxes.
 - ``CaptchaField``
+- ``HideContentWhenPostPlugin``
 
 
 .. |Project continuation| image:: https://img.shields.io/badge/Continuation-Divio_Aldryn_Froms-blue

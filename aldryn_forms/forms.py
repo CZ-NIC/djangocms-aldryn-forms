@@ -15,7 +15,7 @@ from PIL import Image
 
 from .models import FormPlugin, FormSubmission
 from .sizefield.utils import filesizeformat
-from .utils import add_form_error, get_action_backends, get_user_model
+from .utils import add_form_error, get_action_backends, get_user_model, smtp_server_accepts_email_address
 
 
 class FileSizeCheckMixin:
@@ -295,6 +295,14 @@ class FormPluginForm(ExtandableErrorForm):
 
         if getattr(settings, 'ALDRYN_FORMS_SHOW_ALL_RECIPIENTS', False) and 'recipients' in self.fields:
             self.fields['recipients'].queryset = get_user_model().objects.all()
+
+    def clean_recipients(self):
+        recipients = self.cleaned_data["recipients"]
+        if (settings.ALDRYN_FORMS_CHECK_RECIPIENTS if hasattr(settings, 'ALDRYN_FORMS_CHECK_RECIPIENTS') else True):
+            for user in recipients:
+                if user.email:
+                    smtp_server_accepts_email_address(user.email)
+        return recipients
 
     def clean(self):
         redirect_type = self.cleaned_data.get('redirect_type')

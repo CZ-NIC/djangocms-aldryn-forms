@@ -1,4 +1,6 @@
+import logging
 import re
+import smtplib
 from typing import Dict
 
 from django import forms
@@ -36,6 +38,9 @@ from .signals import form_post_save, form_pre_save
 from .sizefield.utils import filesizeformat
 from .utils import get_action_backends
 from .validators import MaxChoicesValidator, MinChoicesValidator, is_valid_recipient
+
+
+logger = logging.getLogger(__name__)
 
 
 class FormElement(CMSPluginBase):
@@ -229,14 +234,17 @@ class FormPlugin(FieldContainer):
         else:
             subject_templates = None
 
-        send_mail(
-            recipients=[user.email for user in recipients],
-            context=context,
-            template_base=getattr(settings, 'ALDRYN_FORMS_EMAIL_TEMPLATES_BASE', 'aldryn_forms/emails/notification'),
-            subject_templates=subject_templates,
-            language=instance.language,
-            reply_to=reply_to,
-        )
+        try:
+            send_mail(
+                recipients=[user.email for user in recipients],
+                context=context,
+                template_base=getattr(settings, 'ALDRYN_FORMS_EMAIL_TEMPLATES_BASE', 'aldryn_forms/emails/notification'),
+                subject_templates=subject_templates,
+                language=instance.language,
+                reply_to=reply_to,
+            )
+        except smtplib.SMTPException as err:
+            logger.error(err)
 
         users_notified = [
             (get_user_name(user), user.email) for user in recipients]
@@ -673,12 +681,15 @@ class EmailField(BaseTextField):
             'form_data': form.get_serialized_field_choices(is_confirmation=True),
             'body_text': form_field_instance.email_body,
         }
-        send_mail(
-            recipients=[email],
-            context=context,
-            subject=form_field_instance.email_subject,
-            template_base=self.email_template_base
-        )
+        try:
+            send_mail(
+                recipients=[email],
+                context=context,
+                subject=form_field_instance.email_subject,
+                template_base=self.email_template_base
+            )
+        except smtplib.SMTPException as err:
+            logger.error(err)
 
     def form_post_save(self, instance, form, **kwargs):
         field_name = form.form_plugin.get_form_field_name(field=instance)

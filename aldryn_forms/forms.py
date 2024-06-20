@@ -219,17 +219,31 @@ class RestrictedImageField(FileSizeCheckMixin, forms.ImageField):
         return new_data
 
 
-def get_email_availability_checker_fnc():
-    """Get function to check email availability."""
-    try:
-        location = settings.ALDRYN_FORMS_EMAIL_AVAILABILITY_CHECKER
-    except AttributeError:
-        return None
-    try:
-        return import_string(location)
-    except ImportError:
+class DummyChecker:
+    # https://gitlab.nic.cz/websites/django-cms-qe/-/blob/master/cms_qe_auth/utils.py#L47
+
+    def __init__(self, hostname: str):
         pass
-    return None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_tb):
+        pass
+
+    def check(self, address: str) -> None:
+        pass
+
+
+def get_email_availability_checker_class():
+    """Get function to check email availability."""
+    # https://gitlab.nic.cz/websites/django-cms-qe/-/blob/master/cms_qe/settings/base/auth.py#L14
+    try:
+        location = settings.ALDRYN_FORMS_EMAIL_AVAILABILITY_CHECKER_CLASS
+        return import_string(location)
+    except (AttributeError, ImportError):
+        pass
+    return DummyChecker
 
 
 class FormSubmissionBaseForm(forms.Form):
@@ -247,7 +261,7 @@ class FormSubmissionBaseForm(forms.Form):
         self.request = kwargs.pop('request')
         super().__init__(*args, **kwargs)
         language = self.form_plugin.language
-        self.email_availability_checker_fnc = get_email_availability_checker_fnc()
+        self.email_availability_checker_class = get_email_availability_checker_class()
 
         self.instance = FormSubmission(
             name=self.form_plugin.name,
@@ -295,15 +309,16 @@ class FormSubmissionBaseForm(forms.Form):
     def clean(self):
         if self.errors:
             return self.cleaned_data
-        for field in self.form_plugin.get_form_fields():
-            plugin = field.plugin_instance.get_plugin_class_instance()
-            if hasattr(plugin, "send_notification_email") and plugin.send_notification_email:
-                serialized_field = plugin.serialize_field(self, field)
-                if serialized_field.value and self.email_availability_checker_fnc is not None:
-                    try:
-                        self.email_availability_checker_fnc(serialized_field.value)
-                    except ValidationError:
-                        self._add_error(_("This email is unavailable."), serialized_field.name)
+        with self.email_availability_checker_class(settings.EMAIL_HOST) as checker:
+            for field in self.form_plugin.get_form_fields():
+                plugin = field.plugin_instance.get_plugin_class_instance()
+                if hasattr(plugin, "send_notification_email") and plugin.send_notification_email:
+                    serialized_field = plugin.serialize_field(self, field)
+                    if serialized_field.value:
+                        try:
+                            checker.check(serialized_field.value)
+                        except ValidationError:
+                            self._add_error(_("This email is unavailable."), serialized_field.name)
         return self.cleaned_data
 
     def save(self, commit=False):
@@ -321,17 +336,17 @@ class FormPluginForm(ExtandableErrorForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.email_availability_checker_fnc = get_email_availability_checker_fnc()
+        self.email_availability_checker_class = get_email_availability_checker_class()
 
         if getattr(settings, 'ALDRYN_FORMS_SHOW_ALL_RECIPIENTS', False) and 'recipients' in self.fields:
             self.fields['recipients'].queryset = get_user_model().objects.all()
 
     def clean_recipients(self):
         recipients = self.cleaned_data["recipients"]
-        if self.email_availability_checker_fnc is not None:
+        with self.email_availability_checker_class(settings.EMAIL_HOST) as checker:
             for user in recipients:
                 if user.email:
-                    self.email_availability_checker_fnc(user.email)
+                    checker.check(user.email)
         return recipients
 
     def clean(self):

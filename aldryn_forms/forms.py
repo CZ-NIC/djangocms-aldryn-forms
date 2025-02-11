@@ -1,4 +1,5 @@
 import re
+import uuid
 
 from django import forms
 from django.conf import settings
@@ -322,6 +323,9 @@ class FormSubmissionBaseForm(forms.Form):
         return self.cleaned_data
 
     def save(self, commit=False):
+        post_uuid = self.cleaned_data.get("post_uuid")
+        if post_uuid is None:
+            self.instance.post_uuid = uuid.uuid4()
         self.instance.set_form_data(self)
         self.instance.save()
 

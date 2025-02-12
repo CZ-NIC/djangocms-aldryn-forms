@@ -1,5 +1,7 @@
 import sys
+import uuid
 from distutils.version import LooseVersion
+from unittest.mock import patch
 
 from django.urls import clear_url_caches
 
@@ -35,7 +37,8 @@ class SubmitFormViewTest(CMSTestCase):
         except AttributeError:
             self.placeholder = self.page.get_placeholders('en').get(slot='content')
 
-        self.redirect_url = 'http://www.google.com'
+        self.redirect_url = "http://www.google.com"
+        self.redirect_url_with_params = "http://www.google.com?aldryn_form_post_uuid=b58683e9-2449-4e29-8b48-3ceea4f34a37"
 
         plugin_data = {
             'redirect_type': 'redirect_to_url',
@@ -84,6 +87,7 @@ class SubmitFormViewTest(CMSTestCase):
             if module in sys.modules:
                 del sys.modules[module]
 
+    @patch("uuid.uuid4", lambda: uuid.UUID('{b58683e9-2449-4e29-8b48-3ceea4f34a37}'))
     def test_form_view_and_submission_with_apphook_django_gte_111(self):
         if CMS_3_6:
             public_page = self.page.publisher_public
@@ -108,8 +112,9 @@ class SubmitFormViewTest(CMSTestCase):
         response = self.client.post(self.page.get_absolute_url('en'), {
             'form_plugin_id': public_page_form_plugin.id,
         })
-        self.assertRedirects(response, self.redirect_url, fetch_redirect_response=False)  # noqa: E501
+        self.assertRedirects(response, self.redirect_url_with_params, fetch_redirect_response=False)  # noqa: E501
 
+    @patch("uuid.uuid4", lambda: uuid.UUID('{b58683e9-2449-4e29-8b48-3ceea4f34a37}'))
     def test_view_submit_one_form_instead_multiple(self):
         """Test checks if only one form is send instead of multiple on page together"""
         page = create_page(
@@ -150,7 +155,7 @@ class SubmitFormViewTest(CMSTestCase):
 
         plugin_data2 = {
             'redirect_type': 'redirect_to_url',
-            'url': 'https://google.com/',
+            'url': self.redirect_url_with_params,
         }
 
         form_plugin2 = add_plugin(

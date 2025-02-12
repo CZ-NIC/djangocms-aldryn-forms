@@ -25,6 +25,7 @@ from emailit.utils import get_template_names
 from filer.models import filemodels, imagemodels
 from PIL import Image
 
+from .constants import ALDRYN_FORMS_POST_UUID_NAME
 from . import models
 from .forms import (
     BooleanFieldForm, CaptchaFieldForm, DateFieldForm, DateTimeFieldForm, EmailFieldForm, FileFieldForm, FormPluginForm,
@@ -194,7 +195,8 @@ class FormPlugin(FieldContainer):
         return kwargs
 
     def get_success_url(self, instance):
-        return instance.success_url
+        params = "" if instance.post_uuid is None else f"?{ALDRYN_FORMS_POST_UUID_NAME}={instance.post_uuid}"
+        return f"{instance.success_url}{params}"
 
     def send_success_message(self, instance, request):
         """

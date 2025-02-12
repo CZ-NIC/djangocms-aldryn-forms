@@ -4,3 +4,5 @@ DEFAULT_ALDRYN_FORMS_ACTION_BACKENDS = {
     'none': 'aldryn_forms.action_backends.NoAction',
 }
 ALDRYN_FORMS_ACTION_BACKEND_KEY_MAX_SIZE = 15
+
+ALDRYN_FORMS_POST_UUID_NAME = "aldryn_form_post_uuid"

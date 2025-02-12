@@ -16,6 +16,7 @@ from django.utils.translation import gettext_lazy as _
 from easy_thumbnails.VIL import Image as VILImage
 from PIL import Image
 
+from .constants import ALDRYN_FORMS_POST_UUID_NAME
 from .models import FormPlugin, FormSubmission
 from .sizefield.utils import filesizeformat
 from .utils import add_form_error, get_action_backends, get_user_model
@@ -330,7 +331,7 @@ class FormSubmissionBaseForm(forms.Form):
         self.instance.save()
 
     def save(self, commit=False):
-        post_uuid = self.cleaned_data.get("aldryn_form_post_uuid")
+        post_uuid = self.cleaned_data.get(ALDRYN_FORMS_POST_UUID_NAME)
         if post_uuid is None:
             self.save_new_form(uuid.uuid4())
         else:

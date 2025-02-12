@@ -219,6 +219,13 @@ class FormPlugin(FieldContainer):
         recipients = [user for user in users.iterator() if is_valid_recipient(user.email)]
         users_notified = [(get_user_name(user), user.email) for user in recipients]
         form.instance.set_recipients(users_notified)
+        form.instance.set_form_data(form)
+
+        post_ident = form.cleaned_data.get(ALDRYN_FORMS_POST_IDENT_NAME)
+        if post_ident is None:
+            post_ident = form.generate_post_ident()
+            form.initial_post_ident = post_ident
+
         SubmittedToBeSent.objects.create(
             name=form.instance.name,
             data=form.instance.data,
@@ -226,7 +233,7 @@ class FormPlugin(FieldContainer):
             language=form.instance.language,
             form_url=form.instance.form_url,
             sent_at=form.instance.sent_at,
-            post_ident=form.instance.post_ident
+            post_ident=post_ident
         )
         return users_notified
 

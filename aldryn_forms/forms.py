@@ -265,6 +265,7 @@ class FormSubmissionBaseForm(forms.Form):
         super().__init__(*args, **kwargs)
         language = self.form_plugin.language
         self.email_availability_checker_class = get_email_availability_checker_class()
+        self.initial_post_ident = None
 
         self.instance = FormSubmission(
             name=self.form_plugin.name,
@@ -324,6 +325,10 @@ class FormSubmissionBaseForm(forms.Form):
                             self._add_error(_("This email is unavailable."), serialized_field.name)
         return self.cleaned_data
 
+    def generate_post_ident(self):
+        """Generate new post_ident."""
+        return self.initial_post_ident if self.initial_post_ident else get_random_string(64)
+
     def save_new_submission(self, post_ident: str) -> None:
         """Save a new submission with unique ID."""
         self.instance.post_ident = post_ident
@@ -334,7 +339,7 @@ class FormSubmissionBaseForm(forms.Form):
         """Save a new submission or append into a previous one."""
         post_ident = self.cleaned_data.get(ALDRYN_FORMS_POST_IDENT_NAME)
         if post_ident is None:
-            self.save_new_submission(get_random_string(64))
+            self.save_new_submission(self.generate_post_ident())
         else:
             try:
                 previous_submit = FormSubmission.objects.get(post_ident=post_ident)

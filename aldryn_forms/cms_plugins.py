@@ -214,7 +214,9 @@ class FormPlugin(FieldContainer):
             message = markdown.markdown(instance.success_message)
             messages.success(request, mark_safe(message))
 
-    def postpone_send_notifications(self, instance: models.FormPlugin, form: FormSubmissionBaseForm) -> list[tuple[str, str]]:
+    def postpone_send_notifications(
+        self, instance: models.FormPlugin, form: FormSubmissionBaseForm
+    ) -> list[tuple[str, str]]:
         users = instance.recipients.exclude(email='')
         recipients = [user for user in users.iterator() if is_valid_recipient(user.email)]
         users_notified = [(get_user_name(user), user.email) for user in recipients]

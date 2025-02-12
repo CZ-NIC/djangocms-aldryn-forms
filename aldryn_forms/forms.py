@@ -1,3 +1,4 @@
+import json
 import re
 import uuid
 
@@ -327,9 +328,6 @@ class FormSubmissionBaseForm(forms.Form):
         self.instance.post_uuid = post_uuid
         self.instance.set_form_data(self)
         self.instance.save()
-        print("=-" * 60)
-        print(self.instance.post_uuid)
-        print(self.instance.data)
 
     def save(self, commit=False):
         post_uuid = self.cleaned_data.get("aldryn_form_post_uuid")
@@ -338,7 +336,10 @@ class FormSubmissionBaseForm(forms.Form):
         else:
             try:
                 previous_submit = FormSubmission.objects.get(post_uuid=post_uuid)
-                previous_submit.append_form_data(self)
+                data = previous_submit.get_form_data()
+                self.instance.set_form_data(self)
+                data.extend(self.instance.get_form_data())
+                previous_submit.data = json.dumps(data)
                 previous_submit.save()
             except FormSubmission.DoesNotExist:
                 self.save_new_form(post_uuid)

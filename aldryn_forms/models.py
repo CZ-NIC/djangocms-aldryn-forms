@@ -697,7 +697,7 @@ class FormSubmissionBase(models.Model):
         blank=True,
     )
     sent_at = models.DateTimeField(auto_now_add=True)
-    post_uuid = models.UUIDField(null=True, blank=True)
+    post_ident = models.CharField(max_length=64, null=True, blank=True)
 
     class Meta:
         abstract = True

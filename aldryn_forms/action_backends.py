@@ -1,5 +1,6 @@
 import logging
 
+from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
 from .action_backends_base import BaseAction
@@ -12,6 +13,8 @@ class DefaultAction(BaseAction):
     verbose_name = _('Save to site administration and send email')
 
     def form_valid(self, cmsplugin, instance, request, form):
+        if hasattr(settings, "ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION"):
+            pass  # TODO: postpone notification
         recipients = cmsplugin.send_notifications(instance, form)
         form.instance.set_recipients(recipients)
         form.save()

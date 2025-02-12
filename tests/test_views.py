@@ -1,5 +1,4 @@
 import sys
-import uuid
 from distutils.version import LooseVersion
 from unittest.mock import patch
 
@@ -12,13 +11,12 @@ from cms.test_utils.testcases import CMSTestCase
 
 
 # These means "less than or equal"
-CMS_3_6 = LooseVersion(cms.__version__) < LooseVersion('4.0')
+CMS_3_6 = LooseVersion(cms.__version__) < LooseVersion("4.0")
 
 
 class SubmitFormViewTest(CMSTestCase):
-
     def setUp(self):
-        self.APP_MODULE = 'aldryn_forms.cms_apps.FormsApp'
+        self.APP_MODULE = "aldryn_forms.cms_apps.FormsApp"
         clear_app_resolvers()
         clear_url_caches()
 
@@ -26,37 +24,39 @@ class SubmitFormViewTest(CMSTestCase):
             del sys.modules[self.APP_MODULE]
 
         self.page = create_page(
-            'tpage',
-            'test_page.html',
-            'en',
+            "tpage",
+            "test_page.html",
+            "en",
             published=True,
-            apphook='FormsApp',
+            apphook="FormsApp",
         )
         try:
-            self.placeholder = self.page.placeholders.get(slot='content')
+            self.placeholder = self.page.placeholders.get(slot="content")
         except AttributeError:
-            self.placeholder = self.page.get_placeholders('en').get(slot='content')
+            self.placeholder = self.page.get_placeholders("en").get(slot="content")
 
         self.redirect_url = "http://www.google.com"
-        self.redirect_url_with_params = "http://www.google.com?aldryn_form_post_uuid=b58683e9-2449-4e29-8b48-3ceea4f34a37"
+        self.redirect_url_with_params = "http://www.google.com?aldryn_form_post_ident=aBH7hWEGAihsg9KxctpNRfvEXUoOFpJZigmZETqWWNVs4gENFsL3qva1d4Q93URg"
 
         plugin_data = {
-            'redirect_type': 'redirect_to_url',
-            'url': self.redirect_url,
+            "redirect_type": "redirect_to_url",
+            "url": self.redirect_url,
         }
-        self.form_plugin = add_plugin(self.placeholder, 'FormPlugin', 'en', **plugin_data)  # noqa: E501
+        self.form_plugin = add_plugin(
+            self.placeholder, "FormPlugin", "en", **plugin_data
+        )  # noqa: E501
 
         add_plugin(
             self.placeholder,
-            'SubmitButton',
-            'en',
+            "SubmitButton",
+            "en",
             target=self.form_plugin,
-            label='Submit',
+            label="Submit",
         )
-        self.form_plugin.action_backend = 'default'
+        self.form_plugin.action_backend = "default"
         self.form_plugin.save()
         if CMS_3_6:
-            self.page.publish('en')
+            self.page.publish("en")
 
         self.reload_urls()
         self.apphook_clear()
@@ -75,7 +75,7 @@ class SubmitFormViewTest(CMSTestCase):
         from django.conf import settings
 
         url_modules = [
-            'cms.urls',
+            "cms.urls",
             self.APP_MODULE,
             settings.ROOT_URLCONF,
         ]
@@ -87,7 +87,10 @@ class SubmitFormViewTest(CMSTestCase):
             if module in sys.modules:
                 del sys.modules[module]
 
-    @patch("uuid.uuid4", lambda: uuid.UUID('{b58683e9-2449-4e29-8b48-3ceea4f34a37}'))
+    @patch(
+        "django.utils.crypto.get_random_string",
+        lambda length: "aBH7hWEGAihsg9KxctpNRfvEXUoOFpJZigmZETqWWNVs4gENFsL3qva1d4Q93URg",
+    )
     def test_form_view_and_submission_with_apphook_django_gte_111(self):
         if CMS_3_6:
             public_page = self.page.publisher_public
@@ -96,168 +99,176 @@ class SubmitFormViewTest(CMSTestCase):
         try:
             public_placeholder = public_page.placeholders.first()
         except AttributeError:
-            public_placeholder = public_page.get_placeholders('en').first()
+            public_placeholder = public_page.get_placeholders("en").first()
 
-        public_page_form_plugin = (
-            public_placeholder
-            .cmsplugin_set
-            .filter(plugin_type='FormPlugin')
-            .first()
-        )
-        response = self.client.get(self.page.get_absolute_url('en'))
+        public_page_form_plugin = public_placeholder.cmsplugin_set.filter(
+            plugin_type="FormPlugin"
+        ).first()
+        response = self.client.get(self.page.get_absolute_url("en"))
 
         input_string = '<input type="hidden" name="form_plugin_id" value="{}"'
         self.assertContains(response, input_string.format(public_page_form_plugin.id))  # noqa: E501
 
-        response = self.client.post(self.page.get_absolute_url('en'), {
-            'form_plugin_id': public_page_form_plugin.id,
-        })
-        self.assertRedirects(response, self.redirect_url_with_params, fetch_redirect_response=False)  # noqa: E501
+        response = self.client.post(
+            self.page.get_absolute_url("en"),
+            {
+                "form_plugin_id": public_page_form_plugin.id,
+            },
+        )
+        self.assertRedirects(
+            response, self.redirect_url_with_params, fetch_redirect_response=False
+        )  # noqa: E501
 
-    @patch("uuid.uuid4", lambda: uuid.UUID('{b58683e9-2449-4e29-8b48-3ceea4f34a37}'))
+    @patch(
+        "django.utils.crypto.get_random_string",
+        lambda length: "aBH7hWEGAihsg9KxctpNRfvEXUoOFpJZigmZETqWWNVs4gENFsL3qva1d4Q93URg",
+    )
     def test_view_submit_one_form_instead_multiple(self):
         """Test checks if only one form is send instead of multiple on page together"""
         page = create_page(
-            'multiple forms',
-            'test_page.html',
-            'en',
+            "multiple forms",
+            "test_page.html",
+            "en",
             published=True,
-            apphook='FormsApp',
+            apphook="FormsApp",
         )
-        placeholder = page.placeholders.get(slot='content')
+        placeholder = page.placeholders.get(slot="content")
 
         form_plugin = add_plugin(
             placeholder,
-            'FormPlugin',
-            'en',
+            "FormPlugin",
+            "en",
         )  # noqa: E501
 
         add_plugin(
             placeholder,
-            'EmailField',
-            'en',
-            name='email_1',
+            "EmailField",
+            "en",
+            name="email_1",
             required=True,
             target=form_plugin,
-            label='Submit',
+            label="Submit",
         )
 
         add_plugin(
             placeholder,
-            'SubmitButton',
-            'en',
+            "SubmitButton",
+            "en",
             target=form_plugin,
-            label='Submit',
+            label="Submit",
         )
 
-        form_plugin.action_backend = 'default'
+        form_plugin.action_backend = "default"
         form_plugin.save()
 
         plugin_data2 = {
-            'redirect_type': 'redirect_to_url',
-            'url': self.redirect_url_with_params,
+            "redirect_type": "redirect_to_url",
+            "url": self.redirect_url_with_params,
         }
 
-        form_plugin2 = add_plugin(
-            placeholder,
-            'FormPlugin',
-            'en',
-            **plugin_data2
-        )  # noqa: E501
+        form_plugin2 = add_plugin(placeholder, "FormPlugin", "en", **plugin_data2)  # noqa: E501
 
         add_plugin(
             placeholder,
-            'SubmitButton',
-            'en',
+            "SubmitButton",
+            "en",
             target=form_plugin2,
-            label='Submit',
+            label="Submit",
         )
 
-        form_plugin2.action_backend = 'default'
+        form_plugin2.action_backend = "default"
         form_plugin2.save()
 
-        page.publish('en')
+        page.publish("en")
         self.reload_urls()
         self.apphook_clear()
 
-        response = self.client.post(page.get_absolute_url('en'), {
-            'form_plugin_id': form_plugin2.id,
-            'email_1': 'test@test',
-        })
-        self.assertRedirects(response, plugin_data2['url'], fetch_redirect_response=False)  # noqa: E501
+        response = self.client.post(
+            page.get_absolute_url("en"),
+            {
+                "form_plugin_id": form_plugin2.id,
+                "email_1": "test@test",
+            },
+        )
+        self.assertRedirects(
+            response, plugin_data2["url"], fetch_redirect_response=False
+        )  # noqa: E501
 
     def test_view_submit_one_valid_form_instead_multiple(self):
         """Test checks if only one form is validated instead multiple on a page"""
         page = create_page(
-            'multiple forms',
-            'test_page.html',
-            'en',
+            "multiple forms",
+            "test_page.html",
+            "en",
             published=True,
-            apphook='FormsApp',
+            apphook="FormsApp",
         )
-        placeholder = page.placeholders.get(slot='content')
+        placeholder = page.placeholders.get(slot="content")
 
         form_plugin = add_plugin(
             placeholder,
-            'FormPlugin',
-            'en',
+            "FormPlugin",
+            "en",
         )  # noqa: E501
 
         add_plugin(
             placeholder,
-            'EmailField',
-            'en',
-            name='email_1',
+            "EmailField",
+            "en",
+            name="email_1",
             required=True,
             target=form_plugin,
         )
 
         add_plugin(
             placeholder,
-            'SubmitButton',
-            'en',
+            "SubmitButton",
+            "en",
             target=form_plugin,
-            label='Submit',
+            label="Submit",
         )
 
-        form_plugin.action_backend = 'default'
+        form_plugin.action_backend = "default"
         form_plugin.save()
 
         form_plugin2 = add_plugin(
             placeholder,
-            'FormPlugin',
-            'en',
+            "FormPlugin",
+            "en",
         )  # noqa: E501
 
         add_plugin(
             placeholder,
-            'EmailField',
-            'en',
-            name='email_2',
+            "EmailField",
+            "en",
+            name="email_2",
             required=True,
             target=form_plugin2,
         )
 
         add_plugin(
             placeholder,
-            'SubmitButton',
-            'en',
+            "SubmitButton",
+            "en",
             target=form_plugin2,
-            label='Submit',
+            label="Submit",
         )
 
-        form_plugin2.action_backend = 'default'
+        form_plugin2.action_backend = "default"
         form_plugin2.save()
 
-        page.publish('en')
+        page.publish("en")
         self.reload_urls()
         self.apphook_clear()
 
-        response = self.client.post(page.get_absolute_url('en'), {
-            'form_plugin_id': form_plugin2.id,
-            'email_2': 'test@test',
-        })
+        response = self.client.post(
+            page.get_absolute_url("en"),
+            {
+                "form_plugin_id": form_plugin2.id,
+                "email_2": "test@test",
+            },
+        )
 
         email_field = '<input type="email" name="{name}"'
-        self.assertContains(response, email_field.format(name='email_1'))
-        self.assertContains(response, email_field.format(name='email_2'))
+        self.assertContains(response, email_field.format(name="email_1"))
+        self.assertContains(response, email_field.format(name="email_2"))

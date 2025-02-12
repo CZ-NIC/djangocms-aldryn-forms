@@ -1,7 +1,6 @@
 import logging
 import re
 import smtplib
-import uuid
 from typing import Any, Dict, Optional
 from urllib.parse import parse_qs, urlencode, urlparse
 
@@ -29,7 +28,7 @@ from filer.models import filemodels, imagemodels
 from PIL import Image
 
 from . import models
-from .constants import ALDRYN_FORMS_POST_UUID_NAME
+from .constants import ALDRYN_FORMS_POST_IDENT_NAME
 from .forms import (
     BooleanFieldForm, CaptchaFieldForm, DateFieldForm, DateTimeFieldForm, EmailFieldForm, FileFieldForm, FormPluginForm,
     FormSubmissionBaseForm, HiddenFieldForm, ImageFieldForm, MultipleSelectFieldForm, RadioFieldForm,
@@ -97,7 +96,7 @@ class FormPlugin(FieldContainer):
 
         if request.POST.get('form_plugin_id') == str(instance.id) and form.is_valid():
             context['post_success'] = True
-            context['form_success_url'] = self.get_success_url(instance, form.instance.post_uuid)
+            context['form_success_url'] = self.get_success_url(instance, form.instance.post_ident)
         context['form'] = form
         return context
 
@@ -197,11 +196,11 @@ class FormPlugin(FieldContainer):
             kwargs['files'] = request.FILES
         return kwargs
 
-    def get_success_url(self, instance: models.FormPlugin, post_uuid: Optional[uuid.UUID]) -> str:
-        if post_uuid is not None:
+    def get_success_url(self, instance: models.FormPlugin, post_ident: Optional[str]) -> str:
+        if post_ident is not None:
             result = urlparse(instance.success_url)
             params = parse_qs(result.query)
-            params[ALDRYN_FORMS_POST_UUID_NAME] = post_uuid
+            params[ALDRYN_FORMS_POST_IDENT_NAME] = post_ident
             result = result._replace(query=urlencode(params))
             return result.geturl()
         return instance.success_url

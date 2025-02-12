@@ -337,9 +337,10 @@ class FormSubmissionBaseForm(forms.Form):
         else:
             try:
                 previous_submit = FormSubmission.objects.get(post_uuid=post_uuid)
-                data = previous_submit.get_form_data()
-                self.instance.set_form_data(self)
-                data.extend(self.instance.get_form_data())
+                data: list[dict[str, str]] = json.loads(previous_submit.data)
+                fields = self.get_serialized_fields(is_confirmation=False)
+                fields_as_dicts = [field._asdict() for field in fields if field.name != ALDRYN_FORMS_POST_UUID_NAME]
+                data.extend(fields_as_dicts)
                 previous_submit.data = json.dumps(data)
                 previous_submit.save()
             except FormSubmission.DoesNotExist:

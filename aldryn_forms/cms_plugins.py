@@ -194,9 +194,8 @@ class FormPlugin(FieldContainer):
             kwargs['files'] = request.FILES
         return kwargs
 
-    def get_success_url(self, instance):
-        params = "" if instance.post_uuid is None else f"?{ALDRYN_FORMS_POST_UUID_NAME}={instance.post_uuid}"
-        return f"{instance.success_url}{params}"
+    def get_success_url(self, instance: models.FormPlugin) -> str:
+        return instance.success_url
 
     def send_success_message(self, instance, request):
         """

@@ -227,16 +227,22 @@ class FormPlugin(FieldContainer):
         if post_ident is None:
             post_ident = form.generate_post_ident()
             form.initial_post_ident = post_ident
+            SubmittedToBeSent.objects.create(
+                name=form.instance.name,
+                data=form.instance.data,
+                recipients=form.instance.recipients,
+                language=form.instance.language,
+                form_url=form.instance.form_url,
+                sent_at=form.instance.sent_at,
+                post_ident=post_ident
+            )
+        else:
+            try:
+                submitted = SubmittedToBeSent.objects.get(post_ident=post_ident)
+                print(submitted)  # TODO:
+            except SubmittedToBeSent.DoesNotExist:
+                pass  # TODO: save new SubmittedToBeSent
 
-        SubmittedToBeSent.objects.create(
-            name=form.instance.name,
-            data=form.instance.data,
-            recipients=form.instance.recipients,
-            language=form.instance.language,
-            form_url=form.instance.form_url,
-            sent_at=form.instance.sent_at,
-            post_ident=post_ident
-        )
         return users_notified
 
     def send_notifications(self, instance, form):

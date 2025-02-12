@@ -88,7 +88,7 @@ class SubmitFormViewTest(CMSTestCase):
                 del sys.modules[module]
 
     @patch(
-        "django.utils.crypto.get_random_string",
+        "aldryn_forms.forms.get_random_string",
         lambda length: "aBH7hWEGAihsg9KxctpNRfvEXUoOFpJZigmZETqWWNVs4gENFsL3qva1d4Q93URg",
     )
     def test_form_view_and_submission_with_apphook_django_gte_111(self):
@@ -120,7 +120,7 @@ class SubmitFormViewTest(CMSTestCase):
         )  # noqa: E501
 
     @patch(
-        "django.utils.crypto.get_random_string",
+        "aldryn_forms.forms.get_random_string",
         lambda length: "aBH7hWEGAihsg9KxctpNRfvEXUoOFpJZigmZETqWWNVs4gENFsL3qva1d4Q93URg",
     )
     def test_view_submit_one_form_instead_multiple(self):

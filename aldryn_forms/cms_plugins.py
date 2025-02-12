@@ -245,6 +245,12 @@ class FormPlugin(FieldContainer):
 
         return users_notified
 
+    # if request_is_ajax(request):
+    #     return JsonResponse(data)
+    # def request_is_ajax(request):
+    #     """Check that request is an Ajax type."""
+    #     return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
+
     def send_notifications(self, instance, form):
         users = instance.recipients.exclude(email='')
 

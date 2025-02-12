@@ -752,8 +752,20 @@ class FormSubmissionBase(models.Model):
     def set_form_data(self, form):
         fields = form.get_serialized_fields(is_confirmation=False)
         fields_as_dicts = [field._asdict() for field in fields]
+        print("fields_as_dicts:", fields_as_dicts)
 
         self.data = json.dumps(fields_as_dicts)
+        print("FINAL.self.data", self.data)
+
+    def append_form_data(self, form):
+        fields = form.get_serialized_fields(is_confirmation=False)
+        fields_as_dicts = [field._asdict() for field in fields]
+        print("fields_as_dicts:", fields_as_dicts)
+        print("1.self.data", self.data)
+        data = self.get_form_data()
+        data.extend(fields_as_dicts)
+        self.data = json.dumps(data)
+        print("2.self.data", self.data)
 
     def set_recipients(self, recipients):
         raw_recipients = [
@@ -767,3 +779,12 @@ class FormSubmission(FormSubmissionBase):
         ordering = ['-sent_at']
         verbose_name = _('Form submission')
         verbose_name_plural = _('Form submissions')
+
+
+class SubmittedToBeSent(FormSubmissionBase):
+    """Submitted form to be sent by email."""
+
+    class Meta:
+        ordering = ['-sent_at']
+        verbose_name = _('Submitted form to be sent')
+        verbose_name_plural = _('Submitted forms to be sent')

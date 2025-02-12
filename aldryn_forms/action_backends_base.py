@@ -3,7 +3,7 @@ import abc
 
 class BaseAction(metaclass=abc.ABCMeta):
 
-    @abc.abstractproperty
+    @abc.abstractmethod
     def verbose_name(self):
         pass  # pragma: no cover
 

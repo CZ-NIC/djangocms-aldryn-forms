@@ -322,12 +322,26 @@ class FormSubmissionBaseForm(forms.Form):
                             self._add_error(_("This email is unavailable."), serialized_field.name)
         return self.cleaned_data
 
-    def save(self, commit=False):
-        post_uuid = self.cleaned_data.get("post_uuid")
-        if post_uuid is None:
-            self.instance.post_uuid = uuid.uuid4()
+    def save_new_form(self, post_uuid: uuid.uuid4) -> None:
+        """Save new form with unique ID."""
+        self.instance.post_uuid = post_uuid
         self.instance.set_form_data(self)
         self.instance.save()
+        print("=-" * 60)
+        print(self.instance.post_uuid)
+        print(self.instance.data)
+
+    def save(self, commit=False):
+        post_uuid = self.cleaned_data.get("aldryn_form_post_uuid")
+        if post_uuid is None:
+            self.save_new_form(uuid.uuid4())
+        else:
+            try:
+                previous_submit = FormSubmission.objects.get(post_uuid=post_uuid)
+                previous_submit.append_form_data(self)
+                previous_submit.save()
+            except FormSubmission.DoesNotExist:
+                self.save_new_form(post_uuid)
 
 
 class ExtandableErrorForm(forms.ModelForm):

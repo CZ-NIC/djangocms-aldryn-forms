@@ -36,7 +36,7 @@ from .forms import (
     TextFieldForm, TimeFieldForm,
 )
 from .helpers import get_user_name
-from .models import SerializedFormField
+from .models import SerializedFormField, SubmittedToBeSent
 from .signals import form_post_save, form_pre_save
 from .sizefield.utils import filesizeformat
 from .utils import get_action_backends
@@ -213,6 +213,22 @@ class FormPlugin(FieldContainer):
         if instance.success_message:
             message = markdown.markdown(instance.success_message)
             messages.success(request, mark_safe(message))
+
+    def postpone_send_notifications(self, instance: models.FormPlugin, form: FormSubmissionBaseForm) -> list[tuple[str, str]]:
+        users = instance.recipients.exclude(email='')
+        recipients = [user for user in users.iterator() if is_valid_recipient(user.email)]
+        users_notified = [(get_user_name(user), user.email) for user in recipients]
+        form.instance.set_recipients(users_notified)
+        SubmittedToBeSent.objects.create(
+            name=form.instance.name,
+            data=form.instance.data,
+            recipients=form.instance.recipients,
+            language=form.instance.language,
+            form_url=form.instance.form_url,
+            sent_at=form.instance.sent_at,
+            post_ident=form.instance.post_ident
+        )
+        return users_notified
 
     def send_notifications(self, instance, form):
         users = instance.recipients.exclude(email='')

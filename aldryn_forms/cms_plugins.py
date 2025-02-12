@@ -1,7 +1,7 @@
 import logging
 import re
 import smtplib
-from typing import Dict
+from typing import Any, Dict
 
 from django import forms
 from django.apps import apps
@@ -10,6 +10,7 @@ from django.contrib import messages
 from django.contrib.admin import TabularInline
 from django.core.validators import MinLengthValidator
 from django.db.models import query
+from django.http import HttpRequest
 from django.template.loader import select_template
 from django.utils.safestring import mark_safe
 from django.utils.translation import get_language, gettext
@@ -25,8 +26,8 @@ from emailit.utils import get_template_names
 from filer.models import filemodels, imagemodels
 from PIL import Image
 
-from .constants import ALDRYN_FORMS_POST_UUID_NAME
 from . import models
+from .constants import ALDRYN_FORMS_POST_UUID_NAME
 from .forms import (
     BooleanFieldForm, CaptchaFieldForm, DateFieldForm, DateTimeFieldForm, EmailFieldForm, FileFieldForm, FormPluginForm,
     FormSubmissionBaseForm, HiddenFieldForm, ImageFieldForm, MultipleSelectFieldForm, RadioFieldForm,
@@ -101,7 +102,7 @@ class FormPlugin(FieldContainer):
     def get_render_template(self, context, instance, placeholder):
         return instance.form_template
 
-    def form_valid(self, instance, request, form):
+    def form_valid(self, instance: models.FormPlugin, request: HttpRequest, form: FormSubmissionBaseForm) -> Any:
         action_backend = get_action_backends()[form.form_plugin.action_backend]()
         return action_backend.form_valid(self, instance, request, form)
 

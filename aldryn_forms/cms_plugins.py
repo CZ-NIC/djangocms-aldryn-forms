@@ -3,6 +3,7 @@ import re
 import smtplib
 import uuid
 from typing import Any, Dict, Optional
+from urllib.parse import parse_qs, urlencode, urlparse
 
 from django import forms
 from django.apps import apps
@@ -197,8 +198,13 @@ class FormPlugin(FieldContainer):
         return kwargs
 
     def get_success_url(self, instance: models.FormPlugin, post_uuid: Optional[uuid.UUID]) -> str:
-        params = "" if post_uuid is None else f"?{ALDRYN_FORMS_POST_UUID_NAME}={post_uuid}"
-        return f"{instance.success_url}{params}"
+        if post_uuid is not None:
+            result = urlparse(instance.success_url)
+            params = parse_qs(result.query)
+            params[ALDRYN_FORMS_POST_UUID_NAME] = post_uuid
+            result = result._replace(query=urlencode(params))
+            return result.geturl()
+        return instance.success_url
 
     def send_success_message(self, instance, request):
         """

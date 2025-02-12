@@ -1,7 +1,8 @@
 import logging
 import re
 import smtplib
-from typing import Any, Dict
+import uuid
+from typing import Any, Dict, Optional
 
 from django import forms
 from django.apps import apps
@@ -95,7 +96,7 @@ class FormPlugin(FieldContainer):
 
         if request.POST.get('form_plugin_id') == str(instance.id) and form.is_valid():
             context['post_success'] = True
-            context['form_success_url'] = self.get_success_url(instance)
+            context['form_success_url'] = self.get_success_url(instance, form.instance.post_uuid)
         context['form'] = form
         return context
 
@@ -195,8 +196,9 @@ class FormPlugin(FieldContainer):
             kwargs['files'] = request.FILES
         return kwargs
 
-    def get_success_url(self, instance: models.FormPlugin) -> str:
-        return instance.success_url
+    def get_success_url(self, instance: models.FormPlugin, post_uuid: Optional[uuid.UUID]) -> str:
+        params = "" if post_uuid is None else f"?{ALDRYN_FORMS_POST_UUID_NAME}={post_uuid}"
+        return f"{instance.success_url}{params}"
 
     def send_success_message(self, instance, request):
         """

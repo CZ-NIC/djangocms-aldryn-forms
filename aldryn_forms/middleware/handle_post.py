@@ -32,7 +32,7 @@ class HandleHttpPost(MiddlewareMixin):
 
         form_plugin_instance = form_plugin.get_plugin_instance()[1]
         form = form_plugin_instance.process_form(form_plugin, request)
-        success_url = form_plugin_instance.get_success_url(instance=form_plugin)
+        success_url = form_plugin_instance.get_success_url(instance=form_plugin, post_uuid=form.instance.post_uuid)
 
         if form.is_valid() and success_url:
             return HttpResponseRedirect(success_url)

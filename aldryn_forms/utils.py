@@ -18,7 +18,6 @@ from emailit.utils import get_template_names
 from .action_backends_base import BaseAction
 from .compat import build_plugin_tree
 from .constants import ALDRYN_FORMS_ACTION_BACKEND_KEY_MAX_SIZE, DEFAULT_ALDRYN_FORMS_ACTION_BACKENDS
-from .helpers import get_user_name
 from .validators import is_valid_recipient
 
 
@@ -144,7 +143,7 @@ def add_form_error(form, message, field=NON_FIELD_ERRORS):
         form._errors[field] = form.error_class([message])
 
 
-def send_postponed_notifications(instance: "FormSubmissionBase") -> None:
+def send_postponed_notifications(instance: "FormSubmissionBase") -> bool:
     """Send postponed notifications."""
     recipients = [user for user in instance.get_recipients() if is_valid_recipient(user.email)]
     form_data = [NameTypeField(item.name, item.value) for item in instance.get_form_data()]
@@ -172,3 +171,5 @@ def send_postponed_notifications(instance: "FormSubmissionBase") -> None:
         )
     except smtplib.SMTPException as err:
         logger.error(err)
+        return False
+    return True

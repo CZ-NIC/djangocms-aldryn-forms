@@ -16,5 +16,5 @@ class Command(BaseCommand):
         if duration:
             expire = django_timezone_now() - timedelta(minutes=duration)
             for instance in SubmittedToBeSent.objects.filter(sent_at__lt=expire):
-                send_postponed_notifications(instance)
-                instance.delete()
+                if send_postponed_notifications(instance):
+                    instance.delete()

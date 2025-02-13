@@ -14,7 +14,7 @@ from django.db.models import query
 from django.http import HttpRequest
 from django.template.loader import select_template
 from django.utils.safestring import mark_safe
-from django.utils.translation import gettext
+from django.utils.translation import get_language, gettext
 from django.utils.translation import gettext_lazy as _
 
 from cms.models.pluginmodel import CMSPlugin
@@ -23,6 +23,7 @@ from cms.plugin_pool import plugin_pool
 
 import markdown
 from emailit.api import send_mail
+from emailit.utils import get_template_names
 from filer.models import filemodels, imagemodels
 from PIL import Image
 
@@ -38,7 +39,7 @@ from .helpers import get_user_name
 from .models import SerializedFormField, SubmittedToBeSent
 from .signals import form_post_save, form_pre_save
 from .sizefield.utils import filesizeformat
-from .utils import get_action_backends, send_notifications
+from .utils import get_action_backends
 from .validators import MaxChoicesValidator, MinChoicesValidator, is_valid_recipient
 
 
@@ -256,7 +257,49 @@ class FormPlugin(FieldContainer):
     #     return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
 
     def send_notifications(self, instance, form):
-        send_notifications(instance, form)
+        users = instance.recipients.exclude(email='')
+
+        recipients = [user for user in users.iterator()
+                      if is_valid_recipient(user.email)]
+
+        context = {
+            'form_name': instance.name,
+            'form_data': form.get_serialized_field_choices(),
+            'form_plugin': instance,
+        }
+
+        reply_to = None
+        for field_name, field_instance in form.fields.items():
+            if hasattr(field_instance, '_model_instance') and \
+                    field_instance._model_instance.plugin_type == 'EmailField':
+                if form.cleaned_data.get(field_name):
+                    reply_to = [form.cleaned_data[field_name]]
+                    break
+
+        subject_template_base = getattr(settings, 'ALDRYN_FORMS_EMAIL_SUBJECT_TEMPLATES_BASE',
+                                        getattr(settings, 'ALDRYN_FORMS_EMAIL_TEMPLATES_BASE', None))
+        if subject_template_base:
+            language = instance.language or get_language()
+            subject_templates = get_template_names(language, subject_template_base, 'subject', 'txt')
+        else:
+            subject_templates = None
+
+        try:
+            send_mail(
+                recipients=[user.email for user in recipients],
+                context=context,
+                template_base=getattr(
+                    settings, 'ALDRYN_FORMS_EMAIL_TEMPLATES_BASE', 'aldryn_forms/emails/notification'),
+                subject_templates=subject_templates,
+                language=instance.language,
+                reply_to=reply_to,
+            )
+        except smtplib.SMTPException as err:
+            logger.error(err)
+
+        users_notified = [
+            (get_user_name(user), user.email) for user in recipients]
+        return users_notified
 
 
 class Fieldset(FieldContainer):

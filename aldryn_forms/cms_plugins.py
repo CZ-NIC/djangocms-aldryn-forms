@@ -28,7 +28,7 @@ from filer.models import filemodels, imagemodels
 from PIL import Image
 
 from . import models
-from .constants import ALDRYN_FORMS_POST_IDENT_NAME
+from .constants import ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION, ALDRYN_FORMS_POST_IDENT_NAME
 from .forms import (
     BooleanFieldForm, CaptchaFieldForm, DateFieldForm, DateTimeFieldForm, EmailFieldForm, FileFieldForm, FormPluginForm,
     FormSubmissionBaseForm, HiddenFieldForm, ImageFieldForm, MultipleSelectFieldForm, RadioFieldForm,
@@ -197,7 +197,8 @@ class FormPlugin(FieldContainer):
         return kwargs
 
     def get_success_url(self, instance: models.FormPlugin, post_ident: Optional[str]) -> str:
-        if post_ident is not None:
+        duration = getattr(settings, ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION, 0)
+        if duration and post_ident is not None:
             result = urlparse(instance.success_url)
             params = parse_qs(result.query)
             params[ALDRYN_FORMS_POST_IDENT_NAME] = post_ident
@@ -214,6 +215,18 @@ class FormPlugin(FieldContainer):
             message = markdown.markdown(instance.success_message)
             messages.success(request, mark_safe(message))
 
+    def save_new_submission(self, form: FormSubmissionBaseForm, post_ident: str) -> None:
+        """Save a new submission to be sent."""
+        SubmittedToBeSent.objects.create(
+            name=form.instance.name,
+            data=form.instance.data,
+            recipients=form.instance.recipients,
+            language=form.instance.language,
+            form_url=form.instance.form_url,
+            sent_at=form.instance.sent_at,
+            post_ident=post_ident
+        )
+
     def postpone_send_notifications(
         self, instance: models.FormPlugin, form: FormSubmissionBaseForm
     ) -> list[tuple[str, str]]:
@@ -227,21 +240,13 @@ class FormPlugin(FieldContainer):
         if post_ident is None:
             post_ident = form.generate_post_ident()
             form.initial_post_ident = post_ident
-            SubmittedToBeSent.objects.create(
-                name=form.instance.name,
-                data=form.instance.data,
-                recipients=form.instance.recipients,
-                language=form.instance.language,
-                form_url=form.instance.form_url,
-                sent_at=form.instance.sent_at,
-                post_ident=post_ident
-            )
+            self.save_new_submission(form, post_ident)
         else:
             try:
-                submitted = SubmittedToBeSent.objects.get(post_ident=post_ident)
-                print(submitted)  # TODO:
+                previous_submit = SubmittedToBeSent.objects.get(post_ident=post_ident)
+                form.append_into_previous_submission(previous_submit)
             except SubmittedToBeSent.DoesNotExist:
-                pass  # TODO: save new SubmittedToBeSent
+                self.save_new_submission(form, post_ident)
 
         return users_notified
 

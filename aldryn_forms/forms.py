@@ -17,7 +17,7 @@ from easy_thumbnails.VIL import Image as VILImage
 from PIL import Image
 
 from .constants import ALDRYN_FORMS_POST_IDENT_NAME
-from .models import FormPlugin, FormSubmission
+from .models import FormPlugin, FormSubmission, FormSubmissionBase
 from .sizefield.utils import filesizeformat
 from .utils import add_form_error, get_action_backends, get_user_model
 
@@ -335,6 +335,15 @@ class FormSubmissionBaseForm(forms.Form):
         self.instance.set_form_data(self)
         self.instance.save()
 
+    def append_into_previous_submission(self, previous_submit: FormSubmissionBase) -> None:
+        """Append post into previous submission."""
+        data: list[dict[str, str]] = json.loads(previous_submit.data)
+        fields = self.get_serialized_fields(is_confirmation=False)
+        fields_as_dicts = [field._asdict() for field in fields if field.name != ALDRYN_FORMS_POST_IDENT_NAME]
+        data.extend(fields_as_dicts)
+        previous_submit.data = json.dumps(data)
+        previous_submit.save()
+
     def save(self, commit=False):
         """Save a new submission or append into a previous one."""
         post_ident = self.cleaned_data.get(ALDRYN_FORMS_POST_IDENT_NAME)
@@ -343,12 +352,7 @@ class FormSubmissionBaseForm(forms.Form):
         else:
             try:
                 previous_submit = FormSubmission.objects.get(post_ident=post_ident)
-                data: list[dict[str, str]] = json.loads(previous_submit.data)
-                fields = self.get_serialized_fields(is_confirmation=False)
-                fields_as_dicts = [field._asdict() for field in fields if field.name != ALDRYN_FORMS_POST_IDENT_NAME]
-                data.extend(fields_as_dicts)
-                previous_submit.data = json.dumps(data)
-                previous_submit.save()
+                self.append_into_previous_submission(previous_submit)
             except FormSubmission.DoesNotExist:
                 self.save_new_submission(post_ident)
 

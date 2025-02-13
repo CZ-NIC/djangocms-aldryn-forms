@@ -1,5 +1,6 @@
 import logging
 import smtplib
+from typing import TYPE_CHECKING, NamedTuple
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
@@ -19,6 +20,15 @@ from .compat import build_plugin_tree
 from .constants import ALDRYN_FORMS_ACTION_BACKEND_KEY_MAX_SIZE, DEFAULT_ALDRYN_FORMS_ACTION_BACKENDS
 from .helpers import get_user_name
 from .validators import is_valid_recipient
+
+
+if TYPE_CHECKING:
+    from .models import FormSubmissionBase
+
+
+class NameTypeField(NamedTuple):
+    name: str
+    value: str
 
 
 logger = logging.getLogger(__name__)
@@ -134,26 +144,15 @@ def add_form_error(form, message, field=NON_FIELD_ERRORS):
         form._errors[field] = form.error_class([message])
 
 
-def send_notifications(instance, form):
-    """Send notifications."""
-    users = instance.recipients.exclude(email='')
-
-    recipients = [user for user in users.iterator() if is_valid_recipient(user.email)]
-
+def send_postponed_notifications(instance: "FormSubmissionBase") -> None:
+    """Send postponed notifications."""
+    recipients = [user for user in instance.get_recipients() if is_valid_recipient(user.email)]
+    form_data = [NameTypeField(item.name, item.value) for item in instance.get_form_data()]
     context = {
         'form_name': instance.name,
-        'form_data': form.get_serialized_field_choices(),
+        'form_data': form_data,
         'form_plugin': instance,
     }
-
-    reply_to = None
-    for field_name, field_instance in form.fields.items():
-        if hasattr(field_instance, '_model_instance') and \
-                field_instance._model_instance.plugin_type == 'EmailField':
-            if form.cleaned_data.get(field_name):
-                reply_to = [form.cleaned_data[field_name]]
-                break
-
     subject_template_base = getattr(settings, 'ALDRYN_FORMS_EMAIL_SUBJECT_TEMPLATES_BASE',
                                     getattr(settings, 'ALDRYN_FORMS_EMAIL_TEMPLATES_BASE', None))
     if subject_template_base:
@@ -170,10 +169,6 @@ def send_notifications(instance, form):
                 settings, 'ALDRYN_FORMS_EMAIL_TEMPLATES_BASE', 'aldryn_forms/emails/notification'),
             subject_templates=subject_templates,
             language=instance.language,
-            reply_to=reply_to,
         )
     except smtplib.SMTPException as err:
         logger.error(err)
-
-    users_notified = [(get_user_name(user), user.email) for user in recipients]
-    return users_notified

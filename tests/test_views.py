@@ -2,6 +2,7 @@ import sys
 from distutils.version import LooseVersion
 from unittest.mock import patch
 
+from django.test import override_settings
 from django.urls import clear_url_caches
 
 import cms
@@ -87,11 +88,7 @@ class SubmitFormViewTest(CMSTestCase):
             if module in sys.modules:
                 del sys.modules[module]
 
-    @patch(
-        "aldryn_forms.forms.get_random_string",
-        lambda length: "aBH7hWEGAihsg9KxctpNRfvEXUoOFpJZigmZETqWWNVs4gENFsL3qva1d4Q93URg",
-    )
-    def test_form_view_and_submission_with_apphook_django_gte_111(self):
+    def _form_view_and_submission_with_apphook_django_gte_111(self, redirect_url):
         if CMS_3_6:
             public_page = self.page.publisher_public
         else:
@@ -116,14 +113,21 @@ class SubmitFormViewTest(CMSTestCase):
             },
         )
         self.assertRedirects(
-            response, self.redirect_url_with_params, fetch_redirect_response=False
+            response, redirect_url, fetch_redirect_response=False
         )  # noqa: E501
+
+    def test_form_view_and_submission_with_apphook_django_gte_111(self):
+        self._form_view_and_submission_with_apphook_django_gte_111(self.redirect_url)
 
     @patch(
         "aldryn_forms.forms.get_random_string",
         lambda length: "aBH7hWEGAihsg9KxctpNRfvEXUoOFpJZigmZETqWWNVs4gENFsL3qva1d4Q93URg",
     )
-    def test_view_submit_one_form_instead_multiple(self):
+    @override_settings(ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION=30)
+    def test_form_view_and_submission_with_apphook_django_gte_111_multiple_steps(self):
+        self._form_view_and_submission_with_apphook_django_gte_111(self.redirect_url_with_params)
+
+    def _submit_one_form_instead_multiple(self, redirect_url):
         """Test checks if only one form is send instead of multiple on page together"""
         page = create_page(
             "multiple forms",
@@ -163,7 +167,7 @@ class SubmitFormViewTest(CMSTestCase):
 
         plugin_data2 = {
             "redirect_type": "redirect_to_url",
-            "url": self.redirect_url_with_params,
+            "url": redirect_url,
         }
 
         form_plugin2 = add_plugin(placeholder, "FormPlugin", "en", **plugin_data2)  # noqa: E501
@@ -193,6 +197,17 @@ class SubmitFormViewTest(CMSTestCase):
         self.assertRedirects(
             response, plugin_data2["url"], fetch_redirect_response=False
         )  # noqa: E501
+
+    @patch(
+        "aldryn_forms.forms.get_random_string",
+        lambda length: "aBH7hWEGAihsg9KxctpNRfvEXUoOFpJZigmZETqWWNVs4gENFsL3qva1d4Q93URg",
+    )
+    @override_settings(ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION=30)
+    def test_view_submit_one_form_instead_multiple_multiple_steps(self):
+        self._submit_one_form_instead_multiple(self.redirect_url_with_params)
+
+    def test_view_submit_one_form_instead_multiple(self):
+        self._submit_one_form_instead_multiple(self.redirect_url)
 
     def test_view_submit_one_valid_form_instead_multiple(self):
         """Test checks if only one form is validated instead multiple on a page"""

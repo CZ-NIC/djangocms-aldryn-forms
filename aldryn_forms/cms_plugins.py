@@ -1,7 +1,7 @@
 import logging
 import re
 import smtplib
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import parse_qs, urlencode, urlparse
 
 from django import forms
@@ -229,7 +229,7 @@ class FormPlugin(FieldContainer):
 
     def postpone_send_notifications(
         self, instance: models.FormPlugin, form: FormSubmissionBaseForm
-    ) -> list[tuple[str, str]]:
+    ) -> List[Tuple[str, str]]:
         users = instance.recipients.exclude(email='')
         recipients = [user for user in users.iterator() if is_valid_recipient(user.email)]
         users_notified = [(get_user_name(user), user.email) for user in recipients]

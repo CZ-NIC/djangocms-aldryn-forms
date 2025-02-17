@@ -266,7 +266,7 @@ async function sendData(form) {
         })
         const data = await response.json()
         if (form.dataset.run_next) {
-            document[form.dataset.run_next](data)
+            document[form.dataset.run_next](form, data)
         } else {
             displayMessage(form, data.message, "success")
         }

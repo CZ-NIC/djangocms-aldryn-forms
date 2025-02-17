@@ -152,9 +152,13 @@ Example: ::
 
 Example of ``runNext`` javascript function: ::
 
-    function runNext(data) {
+    function runNext(form, data) {
         ...
-        document.querySelector('input[name="aldryn_form_post_ident"]').value = data.post_ident
+        const input = form.querySelector('input[name="aldryn_form_post_ident"]')
+        if (!input.value) {
+            input.value = data.post_ident
+            form.submit()
+        }
         ...
     }
 

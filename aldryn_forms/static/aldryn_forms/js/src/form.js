@@ -222,3 +222,31 @@ export function enableFieldUploadDragAndDrop() {
         }
     }
 }
+
+
+async function sendData(form) {
+    const formData = new FormData(form)
+    try {
+        const response = await fetch(form.action, {
+            method: "POST",
+            body: formData,
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+            },
+        })
+        console.log(await response.json())
+    } catch (e) {
+        console.error(e)
+    }
+}
+
+
+export function enableSubmitFromByFetch() {
+    for (const form of document.querySelectorAll('form.submit-by-fetch')) {
+        console.log("form:", form)
+        form.addEventListener("submit", (event) => {
+            event.preventDefault()
+            sendData(form)
+        })
+    }
+}

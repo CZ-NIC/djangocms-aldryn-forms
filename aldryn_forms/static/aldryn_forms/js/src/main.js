@@ -3,6 +3,7 @@ import {
     disableButtonSubmit,
     handleRequiredFields,
     handleFormRequiredCheckbox,
+    enableSubmitFromByFetch,
 } from './form'
 
 
@@ -30,4 +31,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     enableFieldUploadDragAndDrop()
+    enableSubmitFromByFetch()
 })

@@ -1,6 +1,6 @@
 from typing import Callable, Dict, Optional, Tuple
 
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.utils.deprecation import MiddlewareMixin
 
 from aldryn_forms.models import FormPlugin
@@ -34,7 +34,14 @@ class HandleHttpPost(MiddlewareMixin):
         form = form_plugin_instance.process_form(form_plugin, request)
         success_url = form_plugin_instance.get_success_url(instance=form_plugin, post_ident=form.instance.post_ident)
 
-        if form.is_valid() and success_url:
-            return HttpResponseRedirect(success_url)
+        if form.is_valid():
+            if request.META.get('HTTP_X_REQUESTED_WITH') == "XMLHttpRequest":
+                return JsonResponse({"post_ident": form.instance.post_ident})
+            if success_url:
+                return HttpResponseRedirect(success_url)
+        else:
+            print(form.errors)
+            if request.META.get('HTTP_X_REQUESTED_WITH') == "XMLHttpRequest":
+                return JsonResponse(form.errors.as_json())
 
         return None

@@ -213,11 +213,14 @@ class FormPlugin(FieldContainer):
         """
         if instance.success_message:
             message = markdown.markdown(instance.success_message)
-            messages.success(request, mark_safe(message))
+            if request.META.get('HTTP_X_REQUESTED_WITH') == "XMLHttpRequest":
+                request.aldryn_forms_success_message = message
+            else:
+                messages.success(request, mark_safe(message))
 
-    def save_new_submission(self, form: FormSubmissionBaseForm, post_ident: str) -> None:
+    def save_new_submission(self, form: FormSubmissionBaseForm, post_ident: str) -> SubmittedToBeSent:
         """Save a new submission to be sent."""
-        SubmittedToBeSent.objects.create(
+        return SubmittedToBeSent.objects.create(
             name=form.instance.name,
             data=form.instance.data,
             recipients=form.instance.recipients,
@@ -240,21 +243,15 @@ class FormPlugin(FieldContainer):
         if post_ident is None:
             post_ident = form.generate_post_ident()
             form.initial_post_ident = post_ident
-            self.save_new_submission(form, post_ident)
+            form.instance = self.save_new_submission(form, post_ident)
         else:
             try:
                 previous_submit = SubmittedToBeSent.objects.get(post_ident=post_ident)
                 form.append_into_previous_submission(previous_submit)
             except SubmittedToBeSent.DoesNotExist:
-                self.save_new_submission(form, post_ident)
+                form.instance = self.save_new_submission(form, post_ident)
 
         return users_notified
-
-    # if request_is_ajax(request):
-    #     return JsonResponse(data)
-    # def request_is_ajax(request):
-    #     """Check that request is an Ajax type."""
-    #     return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
 
     def send_notifications(self, instance, form):
         users = instance.recipients.exclude(email='')

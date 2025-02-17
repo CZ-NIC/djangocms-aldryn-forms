@@ -1,3 +1,4 @@
+# import markdown
 from typing import Callable, Dict, Optional, Tuple
 
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse
@@ -36,7 +37,10 @@ class HandleHttpPost(MiddlewareMixin):
 
         if form.is_valid():
             if request.META.get('HTTP_X_REQUESTED_WITH') == "XMLHttpRequest":
-                return JsonResponse({"post_ident": form.instance.post_ident})
+                return JsonResponse({
+                    "post_ident": form.instance.post_ident,
+                    "message": getattr(request, "aldryn_forms_success_message", "OK")
+                })
             if success_url:
                 return HttpResponseRedirect(success_url)
         else:

@@ -78,3 +78,6 @@ npm-debug.log
 package-lock.json
 
 local.sqlite
+
+aldryn_forms/static/aldryn_forms/js/main.js
+aldryn_forms/static/aldryn_forms/js/main.js.map

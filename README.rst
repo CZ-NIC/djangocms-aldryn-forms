@@ -104,11 +104,11 @@ Middleware
 
 Dispatch submitted form by middleware. If the HTTP header ``HTTP_X_REQUESTED_WITH`` is ``XMLHttpRequest`` a json response is returned.
 
-Write in settings.py ::
+Write in settings.py: ::
 
     MIDDLEWARE = [
-        "aldryn_forms.middleware.handle_post.HandleHttpPost"
         ...
+        "aldryn_forms.middleware.handle_post.HandleHttpPost"
     ]
 
 Saving to the same post
@@ -116,13 +116,13 @@ Saving to the same post
 
 Activation of repeated saving to the same post.
 
-Write in settings.py ::
+Write in settings.py: ::
 
     # Send email after 30 minutes. Remove post_ident after 30 minutes.
     ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION = 30
 
 
-The ``post_ident`` parameter is added to the success url for redirection. For example ::
+After this entry, the ``post_ident`` parameter is added to the success url for redirection. For example ::
 
     /thank-you/?post_ident=HErQ2TunSAU0AhTKrNSVDtSVBoYr9gTvUCUsdpMg6AZVqzExXCK06Tm7XIznf1sw
 
@@ -132,7 +132,7 @@ Submit form by javascript
 
 Activating form submission via javascript ``fetch``: Add class ``submit-by-fetch`` into element ``form``.
 
-Example ::
+Example: ::
 
     <form class="submit-by-fetch">
         ...
@@ -144,13 +144,13 @@ Run next submit
 
 Running the next function after submitting the form via js ``fetch`` is done by defining the function name in the ``run_next`` parameter:
 
-Example ::
+Example: ::
 
     <form class="submit-by-fetch" data-run_next="runNext">
         ...
     </form>
 
-Example of ``runNext`` function ::
+Example of ``runNext`` javascript function: ::
 
     function runNext(data) {
         ...
@@ -166,7 +166,7 @@ The command ``aldryn_forms_remove_expired_post_idents`` deletes the ``post_ident
 
 The command ``aldryn_forms_send_emails`` will send all emails that are waiting to be sent.
 
-Add these commands to crontab ::
+Add these commands to crontab: ::
 
 
     1/10 * * * * django-admin aldryn_forms_remove_expired_post_idents

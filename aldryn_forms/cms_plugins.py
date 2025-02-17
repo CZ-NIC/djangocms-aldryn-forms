@@ -107,11 +107,11 @@ class FormPlugin(FieldContainer):
         action_backend = get_action_backends()[form.form_plugin.action_backend]()
         return action_backend.form_valid(self, instance, request, form)
 
-    def form_invalid(self, instance, request, form):
+    def form_invalid(self, instance: models.FormPlugin, request: HttpRequest, form: FormSubmissionBaseForm) -> None:
         if instance.error_message:
             form._add_error(message=instance.error_message)
 
-    def process_form(self, instance, request):
+    def process_form(self, instance: models.FormPlugin, request: HttpRequest) -> FormSubmissionBaseForm:
         form_class = self.get_form_class(instance)
         form_kwargs = self.get_form_kwargs(instance, request)
         form = form_class(**form_kwargs)

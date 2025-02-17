@@ -117,6 +117,12 @@ function unblockSubmit(form) {
     }
 }
 
+function displayNodeMessages(node, messages, class_name) {
+    node.insertAdjacentHTML(
+        'afterend',
+        `<ul class="messages aldryn-forms-post-message"><li class="${class_name}">`
+        + messages.join(`</li><li class="${class_name}">`) + '</ul>') + '</ul>'
+}
 
 function displayMessage(form, message, class_name) {
     for (const button of form.querySelectorAll('[type=submit]')) {
@@ -265,10 +271,24 @@ async function sendData(form) {
             },
         })
         const data = await response.json()
-        if (form.dataset.run_next) {
-            document[form.dataset.run_next](form, data)
+        console.log(data)
+        if (data.status === "ERROR") {
+            for (const name in data.form) {
+                if (name === "__all__") {
+                    displayMessage(form, data.form[name], "error")
+                } else {
+                    const input = form.querySelector(`input[name="${name}"]`)
+                    if (input) {
+                        displayNodeMessages(input, data.form[name], "error")
+                    }
+                }
+            }
         } else {
-            displayMessage(form, data.message, "success")
+            if (form.dataset.run_next) {
+                document[form.dataset.run_next](form, data)
+            } else {
+                displayMessage(form, data.message, "success")
+            }
         }
     } catch (e) {
         displayMessage(form, e, "error")

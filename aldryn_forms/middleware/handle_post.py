@@ -1,7 +1,7 @@
 # import markdown
-from typing import Callable, Dict, Optional, Tuple
+from typing import Callable, Dict, Optional, Tuple, Union
 
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http import HttpRequest, HttpResponseRedirect, JsonResponse
 from django.utils.deprecation import MiddlewareMixin
 
 from aldryn_forms.models import FormPlugin
@@ -13,7 +13,7 @@ class HandleHttpPost(MiddlewareMixin):
 
     def process_view(
         self, request: HttpRequest, callback: Callable, callback_args: Tuple[str, ...], callback_kwargs: Dict[str, str]
-    ) -> Optional[HttpResponse]:
+    ) -> Optional[Union[HttpResponseRedirect, JsonResponse]]:
         """Process view when request method is POST and when the form plugin is found."""
 
         if request.method != 'POST':
@@ -47,8 +47,9 @@ class HandleHttpPost(MiddlewareMixin):
                 return HttpResponseRedirect(success_url)
         else:
             if request.META.get('HTTP_X_REQUESTED_WITH') == "XMLHttpRequest":
-                data = form.errors.as_json()
-                data["status"] = "ERROR"
-                return JsonResponse(data)
+                return JsonResponse({
+                    "status": "ERROR",
+                    "form": form.errors,
+                })
 
         return None

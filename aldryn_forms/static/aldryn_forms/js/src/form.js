@@ -265,7 +265,11 @@ async function sendData(form) {
             },
         })
         const data = await response.json()
-        displayMessage(form, data.message, "success")
+        if (form.dataset.run_next) {
+            document[form.dataset.run_next](data)
+        } else {
+            displayMessage(form, data.message, "success")
+        }
     } catch (e) {
         displayMessage(form, e, "error")
     } finally {

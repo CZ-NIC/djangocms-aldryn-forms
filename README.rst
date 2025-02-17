@@ -118,7 +118,8 @@ Activation of repeated saving to the same post.
 
 Write in settings.py ::
 
-    ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION = 30  # Send email after 30 minutes. Remove post_ident after 30 minutes.
+    # Send email after 30 minutes. Remove post_ident after 30 minutes.
+    ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION = 30
 
 
 The ``post_ident`` parameter is added to the success url for redirection. For example ``/thank-you/?post_ident=HErQ2TunSAU0AhTKrNSVDtSVBoYr9gTvUCUsdpMg6AZVqzExXCK06Tm7XIznf1sw``
@@ -127,10 +128,7 @@ The ``post_ident`` parameter is added to the success url for redirection. For ex
 Submit form by javascript
 =========================
 
-Activating form submission via javascript fetch:
-
- - Add class ``submit-by-fetch`` into element ``form``.
- - Add name of function into form.dataset with key ``run_next``.
+Activating form submission via javascript ``fetch``: Add class ``submit-by-fetch`` into element ``form``.
 
 Example ::
 
@@ -139,10 +137,23 @@ Example ::
     </form>
 
 
-Example of runNext function ::
+Run next submit
+===============
+
+Running the next function after submitting the form via js ``fetch`` is done by defining the function name in the ``run_next`` parameter:
+
+Example ::
+
+    <form class="submit-by-fetch" data-run_next="runNext">
+        ...
+    </form>
+
+Example of ``runNext`` function ::
 
     function runNext(data) {
+        ...
         document.querySelector('input[name="aldryn_form_post_ident"]').value = data.post_ident
+        ...
     }
 
 

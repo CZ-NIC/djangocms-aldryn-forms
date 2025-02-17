@@ -122,7 +122,9 @@ Write in settings.py ::
     ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION = 30
 
 
-The ``post_ident`` parameter is added to the success url for redirection. For example ``/thank-you/?post_ident=HErQ2TunSAU0AhTKrNSVDtSVBoYr9gTvUCUsdpMg6AZVqzExXCK06Tm7XIznf1sw``
+The ``post_ident`` parameter is added to the success url for redirection. For example ::
+
+    /thank-you/?post_ident=HErQ2TunSAU0AhTKrNSVDtSVBoYr9gTvUCUsdpMg6AZVqzExXCK06Tm7XIznf1sw
 
 
 Submit form by javascript
@@ -132,7 +134,7 @@ Activating form submission via javascript ``fetch``: Add class ``submit-by-fetch
 
 Example ::
 
-    <form class="submit-by-fetch" data-run_next="runNext">
+    <form class="submit-by-fetch">
         ...
     </form>
 
@@ -159,6 +161,10 @@ Example of ``runNext`` function ::
 
 Commands
 ========
+
+The command ``aldryn_forms_remove_expired_post_idents`` deletes the ``post_ident`` values for all records older than the value in ``ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION``.
+
+The command ``aldryn_forms_send_emails`` will send all emails that are waiting to be sent.
 
 Add these commands to crontab ::
 

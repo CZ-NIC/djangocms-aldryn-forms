@@ -33,18 +33,22 @@ class HandleHttpPost(MiddlewareMixin):
 
         form_plugin_instance = form_plugin.get_plugin_instance()[1]
         form = form_plugin_instance.process_form(form_plugin, request)
-        success_url = form_plugin_instance.get_success_url(instance=form_plugin, post_ident=form.instance.post_ident)
 
         if form.is_valid():
             if request.META.get('HTTP_X_REQUESTED_WITH') == "XMLHttpRequest":
                 return JsonResponse({
+                    "status": "SUCCESS",
                     "post_ident": form.instance.post_ident,
                     "message": getattr(request, "aldryn_forms_success_message", "OK")
                 })
+            success_url = form_plugin_instance.get_success_url(
+                instance=form_plugin, post_ident=form.instance.post_ident)
             if success_url:
                 return HttpResponseRedirect(success_url)
         else:
             if request.META.get('HTTP_X_REQUESTED_WITH') == "XMLHttpRequest":
-                return JsonResponse(form.errors.as_json())
+                data = form.errors.as_json()
+                data["status"] = "ERROR"
+                return JsonResponse(data)
 
         return None

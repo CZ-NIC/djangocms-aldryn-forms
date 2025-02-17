@@ -99,6 +99,64 @@ Available Plug-ins
 - ``HideContentWhenPostPlugin``
 
 
+Middleware
+==========
+
+Dispatch submitted form by middleware. If the HTTP header ``HTTP_X_REQUESTED_WITH`` is ``XMLHttpRequest`` a json response is returned.
+
+Write in settings.py ::
+
+    MIDDLEWARE = [
+        "aldryn_forms.middleware.handle_post.HandleHttpPost"
+        ...
+    ]
+
+Saving to the same post
+=======================
+
+Activation of repeated saving to the same post.
+
+Write in settings.py ::
+
+    ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION = 30  # Send email after 30 minutes. Remove post_ident after 30 minutes.
+
+
+The ``post_ident`` parameter is added to the success url for redirection. For example ``/thank-you/?post_ident=HErQ2TunSAU0AhTKrNSVDtSVBoYr9gTvUCUsdpMg6AZVqzExXCK06Tm7XIznf1sw``
+
+
+Submit form by javascript
+=========================
+
+Activating form submission via javascript fetch:
+
+ - Add class ``submit-by-fetch`` into element ``form``.
+ - Add name of function into form.dataset with key ``run_next``.
+
+Example ::
+
+    <form class="submit-by-fetch" data-run_next="runNext">
+        ...
+    </form>
+
+
+Example of runNext function ::
+
+    function runNext(data) {
+        document.querySelector('input[name="aldryn_form_post_ident"]').value = data.post_ident
+    }
+
+
+Commands
+========
+
+Add these commands to crontab ::
+
+
+    1/10 * * * * django-admin aldryn_forms_remove_expired_post_idents
+    1/10 * * * * django-admin aldryn_forms_send_emails
+
+
+
 .. |Project continuation| image:: https://img.shields.io/badge/Continuation-Divio_Aldryn_Froms-blue
     :target: https://github.com/CZ-NIC/djangocms-aldryn-forms
     :alt: Continuation of the deprecated project "Divio Aldryn forms"

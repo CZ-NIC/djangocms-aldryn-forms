@@ -44,7 +44,6 @@ class HandleHttpPost(MiddlewareMixin):
             if success_url:
                 return HttpResponseRedirect(success_url)
         else:
-            print(form.errors)
             if request.META.get('HTTP_X_REQUESTED_WITH') == "XMLHttpRequest":
                 return JsonResponse(form.errors.as_json())
 

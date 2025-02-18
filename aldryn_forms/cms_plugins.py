@@ -300,6 +300,12 @@ class FormPlugin(FieldContainer):
         return users_notified
 
 
+class FormWithIdentPlugin(FormPlugin):
+    render_template = True
+    name = _("Form with Ident field")
+    ident_field_name = ALDRYN_FORMS_POST_IDENT_NAME
+
+
 class Fieldset(FieldContainer):
     render_template = True
     name = _('Fieldset')
@@ -1125,6 +1131,7 @@ plugin_pool.register_plugin(NumberField)
 plugin_pool.register_plugin(ImageField)
 plugin_pool.register_plugin(Fieldset)
 plugin_pool.register_plugin(FormPlugin)
+plugin_pool.register_plugin(FormWithIdentPlugin)
 plugin_pool.register_plugin(MultipleSelectField)
 plugin_pool.register_plugin(MultipleCheckboxSelectField)
 plugin_pool.register_plugin(RadioSelectField)

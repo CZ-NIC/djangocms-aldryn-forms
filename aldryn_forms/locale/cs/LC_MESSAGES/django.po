@@ -203,6 +203,9 @@ msgstr "Formulář"
 msgid "Form (Advanced)"
 msgstr "Formulář (Pokročilé)"
 
+msgid "Form action attribute"
+msgstr "Atribut form action"
+
 msgid "Form fields"
 msgstr "Pole formuláře"
 
@@ -219,11 +222,11 @@ msgstr "Odeslání formulářů"
 msgid "Form types"
 msgstr "Typy formulářů"
 
+msgid "Form with Ident field"
+msgstr "Formulář s Ident polem"
+
 msgid "Forms"
 msgstr "Formuláře"
-
-msgid "Form action attribute"
-msgstr "Atribut form action"
 
 msgid "Help text"
 msgstr "Nápověda"

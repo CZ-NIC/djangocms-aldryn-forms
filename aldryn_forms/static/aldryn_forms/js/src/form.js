@@ -259,7 +259,7 @@ export function enableFieldUploadDragAndDrop() {
 }
 
 
-async function sendData(form) {
+export async function sendData(form) {
     removeMessages(form)
     const formData = new FormData(form)
     try {

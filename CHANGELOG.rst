@@ -2,6 +2,8 @@
 Changelog
 =========
 
+* Fix double rendering of hidden input type.
+
 7.4.2 (2025-02-05)
 ==================
 

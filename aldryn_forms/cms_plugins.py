@@ -20,6 +20,7 @@ from django.utils.translation import gettext_lazy as _
 from cms.models.pluginmodel import CMSPlugin
 from cms.plugin_base import CMSPluginBase
 from cms.plugin_pool import plugin_pool
+from cms.plugin_rendering import PluginContext
 
 import markdown
 from emailit.api import send_mail
@@ -240,7 +241,7 @@ class FormPlugin(FieldContainer):
         form.instance.set_form_data(form)
 
         post_ident = form.cleaned_data.get(ALDRYN_FORMS_POST_IDENT_NAME)
-        if post_ident is None:
+        if post_ident is None or post_ident.strip() == "":
             post_ident = form.generate_post_ident()
             form.initial_post_ident = post_ident
             form.instance = self.save_new_submission(form, post_ident)
@@ -448,7 +449,7 @@ class Field(FormElement):
     def get_form_field_widget_kwargs(self, instance):
         return {}
 
-    def render(self, context, instance, placeholder):
+    def render(self, context: PluginContext, instance: models.FieldPlugin, placeholder: str) -> PluginContext:
         context = super().render(context, instance, placeholder)
 
         form = context.get('form')
@@ -456,7 +457,10 @@ class Field(FormElement):
         if form and hasattr(form, 'form_plugin'):
             form_plugin = form.form_plugin
             field_name = form_plugin.get_form_field_name(field=instance)
-            context['field'] = form[field_name]
+            if not form[field_name].is_hidden:
+                # Do not render hidden fields because they are rendered in template aldryn_forms/form.html
+                # in section {% for field in form.hidden_fields %}
+                context['field'] = form[field_name]
         return context
 
     def get_render_template(self, context, instance, placeholder):

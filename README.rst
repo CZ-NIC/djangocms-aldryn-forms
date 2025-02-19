@@ -142,11 +142,13 @@ Example: ::
 Run next submit
 ===============
 
-Running the next function after submitting the form via js ``fetch`` is done by defining the function name in the ``run_next`` parameter:
+Use the ``Form with Ident field`` plugin in the administration.
+In the ``run_next`` dataset parameter, enter the name of the function to be executed after receiving the response
+from javascript ``fetch`` command.
 
 Example: ::
 
-    <form class="submit-by-fetch" data-run_next="runNext">
+    <form data-run_next="runNext">
         ...
     </form>
 
@@ -154,10 +156,8 @@ Example of ``runNext`` javascript function: ::
 
     function runNext(form, data) {
         ...
-        const input = form.querySelector('input[name="aldryn_form_post_ident"]')
-        if (!input.value) {
+        for (const input of document.querySelectorAll('input.aldryn-forms-field-ident')) {
             input.value = data.post_ident
-            form.submit()
         }
         ...
     }

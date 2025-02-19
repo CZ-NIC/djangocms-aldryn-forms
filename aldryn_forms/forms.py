@@ -16,7 +16,7 @@ from django.utils.translation import gettext_lazy as _
 from easy_thumbnails.VIL import Image as VILImage
 from PIL import Image
 
-from .constants import ALDRYN_FORMS_POST_IDENT_NAME
+from .constants import ALDRYN_FORMS_POST_IDENT_NAME, MAX_IDENT_SIZE
 from .models import FormPlugin, FormSubmission, FormSubmissionBase
 from .sizefield.utils import filesizeformat
 from .utils import add_form_error, get_action_backends, get_user_model
@@ -327,7 +327,7 @@ class FormSubmissionBaseForm(forms.Form):
 
     def generate_post_ident(self):
         """Generate new post_ident."""
-        return self.initial_post_ident if self.initial_post_ident else get_random_string(64)
+        return self.initial_post_ident if self.initial_post_ident else get_random_string(MAX_IDENT_SIZE)
 
     def save_new_submission(self, post_ident: str) -> None:
         """Save a new submission with unique ID."""

@@ -29,7 +29,7 @@ from filer.models import filemodels, imagemodels
 from PIL import Image
 
 from . import models
-from .constants import ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION, ALDRYN_FORMS_POST_IDENT_NAME
+from .constants import ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION, ALDRYN_FORMS_POST_IDENT_NAME, MAX_IDENT_SIZE
 from .forms import (
     BooleanFieldForm, CaptchaFieldForm, DateFieldForm, DateTimeFieldForm, EmailFieldForm, FileFieldForm, FormPluginForm,
     FormSubmissionBaseForm, HiddenFieldForm, ImageFieldForm, MultipleSelectFieldForm, RadioFieldForm,
@@ -127,7 +127,7 @@ class FormPlugin(FieldContainer):
 
         if request.POST.get('form_plugin_id') == str(instance.id) and form.is_valid():
             if self.ident_field_name:
-                form.cleaned_data[self.ident_field_name] = request.POST.get(self.ident_field_name)
+                form.cleaned_data[self.ident_field_name] = request.POST.get(self.ident_field_name, "")[:MAX_IDENT_SIZE]
             fields = [field for field in form.base_fields.values()
                       if hasattr(field, '_plugin_instance')]
 

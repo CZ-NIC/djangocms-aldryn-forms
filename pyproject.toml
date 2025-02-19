@@ -1,3 +1,7 @@
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools", "Babel >=2.3", "setuptools-npm"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+version_scheme = "post-release"
+local_scheme = "no-local-version"

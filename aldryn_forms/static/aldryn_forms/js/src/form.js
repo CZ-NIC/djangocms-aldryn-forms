@@ -107,8 +107,8 @@ function blockSubmit(nodeInput) {
 }
 
 
-function unblockSubmit(form) {
-    // const form = nodeInput.closest("form")
+function unblockSubmit(nodeInput) {
+    const form = nodeInput.closest("form")
     for (const button of form.querySelectorAll('[type=submit]')) {
         button.disabled = false
     }

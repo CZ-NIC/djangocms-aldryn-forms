@@ -2,6 +2,10 @@
 Changelog
 =========
 
+7.5.0 (2025-02-19)
+==================
+
+* Add support of multiple submits into one post.
 * Fix double rendering of hidden input type.
 
 7.4.2 (2025-02-05)

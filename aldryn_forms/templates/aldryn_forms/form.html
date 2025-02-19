@@ -10,7 +10,6 @@
     {% if instance.form_attributes %} {{ instance.form_attributes_str }}{% endif %}
     {% if instance.custom_classes %} class="{{ instance.custom_classes }}"{% else %} class="cms-form"{% endif %}
     {% if instance.use_form_action %} action="{{ instance.success_url }}"{% endif %}
-    {% if form.ident_field_name %} data-ident_field_name="{{ form.ident_field_name }}"{% endif %}
     >
 
     {% if form.non_field_errors %}

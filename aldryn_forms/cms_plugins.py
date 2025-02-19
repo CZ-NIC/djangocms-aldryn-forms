@@ -64,6 +64,7 @@ class FormPlugin(FieldContainer):
     model = models.FormPlugin
     form = FormPluginForm
     filter_horizontal = ['recipients']
+    ident_field_name = None
 
     fieldsets = (
         (None, {
@@ -116,6 +117,7 @@ class FormPlugin(FieldContainer):
         form_class = self.get_form_class(instance)
         form_kwargs = self.get_form_kwargs(instance, request)
         form = form_class(**form_kwargs)
+        form.ident_field_name = self.ident_field_name
 
         # Put files into fields.
         if form.files:

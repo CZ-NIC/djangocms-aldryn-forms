@@ -126,6 +126,8 @@ class FormPlugin(FieldContainer):
                     form.fields[input_name].files = form.files.getlist(input_name)
 
         if request.POST.get('form_plugin_id') == str(instance.id) and form.is_valid():
+            if self.ident_field_name:
+                form.cleaned_data[self.ident_field_name] = request.POST.get(self.ident_field_name)
             fields = [field for field in form.base_fields.values()
                       if hasattr(field, '_plugin_instance')]
 

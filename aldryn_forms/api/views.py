@@ -28,7 +28,7 @@ class SubmissionFilter(filters.FilterSet):
 class SubmissionsViewSet(viewsets.ModelViewSet):
     authentication_classes = []
     permission_classes = [SubmissionsPermission]
-    queryset = FormSubmission.objects.all().order_by('-sent_at')
+    queryset = FormSubmission.objects.filter(post_ident__isnull=True).order_by('-sent_at')
     serializer_class = FormSubmissionrSerializer
     paginator = AldrynFormsPagination()
     filter_backends = (filters.DjangoFilterBackend,)

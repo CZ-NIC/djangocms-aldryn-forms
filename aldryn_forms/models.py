@@ -760,6 +760,14 @@ class FormSubmissionBase(models.Model):
             {'name': rec[0], 'email': rec[1]} for rec in recipients]
         self.recipients = json.dumps(raw_recipients)
 
+    def form_recipients(self) -> list[dict[str, str]]:
+        """Form recipients for API."""
+        return [field._asdict() for field in self.get_recipients()]
+
+    def form_data(self) -> list[dict[str, str]]:
+        """Form data for API."""
+        return [field._asdict() for field in self.get_form_data()]
+
 
 class FormSubmission(FormSubmissionBase):
 

@@ -20,9 +20,13 @@ class FormSubmissionrSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class SubmissionFilter(filters.FilterSet):
+    sent_at_period = filters.DateRangeFilter(field_name='sent_at', label="Sent at date range")
+    sent_at_range = filters.DateFromToRangeFilter(field_name='sent_at', label="Sent at date from to")
+    sent_at_range_time = filters.DateTimeFromToRangeFilter(field_name='sent_at', label="Sent at datetime from to")
+
     class Meta:
         model = FormSubmission
-        fields = ('name', 'sent_at')
+        fields = ('name', 'language')
 
 
 class SubmissionsViewSet(viewsets.ModelViewSet):

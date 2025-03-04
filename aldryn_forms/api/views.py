@@ -1,8 +1,15 @@
 from rest_framework import serializers, viewsets
+from rest_framework.permissions import BasePermission
 
 from aldryn_forms.models import FormSubmission
 
 from .pagination import AldrynFormsPagination
+
+
+class SubmissionsPermission(BasePermission):
+
+    def has_permission(self, request, view):
+        return request.user.has_perm("aldryn_forms.view_formsubmission")
 
 
 class FormSubmissionrSerializer(serializers.HyperlinkedModelSerializer):
@@ -12,6 +19,8 @@ class FormSubmissionrSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class SubmissionsViewSet(viewsets.ModelViewSet):
+    authentication_classes = []
+    permission_classes = [SubmissionsPermission]
     queryset = FormSubmission.objects.all().order_by('-sent_at')
     serializer_class = FormSubmissionrSerializer
     paginator = AldrynFormsPagination()

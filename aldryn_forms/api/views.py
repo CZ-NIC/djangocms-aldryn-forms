@@ -1,6 +1,9 @@
+from django.http.response import Http404
+
 from django_filters import rest_framework as filters
 from rest_framework import serializers, viewsets
 from rest_framework.permissions import BasePermission
+from rest_framework.response import Response
 
 from aldryn_forms.models import FormSubmission
 
@@ -29,7 +32,7 @@ class SubmissionFilter(filters.FilterSet):
         fields = ('name', 'language')
 
 
-class SubmissionsViewSet(viewsets.ModelViewSet):
+class SubmissionsViewSet(viewsets.ReadOnlyModelViewSet):
     authentication_classes = []
     permission_classes = [SubmissionsPermission]
     queryset = FormSubmission.objects.filter(post_ident__isnull=True).order_by('-sent_at')
@@ -37,3 +40,12 @@ class SubmissionsViewSet(viewsets.ModelViewSet):
     paginator = AldrynFormsPagination()
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = SubmissionFilter
+
+    def retrieve(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+        except Http404:
+            data = {"error": {"message": "Object not found."}}
+            return Response(data, 400)  # Note: Code 404 cannot be used because it will return a "Not Found page".
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)

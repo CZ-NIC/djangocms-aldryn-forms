@@ -1,5 +1,6 @@
 import json
 import re
+from typing import Optional
 
 from django import forms
 from django.conf import settings
@@ -16,7 +17,7 @@ from django.utils.translation import gettext_lazy as _
 from easy_thumbnails.VIL import Image as VILImage
 from PIL import Image
 
-from .constants import ALDRYN_FORMS_POST_IDENT_NAME, MAX_IDENT_SIZE
+from .constants import ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION, ALDRYN_FORMS_POST_IDENT_NAME, MAX_IDENT_SIZE
 from .models import FormPlugin, FormSubmission, FormSubmissionBase
 from .sizefield.utils import filesizeformat
 from .utils import add_form_error, get_action_backends, get_user_model
@@ -325,11 +326,11 @@ class FormSubmissionBaseForm(forms.Form):
                             self._add_error(_("This email is unavailable."), serialized_field.name)
         return self.cleaned_data
 
-    def generate_post_ident(self):
+    def generate_post_ident(self) -> str:
         """Generate new post_ident."""
         return self.initial_post_ident if self.initial_post_ident else get_random_string(MAX_IDENT_SIZE)
 
-    def save_new_submission(self, post_ident: str) -> None:
+    def save_new_submission(self, post_ident: Optional[str]) -> None:
         """Save a new submission with unique ID."""
         self.instance.post_ident = post_ident
         self.instance.set_form_data(self)
@@ -348,7 +349,9 @@ class FormSubmissionBaseForm(forms.Form):
         """Save a new submission or append into a previous one."""
         post_ident = self.cleaned_data.get(ALDRYN_FORMS_POST_IDENT_NAME)
         if post_ident is None:
-            self.save_new_submission(self.generate_post_ident())
+            duration = getattr(settings, ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION, 0)
+            post_ident = self.generate_post_ident() if duration else None
+            self.save_new_submission(post_ident)
         else:
             try:
                 previous_submit = FormSubmission.objects.get(post_ident=post_ident)

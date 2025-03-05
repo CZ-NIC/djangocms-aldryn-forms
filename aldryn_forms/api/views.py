@@ -1,3 +1,5 @@
+from typing import Callable
+
 from django.http.response import Http404
 
 from django_filters import rest_framework as filters
@@ -21,14 +23,10 @@ class SubmissionFilter(filters.FilterSet):
         fields = ('name', 'language')
 
 
-class SubmissionsViewSet(viewsets.ReadOnlyModelViewSet):
-    authentication_classes = []
-    permission_classes = [SubmissionsPermission]
-    queryset = FormSubmission.objects.filter(post_ident__isnull=True).order_by('-sent_at')
-    serializer_class = FormSubmissionrSerializer
-    paginator = AldrynFormsPagination()
-    filter_backends = (filters.DjangoFilterBackend,)
-    filterset_class = SubmissionFilter
+class SanitizeGetObjectMixin:
+
+    get_object: Callable
+    get_serializer: Callable
 
     def retrieve(self, request, *args, **kwargs):
         try:
@@ -40,7 +38,17 @@ class SubmissionsViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(serializer.data)
 
 
-class FormViewSet(viewsets.ReadOnlyModelViewSet):
+class SubmissionsViewSet(SanitizeGetObjectMixin, viewsets.ReadOnlyModelViewSet):
+    authentication_classes = []
+    permission_classes = [SubmissionsPermission]
+    queryset = FormSubmission.objects.filter(post_ident__isnull=True).order_by('-sent_at')
+    serializer_class = FormSubmissionrSerializer
+    paginator = AldrynFormsPagination()
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = SubmissionFilter
+
+
+class FormViewSet(SanitizeGetObjectMixin, viewsets.ReadOnlyModelViewSet):
     authentication_classes = []
     permission_classes = [FormPermission]
     queryset = FormPlugin.objects.all().order_by('name')

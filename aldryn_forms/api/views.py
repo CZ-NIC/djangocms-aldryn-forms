@@ -51,6 +51,6 @@ class SubmissionsViewSet(SanitizeGetObjectMixin, viewsets.ReadOnlyModelViewSet):
 class FormViewSet(SanitizeGetObjectMixin, viewsets.ReadOnlyModelViewSet):
     authentication_classes = []
     permission_classes = [FormPermission]
-    queryset = FormPlugin.objects.all().order_by('name')
+    queryset = FormPlugin.objects.distinct("name").order_by('name')
     serializer_class = FormSerializer
     paginator = AldrynFormsPagination()

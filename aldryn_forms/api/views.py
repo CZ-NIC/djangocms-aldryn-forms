@@ -1,25 +1,14 @@
 from django.http.response import Http404
 
 from django_filters import rest_framework as filters
-from rest_framework import serializers, viewsets
-from rest_framework.permissions import BasePermission
+from rest_framework import viewsets
 from rest_framework.response import Response
 
-from aldryn_forms.models import FormSubmission
+from aldryn_forms.models import FormPlugin, FormSubmission
 
 from .pagination import AldrynFormsPagination
-
-
-class SubmissionsPermission(BasePermission):
-
-    def has_permission(self, request, view):
-        return request.user.has_perm("aldryn_forms.view_formsubmission")
-
-
-class FormSubmissionrSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = FormSubmission
-        fields = ['name', 'language', 'sent_at', 'form_recipients', 'form_data']
+from .permissions import FormPermission, SubmissionsPermission
+from .serializers import FormSerializer, FormSubmissionrSerializer
 
 
 class SubmissionFilter(filters.FilterSet):
@@ -49,3 +38,11 @@ class SubmissionsViewSet(viewsets.ReadOnlyModelViewSet):
             return Response(data, 400)  # Note: Code 404 cannot be used because it will return a "Not Found page".
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
+
+
+class FormViewSet(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = []
+    permission_classes = [FormPermission]
+    queryset = FormPlugin.objects.all().order_by('name')
+    serializer_class = FormSerializer
+    paginator = AldrynFormsPagination()

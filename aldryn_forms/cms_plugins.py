@@ -84,6 +84,7 @@ class FormPlugin(FieldContainer):
                 'success_message',
                 'recipients',
                 'action_backend',
+                'webhooks',
                 'custom_classes',
                 'form_attributes',
             )

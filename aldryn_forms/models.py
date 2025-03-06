@@ -92,6 +92,13 @@ class SerializedFormField(BaseSerializedFormField):
         return self.name.rpartition('_')[0]
 
 
+class Webook(models.Model):
+    url = models.URLField(_("Webhook URL"))
+
+    def __str__(self):
+        return self.url
+
+
 class BaseFormPlugin(CMSPlugin):
     FALLBACK_FORM_TEMPLATE = 'aldryn_forms/form.html'
     DEFAULT_FORM_TEMPLATE = getattr(
@@ -162,6 +169,7 @@ class BaseFormPlugin(CMSPlugin):
         default='default',
         choices=action_backend_choices(),
     )
+    webhooks = models.ManyToManyField(Webook, blank=True)
 
     form_attributes = AttributesField(
         verbose_name=_('Attributes'),

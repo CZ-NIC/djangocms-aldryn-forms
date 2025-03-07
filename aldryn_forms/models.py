@@ -93,10 +93,11 @@ class SerializedFormField(BaseSerializedFormField):
 
 
 class Webook(models.Model):
-    url = models.URLField(_("Webhook URL"))
+    name = models.CharField(_("Name"), max_length=255, unique=True)
+    url = models.URLField(_("Webhook URL"), unique=True)
 
     def __str__(self):
-        return self.url
+        return self.name
 
 
 class BaseFormPlugin(CMSPlugin):
@@ -706,6 +707,7 @@ class FormSubmissionBase(models.Model):
     )
     sent_at = models.DateTimeField(auto_now_add=True)
     post_ident = models.CharField(max_length=64, null=True, blank=True)
+    webhooks = models.ManyToManyField(Webook, blank=True)
 
     class Meta:
         abstract = True

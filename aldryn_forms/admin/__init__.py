@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from tablib import Dataset
 
-from ..models import FormSubmission
+from ..models import FormSubmission, Webook
 from .base import BaseFormSubmissionAdmin
 from .views import FormExportWizardView
 
@@ -27,3 +27,4 @@ class FormSubmissionAdmin(BaseFormSubmissionAdmin):
 
 
 admin.site.register(FormSubmission, FormSubmissionAdmin)
+admin.site.register(Webook)

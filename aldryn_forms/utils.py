@@ -146,6 +146,8 @@ def add_form_error(form, message, field=NON_FIELD_ERRORS):
 def send_postponed_notifications(instance: "FormSubmissionBase") -> bool:
     """Send postponed notifications."""
     recipients = [user for user in instance.get_recipients() if is_valid_recipient(user.email)]
+    if not recipients:
+        return True
     form_data = [NameTypeField(item.name, item.value) for item in instance.get_form_data()]
     context = {
         'form_name': instance.name,

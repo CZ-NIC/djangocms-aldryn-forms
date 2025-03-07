@@ -235,8 +235,8 @@ class BaseFormPlugin(CMSPlugin):
             return self.url
 
     def copy_relations(self, oldinstance):
-        for recipient in oldinstance.recipients.all():
-            self.recipients.add(recipient)
+        self.recipients.set(oldinstance.recipients.all())
+        self.webhooks.set(oldinstance.webhooks.all())
 
     def get_submit_button(self):
         from .cms_plugins import SubmitButton

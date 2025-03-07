@@ -45,6 +45,8 @@ class BaseFormSubmissionAdmin(admin.ModelAdmin):
         'language',
         'sent_at',
         'get_recipients_for_display',
+        'post_ident',
+        'webhooks',
     ]
 
     # (Field name, Field label, json data)

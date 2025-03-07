@@ -3,6 +3,7 @@ from django.core.management.base import BaseCommand
 from django.utils.timezone import now as django_timezone_now
 from django.utils.timezone import timedelta
 
+from aldryn_forms.api.webhook import trigger_webhooks
 from aldryn_forms.constants import ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION
 from aldryn_forms.models import SubmittedToBeSent
 from aldryn_forms.utils import send_postponed_notifications
@@ -21,4 +22,5 @@ class Command(BaseCommand):
 
         for instance in queryset:
             if send_postponed_notifications(instance):
+                trigger_webhooks(instance.webhooks, instance)
                 instance.delete()

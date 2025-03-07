@@ -250,13 +250,15 @@ class FormPlugin(FieldContainer):
             post_ident = form.generate_post_ident()
             form.initial_post_ident = post_ident
             form.cleaned_data[ALDRYN_FORMS_POST_IDENT_NAME] = post_ident
-            self.save_new_submission(form, post_ident)
+            instance = self.save_new_submission(form, post_ident)
+            instance.webhooks.set(form.instance.webhooks.all())
         else:
             try:
                 previous_submit = SubmittedToBeSent.objects.get(post_ident=post_ident)
                 form.append_into_previous_submission(previous_submit)
             except SubmittedToBeSent.DoesNotExist:
-                self.save_new_submission(form, post_ident)
+                instance = self.save_new_submission(form, post_ident)
+                instance.webhooks.set(form.instance.webhooks.all())
 
         return users_notified
 

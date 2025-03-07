@@ -10,7 +10,7 @@ from aldryn_forms.models import FormPlugin, FormSubmission
 
 from .pagination import AldrynFormsPagination
 from .permissions import FormPermission, SubmissionsPermission
-from .serializers import FormSerializer, FormSubmissionrSerializer
+from .serializers import FormSerializer, FormSubmissionSerializer
 
 
 class SubmissionFilter(filters.FilterSet):
@@ -42,7 +42,7 @@ class SubmissionsViewSet(SanitizeGetObjectMixin, viewsets.ReadOnlyModelViewSet):
     authentication_classes = []
     permission_classes = [SubmissionsPermission]
     queryset = FormSubmission.objects.filter(post_ident__isnull=True).order_by('-sent_at')
-    serializer_class = FormSubmissionrSerializer
+    serializer_class = FormSubmissionSerializer
     paginator = AldrynFormsPagination()
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = SubmissionFilter

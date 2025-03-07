@@ -3,7 +3,7 @@ from rest_framework import serializers
 from aldryn_forms.models import FormPlugin, FormSubmission
 
 
-class FormSubmissionrSerializer(serializers.HyperlinkedModelSerializer):
+class FormSubmissionSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = FormSubmission

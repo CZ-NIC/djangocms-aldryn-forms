@@ -47,19 +47,22 @@ def get_response(
     message: str = None
 ) -> Optional[Union[HttpResponseRedirect, JsonResponse]]:
     """Get response type."""
-    data = {"status": "ERROR"}
-    if form is None:
-        all_msg = [_("The form submission failed. Please try again later.")]
-        if message:
-            all_msg.append(message)
-        data["form"] = {"__all__": all_msg}
-    else:
-        if form.is_valid():
-            data["status"] = "SUCCESS"
-            data["post_ident"] = form.cleaned_data.get(ALDRYN_FORMS_POST_IDENT_NAME)
-            data["message"] = getattr(request, "aldryn_forms_success_message", "OK")
+    if request.method == 'POST':
+        data = {"status": "ERROR"}
+        if form is None:
+            all_msg = [_("The form submission failed. Please try again later.")]
+            if message:
+                all_msg.append(message)
+            data["form"] = {"__all__": all_msg}
         else:
-            data["form"] = form.errors
+            if form.is_valid():
+                data["status"] = "SUCCESS"
+                data["post_ident"] = form.cleaned_data.get(ALDRYN_FORMS_POST_IDENT_NAME)
+                data["message"] = getattr(request, "aldryn_forms_success_message", "OK")
+            else:
+                data["form"] = form.errors
+    else:
+        data = {"status": "SKIP", "message": message}
 
     if request.META.get('HTTP_X_DJANGOCMS_ALDRYN_FORMS') == "SubmittedForm":
         return JsonResponse(data)

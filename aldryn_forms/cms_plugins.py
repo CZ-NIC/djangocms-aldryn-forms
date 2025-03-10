@@ -115,10 +115,19 @@ class FormPlugin(FieldContainer):
             form._add_error(message=instance.error_message)
 
     def process_form(self, instance: models.FormPlugin, request: HttpRequest) -> FormSubmissionBaseForm:
+        PROCESSED_FORM = "aldryn_forms_processed_forms"
+        processed_forms_dict = getattr(request, PROCESSED_FORM, {})
+        processed_form = processed_forms_dict.get(instance.pk)
+        if processed_form is not None:
+            return processed_form  # For was already processed by middleware (HandleHttpPost).
+
         form_class = self.get_form_class(instance)
         form_kwargs = self.get_form_kwargs(instance, request)
         form = form_class(**form_kwargs)
         form.ident_field_name = self.ident_field_name
+
+        processed_forms_dict[instance.pk] = form
+        setattr(request, PROCESSED_FORM, processed_forms_dict)
 
         # Put files into fields.
         if form.files:

@@ -242,11 +242,14 @@ class DummyChecker:
 def get_email_availability_checker_class():
     """Get function to check email availability."""
     # https://gitlab.nic.cz/websites/django-cms-qe/-/blob/master/cms_qe/settings/base/auth.py#L14
-    try:
-        location = settings.ALDRYN_FORMS_EMAIL_AVAILABILITY_CHECKER_CLASS
-        return import_string(location)
-    except (AttributeError, ImportError):
-        pass
+    backend = import_string(settings.EMAIL_BACKEND)
+    if hasattr(backend, "host"):
+        # Check only smtp backend.
+        try:
+            location = settings.ALDRYN_FORMS_EMAIL_AVAILABILITY_CHECKER_CLASS
+            return import_string(location)
+        except (AttributeError, ImportError):
+            pass
     return DummyChecker
 
 

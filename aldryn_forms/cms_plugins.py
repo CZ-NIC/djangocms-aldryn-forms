@@ -119,7 +119,7 @@ class FormPlugin(FieldContainer):
         processed_forms_dict = getattr(request, PROCESSED_FORM, {})
         processed_form = processed_forms_dict.get(instance.pk)
         if processed_form is not None:
-            return processed_form  # For was already processed by middleware (HandleHttpPost).
+            return processed_form  # Form was already processed by middleware HandleHttpPost.
 
         form_class = self.get_form_class(instance)
         form_kwargs = self.get_form_kwargs(instance, request)

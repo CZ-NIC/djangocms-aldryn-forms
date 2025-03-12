@@ -333,7 +333,7 @@ class FormSubmissionBaseForm(forms.Form):
         """Generate new post_ident."""
         return self.initial_post_ident if self.initial_post_ident else get_random_string(MAX_IDENT_SIZE)
 
-    def save_new_submission(self, post_ident: Optional[str]) -> None:
+    def save_form_submission(self, post_ident: Optional[str]) -> None:
         """Save a new submission with unique ID."""
         self.instance.post_ident = post_ident
         self.instance.set_form_data(self)
@@ -354,13 +354,13 @@ class FormSubmissionBaseForm(forms.Form):
         if post_ident is None:
             duration = getattr(settings, ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION, 0)
             post_ident = self.generate_post_ident() if duration else None
-            self.save_new_submission(post_ident)
+            self.save_form_submission(post_ident)
         else:
             try:
                 previous_submit = FormSubmission.objects.get(post_ident=post_ident)
                 self.append_into_previous_submission(previous_submit)
             except FormSubmission.DoesNotExist:
-                self.save_new_submission(post_ident)
+                self.save_form_submission(post_ident)
 
 
 class ExtandableErrorForm(forms.ModelForm):

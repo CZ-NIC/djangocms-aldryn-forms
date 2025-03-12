@@ -268,7 +268,6 @@ export async function sendData(form) {
             body: formData,
             headers: {
                 "X-Requested-With": "XMLHttpRequest",
-                "X-DjangoCms-Aldryn-Forms": "SubmittedForm",
             },
         })
         const data = await response.json()

@@ -175,6 +175,7 @@ class FormPlugin(FieldContainer):
         elif request.POST.get('form_plugin_id') == str(instance.id) and request.method == 'POST':
             # only call form_invalid if request is POST and form is not valid
             self.form_invalid(instance, request, form)
+
         return form
 
     def get_form_class(self, instance):
@@ -259,15 +260,15 @@ class FormPlugin(FieldContainer):
             post_ident = form.generate_post_ident()
             form.initial_post_ident = post_ident
             form.cleaned_data[ALDRYN_FORMS_POST_IDENT_NAME] = post_ident
-            instance = self.save_new_submission(form, post_ident)
-            instance.webhooks.set(instance.webhooks.all())
+            new_instance = self.save_new_submission(form, post_ident)
+            new_instance.webhooks.set(instance.webhooks.all())
         else:
             try:
                 previous_submit = SubmittedToBeSent.objects.get(post_ident=post_ident)
                 form.append_into_previous_submission(previous_submit)
             except SubmittedToBeSent.DoesNotExist:
-                instance = self.save_new_submission(form, post_ident)
-                instance.webhooks.set(instance.webhooks.all())
+                new_instance = self.save_new_submission(form, post_ident)
+                new_instance.webhooks.set(instance.webhooks.all())
 
         return users_notified
 

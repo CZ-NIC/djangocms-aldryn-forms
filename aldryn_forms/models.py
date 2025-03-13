@@ -3,7 +3,7 @@ import re
 import warnings
 from collections import defaultdict, namedtuple
 from functools import partial
-from typing import List
+from typing import Dict, List
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -770,11 +770,11 @@ class FormSubmissionBase(models.Model):
             {'name': rec[0], 'email': rec[1]} for rec in recipients]
         self.recipients = json.dumps(raw_recipients)
 
-    def form_recipients(self) -> list[dict[str, str]]:
+    def form_recipients(self) -> List[Dict[str, str]]:
         """Form recipients for API."""
         return [field._asdict() for field in self.get_recipients()]
 
-    def form_data(self) -> list[dict[str, str]]:
+    def form_data(self) -> List[Dict[str, str]]:
         """Form data for API."""
         return [field._asdict() for field in self.get_form_data()]
 

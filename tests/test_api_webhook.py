@@ -1,10 +1,8 @@
 import json
-from datetime import datetime, timezone
 
 from django.test import SimpleTestCase, TestCase
 
 import responses
-from freezegun import freeze_time
 from requests.exceptions import HTTPError
 from testfixtures import LogCapture
 
@@ -40,7 +38,6 @@ class SendToWebhookTest(Mixin, SimpleTestCase):
         self.log_handler.check()
 
 
-@freeze_time(datetime(2025, 3, 13, 8, 10, tzinfo=timezone.utc))
 class TriggerWebhookTest(Mixin, TestCase):
 
     def setUp(self):

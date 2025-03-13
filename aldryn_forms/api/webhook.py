@@ -31,4 +31,4 @@ def trigger_webhooks(webhooks: ManyToManyField, instance: "FormSubmissionBase") 
         try:
             send_to_webook(hook.url, payload)
         except RequestException as err:
-            logger.error(err)
+            logger.error(f"{hook.url} {err}")

@@ -54,7 +54,7 @@ class TriggerWebhookTest(Mixin, TestCase):
             rsps.add(responses.POST, self.url, body=HTTPError("Connection failed."))
             trigger_webhooks(webhooks, submission)
         self.log_handler.check(
-            ('aldryn_forms.api.webhook', 'ERROR', 'Connection failed.')
+            ('aldryn_forms.api.webhook', 'ERROR', 'https://host.foo/webhook/ Connection failed.')
         )
 
     def test(self):

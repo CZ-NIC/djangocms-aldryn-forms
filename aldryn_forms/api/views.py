@@ -1,5 +1,6 @@
 from typing import Callable
 
+from django.contrib.sites.models import Site
 from django.http.response import Http404
 
 from django_filters import rest_framework as filters
@@ -46,6 +47,12 @@ class SubmissionsViewSet(SanitizeGetObjectMixin, viewsets.ReadOnlyModelViewSet):
     paginator = AldrynFormsPagination()
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = SubmissionFilter
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        site = Site.objects.first()
+        context["hostname"] = site.domain
+        return context
 
 
 class FormViewSet(SanitizeGetObjectMixin, viewsets.ReadOnlyModelViewSet):

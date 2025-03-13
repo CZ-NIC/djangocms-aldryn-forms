@@ -716,18 +716,21 @@ class FormSubmissionBase(models.Model):
         return self.name
 
     def _form_data_hook(self, data, occurrences):
-        field_label = data['label'].strip()
+        field_label = data.get("label", "").strip()
 
         if field_label:
-            field_type = data['name'].rpartition('_')[0]
+            field_type = data.get("name", "").rpartition('_')[0]
             field_id = f'{field_type}_{field_label}'
         else:
-            field_id = data['name']
+            field_id = data.get("name", "")
 
         if field_id in occurrences:
             occurrences[field_id] += 1
 
         data['field_occurrence'] = occurrences[field_id]
+        for name in ("label", "name", "value"):
+            if name not in data:
+                data[name] = ""
         return SerializedFormField(**data)
 
     def _recipients_hook(self, data):

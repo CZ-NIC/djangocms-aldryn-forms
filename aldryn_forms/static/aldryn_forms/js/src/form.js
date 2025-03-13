@@ -38,11 +38,11 @@ export function disableButtonSubmit(event, display_message) {
         button.disabled = true
         button.readOnly = true
         if (display_message) {
+            const form = event.target.closest("form")
+            const message = form && form.dataset.message_wait ? form.dataset.message_wait : gettext("Please wait. Submitting form...")
             button.insertAdjacentHTML(
                 'afterend',
-                '<div class="text-danger aldryn-forms aldryn-forms-submit-msg">'
-                + gettext("Please wait. Submitting form...")
-                + '</div>')
+                '<div class="text-danger aldryn-forms aldryn-forms-submit-msg">' + message + '</div>')
         }
     }
 }

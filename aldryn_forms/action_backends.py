@@ -2,6 +2,7 @@ import logging
 from typing import TYPE_CHECKING
 
 from django.conf import settings
+from django.contrib.sites.models import Site
 from django.http import HttpRequest
 from django.utils.translation import gettext_lazy as _
 
@@ -37,7 +38,8 @@ class DefaultAction(BaseAction):
         form.instance.set_recipients(recipients)
         form.save()
         if not duration:
-            trigger_webhooks(instance.webhooks, form.instance, request.get_host())
+            site = Site.objects.first()
+            trigger_webhooks(instance.webhooks, form.instance, site.domain)
         cmsplugin.send_success_message(instance, request)
 
 
@@ -57,7 +59,8 @@ class EmailAction(BaseAction):
         else:
             recipients = cmsplugin.send_notifications(instance, form)
             logger.info(f'Sent email notifications to {len(recipients)} recipients.')
-            trigger_webhooks(instance.webhooks, form.instance, request.get_host())
+            site = Site.objects.first()
+            trigger_webhooks(instance.webhooks, form.instance, site.domain)
         cmsplugin.send_success_message(instance, request)
 
 

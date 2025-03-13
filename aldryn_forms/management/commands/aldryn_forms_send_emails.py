@@ -1,3 +1,4 @@
+from django.contrib.sites.models import Site
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.utils.timezone import now as django_timezone_now
@@ -20,7 +21,8 @@ class Command(BaseCommand):
         else:
             queryset = SubmittedToBeSent.objects.all()
 
+        site = Site.objects.first()
         for instance in queryset:
             if send_postponed_notifications(instance):
-                trigger_webhooks(instance.webhooks, instance)
+                trigger_webhooks(instance.webhooks, instance, site.domain)
                 instance.delete()

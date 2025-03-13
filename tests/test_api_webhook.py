@@ -1,7 +1,7 @@
 import json
 from datetime import datetime, timezone
 
-from django.test import RequestFactory, TestCase
+from django.test import TestCase
 
 import responses
 from freezegun import freeze_time
@@ -44,9 +44,8 @@ class SendToWebhookTest(Mixin, TestCase):
         post = json.dumps([
             {"label": "Test", "name": "test", "value": 1},
         ])
-        request = RequestFactory().request()
         submission = FormSubmission.objects.create(name="Test", data=post)
-        serializer = FormSubmissionSerializer(submission, context={"request": request})
+        serializer = FormSubmissionSerializer(submission)
         payload = json.dumps(serializer.data)
         response_data = {"status": "OK"}
         with responses.RequestsMock() as rsps:
@@ -68,11 +67,10 @@ class TriggerWebhookTest(Mixin, TestCase):
         data = json.dumps([
             {"label": "Test", "name": "test", "value": 1},
         ])
-        request = RequestFactory().request()
         submission = FormSubmission.objects.create(name="Test", data=data)
         with responses.RequestsMock() as rsps:
             rsps.add(responses.POST, self.url, body=HTTPError("Connection failed."))
-            trigger_webhooks(request, webhooks, submission)
+            trigger_webhooks(webhooks, submission, "testserver")
         self.log_handler.check(
             ('aldryn_forms.api.webhook', 'ERROR', 'https://host.foo/webhook/ Connection failed.')
         )
@@ -82,9 +80,8 @@ class TriggerWebhookTest(Mixin, TestCase):
         data = json.dumps([
             {"label": "Test", "name": "test", "value": 1},
         ])
-        request = RequestFactory().request()
         submission = FormSubmission.objects.create(name="Test", data=data)
         with responses.RequestsMock() as rsps:
             rsps.add(responses.POST, self.url, body=json.dumps([{"status": "OK"}]))
-            trigger_webhooks(request, webhooks, submission)
+            trigger_webhooks(webhooks, submission, "testserver")
         self.log_handler.check()

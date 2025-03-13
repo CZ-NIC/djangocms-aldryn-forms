@@ -12,8 +12,7 @@ class FormSubmissionSerializer(serializers.HyperlinkedModelSerializer):
         fields = ['hostname', 'name', 'language', 'sent_at', 'form_recipients', 'form_data']
 
     def set_hostname(self, instance: FormSubmission) -> str:
-        request = self.context.get("request")
-        return "testserver" if request is None else request.get_host()
+        return self.context.get("hostname", "testserver")
 
 
 class FormSerializer(serializers.HyperlinkedModelSerializer):

@@ -2,8 +2,6 @@ import json
 import logging
 from typing import TYPE_CHECKING
 
-from django.http import HttpRequest
-
 import requests
 from requests.exceptions import RequestException
 
@@ -24,10 +22,10 @@ def send_to_webook(url: str, data: str) -> requests.Response:
     return response
 
 
-def trigger_webhooks(request: HttpRequest, webhooks: ManyToManyField, instance: "FormSubmissionBase") -> None:
+def trigger_webhooks(webhooks: ManyToManyField, instance: "FormSubmissionBase", hostname: str) -> None:
     """Trigger webhooks and send them the instance data."""
     from aldryn_forms.api.serializers import FormSubmissionSerializer
-    serializer = FormSubmissionSerializer(instance, context={"request": request})
+    serializer = FormSubmissionSerializer(instance, context={"hostname": hostname})
     payload = json.dumps(serializer.data)
     for hook in webhooks.all():
         try:

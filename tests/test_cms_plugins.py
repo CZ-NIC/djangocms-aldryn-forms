@@ -10,11 +10,11 @@ from aldryn_forms.models import FormPlugin, FormSubmission
 from tests.test_views import CMS_3_6
 
 
-class FormPluginTestCase(CMSTestCase):
+class DataMixin:
+
+    plugin_name = ""
 
     def setUp(self):
-        super().setUp()
-
         self.page = create_page('test page', 'test_page.html', 'en', published=True)
         try:
             self.placeholder = self.page.placeholders.get(slot='content')
@@ -27,7 +27,15 @@ class FormPluginTestCase(CMSTestCase):
             'url': 'http://www.google.com',
             'name': 'Contact us',
         }
-        self.form_plugin = add_plugin(self.placeholder, 'FormPlugin', 'en', **plugin_data)
+        self.form_plugin = add_plugin(self.placeholder, self.plugin_name, 'en', **plugin_data)
+
+
+class FormPluginTestCase(DataMixin, CMSTestCase):
+
+    plugin_name = "FormPlugin"
+
+    def setUp(self):
+        super().setUp()
         self.form_plugin.recipients.add(self.user)
 
         add_plugin(self.placeholder, 'TextField', 'en', target=self.form_plugin, label="Name", name="name")
@@ -93,22 +101,12 @@ class FormPluginTestCase(CMSTestCase):
         self.assertEqual(len(mail.outbox), 0)
 
 
-class EmailNotificationFormPluginTestCase(CMSTestCase):
+class EmailNotificationFormPluginTestCase(DataMixin, CMSTestCase):
+
+    plugin_name = "EmailNotificationForm"
+
     def setUp(self):
         super().setUp()
-
-        self.page = create_page('test page', 'test_page.html', 'en', published=True)
-        try:
-            self.placeholder = self.page.placeholders.get(slot='content')
-        except AttributeError:
-            self.placeholder = self.page.get_placeholders('en').get(slot='content')
-        self.user = User.objects.create_superuser('username', 'email@example.com', 'password')
-
-        plugin_data = {
-            'redirect_type': 'redirect_to_url',
-            'url': 'http://www.google.com',
-        }
-        self.form_plugin = add_plugin(self.placeholder, 'EmailNotificationForm', 'en', **plugin_data)
         self.form_plugin.email_notifications.create(to_user=self.user, theme='default')
 
         add_plugin(self.placeholder, 'SubmitButton', 'en', target=self.form_plugin)

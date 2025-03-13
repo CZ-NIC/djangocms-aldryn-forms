@@ -54,7 +54,6 @@ class EmailAction(BaseAction):
         duration = getattr(settings, ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION, 0)
         if duration:
             recipients = cmsplugin.postpone_send_notifications(instance, form)
-            logger.info(f'Pospone sent email notifications to {len(recipients)} recipients.')
         else:
             recipients = cmsplugin.send_notifications(instance, form)
             logger.info(f'Sent email notifications to {len(recipients)} recipients.')

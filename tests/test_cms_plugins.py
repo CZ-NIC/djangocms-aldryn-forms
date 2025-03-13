@@ -204,7 +204,7 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
 
     @override_settings(ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION=30)
     @patch("aldryn_forms.forms.get_random_string", lambda size: "BJKHAmxW")
-    def test_postponed_form_submission_default_action_with_webhook(self):
+    def test_form_postponed_submission_default_action_with_webhook(self):
         self.form_plugin.action_backend = 'default'
         self.form_plugin.save()
         if CMS_3_6:
@@ -221,6 +221,29 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
             "name", "data", "post_ident").all().order_by('pk'), [
             ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester"}]', "BJKHAmxW"),
         ], transform=None)
+        self.assertQuerySetEqual(SubmittedToBeSent.objects.values_list(
+            "name", "data", "post_ident").all().order_by('pk'), [
+            ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester"}]', "BJKHAmxW"),
+        ], transform=None)
+        self.assertEqual(len(mail.outbox), 0)
+        self.log_handler.check()
+
+    @override_settings(ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION=30)
+    @patch("aldryn_forms.forms.get_random_string", lambda size: "BJKHAmxW")
+    def test_form_postponed_submission_email_action_webhook(self):
+        self.form_plugin.action_backend = 'email_only'
+        self.form_plugin.save()
+        if CMS_3_6:
+            self.page.publish('en')
+
+        form_plugin = FormPlugin.objects.last()
+        form_plugin.webhooks.add(self.webook)
+        data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester"}
+        with responses.RequestsMock():
+            response = self.client.post(self.page.get_absolute_url('en'), data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(FormSubmission.objects.count(), 0)
         self.assertQuerySetEqual(SubmittedToBeSent.objects.values_list(
             "name", "data", "post_ident").all().order_by('pk'), [
             ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester"}]', "BJKHAmxW"),

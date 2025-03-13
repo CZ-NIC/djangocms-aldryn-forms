@@ -37,7 +37,7 @@ class DefaultAction(BaseAction):
         form.instance.set_recipients(recipients)
         form.save()
         if not duration:
-            trigger_webhooks(instance.webhooks, form.instance)
+            trigger_webhooks(request, instance.webhooks, form.instance)
         cmsplugin.send_success_message(instance, request)
 
 
@@ -57,7 +57,7 @@ class EmailAction(BaseAction):
         else:
             recipients = cmsplugin.send_notifications(instance, form)
             logger.info(f'Sent email notifications to {len(recipients)} recipients.')
-            trigger_webhooks(instance.webhooks, form.instance)
+            trigger_webhooks(request, instance.webhooks, form.instance)
         cmsplugin.send_success_message(instance, request)
 
 

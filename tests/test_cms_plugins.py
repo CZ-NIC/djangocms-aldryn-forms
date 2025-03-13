@@ -251,6 +251,28 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
         self.assertEqual(len(mail.outbox), 0)
         self.log_handler.check()
 
+    @override_settings(ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION=30)
+    def test_form_postponed_submission_no_action_webhook(self):
+        self.form_plugin.action_backend = 'none'
+        self.form_plugin.save()
+        if CMS_3_6:
+            self.page.publish('en')
+
+        form_plugin = FormPlugin.objects.last()
+        form_plugin.webhooks.add(self.webook)
+        data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester"}
+        with responses.RequestsMock():
+            response = self.client.post(self.page.get_absolute_url('en'), data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(FormSubmission.objects.count(), 0)
+        self.assertEqual(SubmittedToBeSent.objects.count(), 0)
+        self.assertEqual(len(mail.outbox), 0)
+        self.log_handler.check(
+            ('aldryn_forms.action_backends', 'INFO',
+             f'Not persisting data for "{form_plugin.pk}" since action_backend is set to "none"'),
+        )
+
 
 class EmailNotificationFormPluginTestCase(DataMixin, CMSTestCase):
 

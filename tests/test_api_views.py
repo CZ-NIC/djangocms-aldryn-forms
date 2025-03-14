@@ -47,6 +47,27 @@ class FormViewSetTest(DataMixin, TestCase):
 @freeze_time(datetime(2025, 3, 14, 9, 30, tzinfo=timezone.utc))
 class SubmissionsViewSetTest(DataMixin, TestCase):
 
+    submitted_post = {
+        "hostname": "example.com",
+        "name": "Test submit",
+        "language": "en",
+        "sent_at": "2025-03-14T04:30:00-05:00",
+        "form_recipients": [],
+        "form_data": [{
+            "name": "test",
+            "label": "Test",
+            "field_occurrence": 1,
+            "value": 1}]
+        }
+    submitted_posts_list = {
+        "count": 1,
+        "next": None,
+        "previous": None,
+        "results": [
+            submitted_post
+        ]
+    }
+
     def setUp(self):
         super().setUp()
         self.view = SubmissionsViewSet.as_view({"get": "list"})
@@ -62,23 +83,21 @@ class SubmissionsViewSetTest(DataMixin, TestCase):
         ]
         FormSubmission.objects.create(name="Test submit", data=json.dumps(data))
         response = self.view(self.request)
-        data = {
-            "count": 1,
-            "next": None,
-            "previous": None,
-            "results": [
-                {"hostname": "example.com",
-                 "name": "Test submit",
-                 "language": "en",
-                 "sent_at": "2025-03-14T04:30:00-05:00",
-                 "form_recipients": [],
-                 "form_data": [{
-                     "name": "test",
-                     "label": "Test",
-                     "field_occurrence": 1,
-                     "value": 1}]
-                 }
-            ]
-        }
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data, data)
+        self.assertEqual(response.data, self.submitted_posts_list)
+
+    def test_get_object(self):
+        data = [
+            {"label": "Test", "name": "test", "value": 1},
+        ]
+        submission = FormSubmission.objects.create(name="Test submit", data=json.dumps(data))
+        view = SubmissionsViewSet.as_view({"get": "retrieve"})
+        response = view(self.request, pk=submission.pk)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, self.submitted_post)
+
+    def test_get_object_not_found(self):
+        view = SubmissionsViewSet.as_view({"get": "retrieve"})
+        response = view(self.request, pk=42)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data, {"error": {"message": "Object not found."}})

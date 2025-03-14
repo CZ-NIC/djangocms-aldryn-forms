@@ -1,3 +1,5 @@
+import json
+
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.test import TestCase
@@ -8,8 +10,7 @@ from cms.models import Placeholder
 from filer.models import Folder
 
 from aldryn_forms.models import (
-    FileUploadFieldPlugin, ImageUploadFieldPlugin,
-    MultipleFilesUploadFieldPlugin, Option,
+    FileUploadFieldPlugin, FormSubmission, ImageUploadFieldPlugin, MultipleFilesUploadFieldPlugin, Option,
 )
 
 
@@ -151,3 +152,23 @@ class ImageUploadFieldPluginTest(TestCase):
         field = ImageUploadFieldPlugin(enable_js=True)
         self.assertTrue(field.enable_js)
         self.assertIsNone(field.max_size)
+
+
+class FormSubmissionTest(TestCase):
+
+    def setUp(self):
+        data = [
+            {"label": "Test", "name": "test", "value": 1},
+        ]
+        self.recipients = [
+            {"name": "Dave Lister", "email": "dave@lister.foo"}
+        ]
+        self.submission = FormSubmission.objects.create(
+            name="Test", data=json.dumps(data), recipients = json.dumps(self.recipients))
+
+    def test_form_recipients(self):
+        self.assertEqual(self.submission.form_recipients(), self.recipients)
+
+    def test_form_data(self):
+        data = [{'name': 'test', 'label': 'Test', 'field_occurrence': 1, 'value': 1}]
+        self.assertEqual(self.submission.form_data(), data)

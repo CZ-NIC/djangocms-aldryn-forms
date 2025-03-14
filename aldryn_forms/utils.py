@@ -21,7 +21,7 @@ from .constants import ALDRYN_FORMS_ACTION_BACKEND_KEY_MAX_SIZE, DEFAULT_ALDRYN_
 from .validators import is_valid_recipient
 
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from .models import FormSubmissionBase
 
 

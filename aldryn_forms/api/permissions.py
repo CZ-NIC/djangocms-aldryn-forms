@@ -5,7 +5,7 @@ from django.http import HttpRequest
 from rest_framework.permissions import BasePermission
 
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from .views import FormViewSet, SubmissionsViewSet
 
 

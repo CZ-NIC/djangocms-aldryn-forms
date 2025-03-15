@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import sys
 
 
 HELPER_SETTINGS = {
@@ -28,7 +29,8 @@ HELPER_SETTINGS = {
 
 def run():
     from djangocms_helper import runner
-    runner.cms('aldryn_forms')
+    extra_args = sys.argv[1:] if len(sys.argv) > 1 else []
+    runner.cms('aldryn_forms', [sys.argv[0]], extra_args=extra_args)
 
 
 if __name__ == '__main__':

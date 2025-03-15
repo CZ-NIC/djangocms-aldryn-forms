@@ -2,7 +2,9 @@ import sys
 from distutils.version import LooseVersion
 from unittest.mock import patch
 
-from django.test import override_settings
+from django.contrib.auth import get_user_model
+from django.core import mail
+from django.test import modify_settings, override_settings
 from django.urls import clear_url_caches
 
 import cms
@@ -10,12 +12,15 @@ from cms.api import add_plugin, create_page
 from cms.appresolver import clear_app_resolvers
 from cms.test_utils.testcases import CMSTestCase
 
+from aldryn_forms.models import FormSubmission
+
 
 # These means "less than or equal"
 CMS_3_6 = LooseVersion(cms.__version__) < LooseVersion("4.0")
 
 
 class SubmitFormViewTest(CMSTestCase):
+
     def setUp(self):
         self.APP_MODULE = "aldryn_forms.cms_apps.FormsApp"
         clear_app_resolvers()
@@ -37,7 +42,8 @@ class SubmitFormViewTest(CMSTestCase):
             self.placeholder = self.page.get_placeholders("en").get(slot="content")
 
         self.redirect_url = "http://www.google.com"
-        self.redirect_url_with_params = "http://www.google.com?aldryn_form_post_ident=aBH7hWEGAihsg9KxctpNRfvEXUoOFpJZigmZETqWWNVs4gENFsL3qva1d4Q93URg"
+        self.redirect_url_with_params = "http://www.google.com?aldryn_form_post_ident=" \
+            "aBH7hWEGAihsg9KxctpNRfvEXUoOFpJZigmZETqWWNVs4gENFsL3qva1d4Q93URg"
 
         plugin_data = {
             "redirect_type": "redirect_to_url",
@@ -287,3 +293,111 @@ class SubmitFormViewTest(CMSTestCase):
         email_field = '<input type="email" name="{name}"'
         self.assertContains(response, email_field.format(name="email_1"))
         self.assertContains(response, email_field.format(name="email_2"))
+
+    def _prepare_form(self):
+        page = create_page(
+            "form",
+            "test_page.html",
+            "en",
+            published=True,
+            apphook="FormsApp",
+        )
+        placeholder = page.placeholders.get(slot="content")
+
+        form_plugin = add_plugin(
+            placeholder,
+            "FormPlugin",
+            "en",
+            action_backend="default",
+        )  # noqa: E501
+        user = get_user_model().objects.create(username="Dave", email="dave@foo.foo")
+        form_plugin.recipients.add(user)
+
+        add_plugin(
+            placeholder,
+            "EmailField",
+            "en",
+            name="email_1",
+            required=True,
+            target=form_plugin,
+            label="Submit",
+        )
+        page.publish("en")
+        self.reload_urls()
+        self.apphook_clear()
+        return page, form_plugin, {'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'}
+
+    @modify_settings(MIDDLEWARE={"append": "aldryn_forms.middleware.handle_post.HandleHttpPost"})
+    def test_middleware_method_get(self):
+        page, form_plugin, headers = self._prepare_form()
+        response = self.client.get(
+            page.get_absolute_url("en"),
+            {
+                "form_plugin_id": form_plugin.pk,
+                "email_1": "test@test",
+            }, **headers
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertQuerySetEqual(FormSubmission.objects.values_list('data'), [])
+        self.assertEqual(len(mail.outbox), 0)
+
+    @modify_settings(MIDDLEWARE={"append": "aldryn_forms.middleware.handle_post.HandleHttpPost"})
+    def test_middleware_method_invalid_id(self):
+        page, _, headers = self._prepare_form()
+        response = self.client.post(
+            page.get_absolute_url("en"),
+            {
+                "form_plugin_id": "foo",
+                "email_1": "test@test",
+            }, **headers
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertQuerySetEqual(FormSubmission.objects.values_list('data'), [])
+        self.assertEqual(len(mail.outbox), 0)
+
+    @modify_settings(MIDDLEWARE={"append": "aldryn_forms.middleware.handle_post.HandleHttpPost"})
+    def test_middleware_method_unknown_id(self):
+        page, _, headers = self._prepare_form()
+        response = self.client.post(
+            page.get_absolute_url("en"),
+            {
+                "form_plugin_id": 42,
+                "email_1": "test@test",
+            }, **headers
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertQuerySetEqual(FormSubmission.objects.values_list('data'), [])
+        self.assertEqual(len(mail.outbox), 0)
+
+    @modify_settings(MIDDLEWARE={"append": "aldryn_forms.middleware.handle_post.HandleHttpPost"})
+    def test_middleware_form_error(self):
+        page, form_plugin, headers = self._prepare_form()
+        response = self.client.post(
+            page.get_absolute_url("en"),
+            {
+                "form_plugin_id": form_plugin.pk,
+            }, **headers
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {'status': 'ERROR', 'form': {'email_1': ['This field is required.']}})
+        self.assertQuerySetEqual(FormSubmission.objects.values_list('data'), [])
+        self.assertEqual(len(mail.outbox), 0)
+
+    @modify_settings(MIDDLEWARE={"append": "aldryn_forms.middleware.handle_post.HandleHttpPost"})
+    def test_middleware_success(self):
+        page, form_plugin, headers = self._prepare_form()
+        response = self.client.post(
+            page.get_absolute_url("en"),
+            {
+                "form_plugin_id": form_plugin.pk,
+                "email_1": "test@test.foo",
+            }, **headers
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {'status': 'SUCCESS', 'post_ident': None, 'message': 'OK'})
+        self.assertQuerySetEqual(FormSubmission.objects.values_list('data'), [
+            ('[{"name": "email_1", "label": "Submit", "field_occurrence": 1, "value": "test@test.foo"}]',)
+        ], transform=tuple)
+        self.assertEqual(len(mail.outbox), 1)
+        msg = mail.outbox[0].message()
+        self.assertEqual(msg.get("to"), "dave@foo.foo")

@@ -370,7 +370,7 @@ class SubmitFormViewTest(CMSTestCase):
         self.assertEqual(len(mail.outbox), 0)
 
     @modify_settings(MIDDLEWARE={"append": "aldryn_forms.middleware.handle_post.HandleHttpPost"})
-    def test_middleware_form_error(self):
+    def test_middleware_form_error_json(self):
         page, form_plugin, headers = self._prepare_form()
         response = self.client.post(
             page.get_absolute_url("en"),
@@ -384,7 +384,7 @@ class SubmitFormViewTest(CMSTestCase):
         self.assertEqual(len(mail.outbox), 0)
 
     @modify_settings(MIDDLEWARE={"append": "aldryn_forms.middleware.handle_post.HandleHttpPost"})
-    def test_middleware_success(self):
+    def test_middleware_success_json(self):
         page, form_plugin, headers = self._prepare_form()
         response = self.client.post(
             page.get_absolute_url("en"),
@@ -395,6 +395,25 @@ class SubmitFormViewTest(CMSTestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {'status': 'SUCCESS', 'post_ident': None, 'message': 'OK'})
+        self.assertQuerySetEqual(FormSubmission.objects.values_list('data'), [
+            ('[{"name": "email_1", "label": "Submit", "field_occurrence": 1, "value": "test@test.foo"}]',)
+        ], transform=tuple)
+        self.assertEqual(len(mail.outbox), 1)
+        msg = mail.outbox[0].message()
+        self.assertEqual(msg.get("to"), "dave@foo.foo")
+
+    @modify_settings(MIDDLEWARE={"append": "aldryn_forms.middleware.handle_post.HandleHttpPost"})
+    def test_middleware_success(self):
+        page, form_plugin, _ = self._prepare_form()
+        response = self.client.post(
+            page.get_absolute_url("en"),
+            {
+                "form_plugin_id": form_plugin.pk,
+                "email_1": "test@test.foo",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get("Content-Type"), "text/html; charset=utf-8")
         self.assertQuerySetEqual(FormSubmission.objects.values_list('data'), [
             ('[{"name": "email_1", "label": "Submit", "field_occurrence": 1, "value": "test@test.foo"}]',)
         ], transform=tuple)

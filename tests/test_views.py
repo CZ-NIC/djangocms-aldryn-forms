@@ -294,7 +294,7 @@ class SubmitFormViewTest(CMSTestCase):
         self.assertContains(response, email_field.format(name="email_1"))
         self.assertContains(response, email_field.format(name="email_2"))
 
-    def _prepare_form(self):
+    def _prepare_form(self, redirect=False):
         page = create_page(
             "form",
             "test_page.html",
@@ -304,11 +304,17 @@ class SubmitFormViewTest(CMSTestCase):
         )
         placeholder = page.placeholders.get(slot="content")
 
+        kwargs = {}
+        if redirect:
+            kwargs["redirect_type"] = "redirect_to_page"
+            kwargs["redirect_page"] =  page
+            # kwargs["success_url"] = "https://test.foo/success/"
         form_plugin = add_plugin(
             placeholder,
             "FormPlugin",
             "en",
             action_backend="default",
+            **kwargs
         )  # noqa: E501
         user = get_user_model().objects.create(username="Dave", email="dave@foo.foo")
         form_plugin.recipients.add(user)
@@ -413,6 +419,25 @@ class SubmitFormViewTest(CMSTestCase):
             },
         )
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get("Content-Type"), "text/html; charset=utf-8")
+        self.assertQuerySetEqual(FormSubmission.objects.values_list('data'), [
+            ('[{"name": "email_1", "label": "Submit", "field_occurrence": 1, "value": "test@test.foo"}]',)
+        ], transform=tuple)
+        self.assertEqual(len(mail.outbox), 1)
+        msg = mail.outbox[0].message()
+        self.assertEqual(msg.get("to"), "dave@foo.foo")
+
+    @modify_settings(MIDDLEWARE={"append": "aldryn_forms.middleware.handle_post.HandleHttpPost"})
+    def test_middleware_success_redirect(self):
+        page, form_plugin, _ = self._prepare_form(redirect=True)
+        response = self.client.post(
+            page.get_absolute_url("en"),
+            {
+                "form_plugin_id": form_plugin.pk,
+                "email_1": "test@test.foo",
+            },
+        )
+        self.assertRedirects(response, page.get_absolute_url("en"))
         self.assertEqual(response.get("Content-Type"), "text/html; charset=utf-8")
         self.assertQuerySetEqual(FormSubmission.objects.values_list('data'), [
             ('[{"name": "email_1", "label": "Submit", "field_occurrence": 1, "value": "test@test.foo"}]',)

@@ -13,7 +13,7 @@ from cms.api import add_plugin, create_page
 from cms.appresolver import clear_app_resolvers
 from cms.test_utils.testcases import CMSTestCase
 
-from aldryn_forms.models import FormSubmission
+from aldryn_forms.models import FormPlugin, FormSubmission
 
 
 # These means "less than or equal"
@@ -332,7 +332,7 @@ class SubmitFormViewTest(CMSTestCase):
         page.publish("en")
         self.reload_urls()
         self.apphook_clear()
-        return page, form_plugin, {'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'}
+        return page, FormPlugin.objects.last(), {'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'}
 
     @modify_settings(MIDDLEWARE={"append": "aldryn_forms.middleware.handle_post.HandleHttpPost"})
     def test_middleware_method_get(self):
@@ -462,3 +462,17 @@ class SubmitFormViewTest(CMSTestCase):
         self.assertIsInstance(response, HttpResponseBadRequest)
         self.assertEqual(len(mail.outbox), 0)
         self.assertQuerySetEqual(FormSubmission.objects.values_list('data'), [])
+
+    @modify_settings(MIDDLEWARE={"append": "aldryn_forms.middleware.handle_post.HandleHttpPost"})
+    def test_middleware_form_error(self):
+        page, form_plugin, _ = self._prepare_form(redirect=True)
+        response = self.client.post(
+            page.get_absolute_url("en"),
+            {
+                "form_plugin_id": form_plugin.pk,
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["form"].errors, {'email_1': ['This field is required.']})
+        self.assertQuerySetEqual(FormSubmission.objects.values_list('data'), [])
+        self.assertEqual(len(mail.outbox), 0)

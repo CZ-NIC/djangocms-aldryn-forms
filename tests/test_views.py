@@ -4,6 +4,7 @@ from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.core import mail
+from django.http import HttpResponseBadRequest
 from django.test import modify_settings, override_settings
 from django.urls import clear_url_caches
 
@@ -445,3 +446,19 @@ class SubmitFormViewTest(CMSTestCase):
         self.assertEqual(len(mail.outbox), 1)
         msg = mail.outbox[0].message()
         self.assertEqual(msg.get("to"), "dave@foo.foo")
+        self.assertQuerySetEqual(FormSubmission.objects.values_list('data'), [
+            ('[{"name": "email_1", "label": "Submit", "field_occurrence": 1, "value": "test@test.foo"}]',)
+        ], transform=tuple)
+
+    @modify_settings(MIDDLEWARE={"append": "aldryn_forms.middleware.handle_post.HandleHttpPost"})
+    def test_middleware_form_plugin_is_none(self):
+        page, _, _ = self._prepare_form()
+        response = self.client.post(
+            page.get_absolute_url("en"),
+            {
+                "email_1": "test@test.foo",
+            },
+        )
+        self.assertIsInstance(response, HttpResponseBadRequest)
+        self.assertEqual(len(mail.outbox), 0)
+        self.assertQuerySetEqual(FormSubmission.objects.values_list('data'), [])

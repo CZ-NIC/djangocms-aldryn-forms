@@ -3,7 +3,6 @@ from typing import Callable, Dict, Optional, Tuple, Union
 
 from django.http import HttpRequest, HttpResponseRedirect, JsonResponse
 from django.utils.deprecation import MiddlewareMixin
-from django.utils.translation import gettext_lazy as _
 
 from aldryn_forms.constants import ALDRYN_FORMS_POST_IDENT_NAME
 from aldryn_forms.forms import FormSubmissionBaseForm
@@ -37,30 +36,25 @@ class HandleHttpPost(MiddlewareMixin):
         form_plugin_instance = form_plugin.get_plugin_instance()[1]
         form = form_plugin_instance.process_form(form_plugin, request)
 
-        return get_response(request, form_plugin, form)
+        return get_response(request, (form_plugin, form))
 
 
 def get_response(
     request: HttpRequest,
-    form_plugin: FormPlugin = None,
-    form: FormSubmissionBaseForm = None,
+    form_plugin_and_form: Tuple[FormPlugin, FormSubmissionBaseForm] = None,
 ) -> Optional[Union[HttpResponseRedirect, JsonResponse]]:
     """Get response type."""
-    if form_plugin is None:
+    if form_plugin_and_form is None:
         return None
+    form_plugin, form = form_plugin_and_form
 
-    data: dict[str, str] = {"status": "PASS"}
-    if request.method == 'POST':
-        data["status"] = "ERROR"
-        if form is None:
-            data["form"] = {"__all__": [_("The form submission failed. Please try again later.")]}
-        else:
-            if form.is_valid():
-                data["status"] = "SUCCESS"
-                data["post_ident"] = form.cleaned_data.get(ALDRYN_FORMS_POST_IDENT_NAME)
-                data["message"] = getattr(request, "aldryn_forms_success_message", "OK")
-            else:
-                data["form"] = form.errors
+    data: dict[str, str] = {"status": "ERROR"}
+    if form.is_valid():
+        data["status"] = "SUCCESS"
+        data["post_ident"] = form.cleaned_data.get(ALDRYN_FORMS_POST_IDENT_NAME)
+        data["message"] = getattr(request, "aldryn_forms_success_message", "OK")
+    else:
+        data["form"] = form.errors
 
     if request.META.get('HTTP_X_REQUESTED_WITH') == "XMLHttpRequest":
         return JsonResponse(data)

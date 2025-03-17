@@ -102,17 +102,38 @@ Available Plug-ins
 Middleware
 ==========
 
-Dispatch submitted form by middleware. If the HTTP header ``HTTP_X_DJANGOCMS_ALDRYN_FORMS`` is ``SubmittedForm`` a json response is returned.
+The standard processing of the form is that after submitting it, the form page is reloaded with a javascript redirect to the next page.
+Before the redirection takes place, the user is shown the text "You will be redirected shortly".
+You activate the direct redirect by adding middleware into settings.
 
-Write in settings.py: ::
+Add middleware in settings.py: ::
 
     MIDDLEWARE = [
         ...
         "aldryn_forms.middleware.handle_post.HandleHttpPost"
     ]
 
-Saving to the same post
-=======================
+
+If the HTTP request contains the ``X-Requested-With`` header with the ``XMLHttpRequest`` value, the middleware returns a JSON response.
+
+    ::
+
+    {'status': 'SUCCESS', 'post_ident': None, 'message': 'OK'}
+
+or
+
+    ::
+
+    {'status': 'ERROR', 'form': {'name': ['This field is required.']}}
+
+
+Multiple saving to the same post
+================================
+
+To activate multiple saving to the same post, use the ``ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION`` switch.
+This also specifies how long the user can write to the post.
+To make the whole process work, you need to run the ``aldryn_forms_send_emails`` and ``aldryn_forms_remove_expired_post_idents`` commands regularly.
+The first command sends emails if it was set to do so in the form plugin. The second resets the submit identifier so that it can no longer be written to.
 
 Activation of repeated saving to the same post.
 
@@ -125,6 +146,9 @@ Write in settings.py: ::
 After this entry, the ``post_ident`` parameter is added to the success url for redirection. For example ::
 
     /thank-you/?post_ident=HErQ2TunSAU0AhTKrNSVDtSVBoYr9gTvUCUsdpMg6AZVqzExXCK06Tm7XIznf1sw
+
+If this identifier is added to another post, a new post is not created, but it is added to an existing post.
+For this case you can use the ``Form with Ident field`` plugin, which contains a hidden field where the value is stored via javascript.
 
 
 Submit form by javascript
@@ -163,19 +187,52 @@ Example of ``runNext`` javascript function: ::
     }
 
 
-Commands
-========
-
-The command ``aldryn_forms_remove_expired_post_idents`` deletes the ``post_ident`` values for all records older than the value in ``ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION``.
+Multiple post save commands
+===========================
 
 The command ``aldryn_forms_send_emails`` will send all emails that are waiting to be sent.
 
+The command ``aldryn_forms_remove_expired_post_idents`` deletes the ``post_ident`` values for all records older than the value in ``ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION``.
+
 Add these commands to crontab: ::
 
+    1/10 * * * * django-admin aldryn_forms_send_emails; django-admin aldryn_forms_remove_expired_post_idents
 
-    1/10 * * * * django-admin aldryn_forms_remove_expired_post_idents
-    1/10 * * * * django-admin aldryn_forms_send_emails
 
+Webhooks
+========
+
+After submitting the form it is possible to send the form data to some url using webhook. For example:
+
+
+Webhook example: ::
+
+    https://webhook.example/67d5fbee-fc40-8012-880b-ed4f8fb0491c/
+
+
+Example of sent data: ::
+
+    {
+        "hostname": "example.com",
+        "name": "The form name",
+        "language": "en",
+        "sent_at": "2025-03-17T09:39:18.202231Z",
+        "form_recipients": [
+            {
+                "name": "Dave",
+                "email": "dave@dwarf.red"
+            }
+        ],
+        "form_data": [
+            {
+                "name": "name",
+                "label": "Name",
+                "field_occurrence": 1,
+                "value": "Rimmer"
+            },
+            ...
+        ]
+    }
 
 
 .. |Project continuation| image:: https://img.shields.io/badge/Continuation-Divio_Aldryn_Froms-blue

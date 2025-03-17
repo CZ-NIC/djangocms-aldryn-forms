@@ -309,7 +309,6 @@ class SubmitFormViewTest(CMSTestCase):
         if redirect:
             kwargs["redirect_type"] = "redirect_to_page"
             kwargs["redirect_page"] =  page
-            # kwargs["success_url"] = "https://test.foo/success/"
         form_plugin = add_plugin(
             placeholder,
             "FormPlugin",

@@ -1,6 +1,6 @@
 import json
 import re
-from typing import Optional
+from typing import Dict, List, Optional
 
 from django import forms
 from django.conf import settings
@@ -341,7 +341,7 @@ class FormSubmissionBaseForm(forms.Form):
 
     def append_into_previous_submission(self, previous_submit: FormSubmissionBase) -> None:
         """Append post into previous submission."""
-        data: list[dict[str, str]] = json.loads(previous_submit.data)
+        data: List[Dict[str, str]] = json.loads(previous_submit.data)
         fields = self.get_serialized_fields(is_confirmation=False)
         fields_as_dicts = [field._asdict() for field in fields if field.name != ALDRYN_FORMS_POST_IDENT_NAME]
         data.extend(fields_as_dicts)

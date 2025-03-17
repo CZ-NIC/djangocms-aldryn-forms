@@ -1,3 +1,4 @@
+import json
 import sys
 from distutils.version import LooseVersion
 from unittest.mock import patch
@@ -295,7 +296,7 @@ class SubmitFormViewTest(CMSTestCase):
         self.assertContains(response, email_field.format(name="email_1"))
         self.assertContains(response, email_field.format(name="email_2"))
 
-    def _prepare_form(self, redirect=False):
+    def _prepare_form(self, redirect=False, form_plugin_name="FormPlugin"):
         page = create_page(
             "form",
             "test_page.html",
@@ -311,7 +312,7 @@ class SubmitFormViewTest(CMSTestCase):
             kwargs["redirect_page"] =  page
         form_plugin = add_plugin(
             placeholder,
-            "FormPlugin",
+            form_plugin_name,
             "en",
             action_backend="default",
             **kwargs
@@ -474,4 +475,28 @@ class SubmitFormViewTest(CMSTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context["form"].errors, {'email_1': ['This field is required.']})
         self.assertQuerySetEqual(FormSubmission.objects.values_list('data'), [])
+        self.assertEqual(len(mail.outbox), 0)
+
+    @modify_settings(MIDDLEWARE={"append": "aldryn_forms.middleware.handle_post.HandleHttpPost"})
+    @override_settings(ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION=30)
+    def test_join_post_into_submission(self):
+        page, form_plugin, headers = self._prepare_form(form_plugin_name="FormWithIdentPlugin")
+        data = [
+            {"label": "Test", "name": "test", "value": 1},
+        ]
+        FormSubmission.objects.create(name="Test submit", data=json.dumps(data), post_ident="1234567890")
+        response = self.client.post(
+            page.get_absolute_url("en"),
+            {
+                "form_plugin_id": form_plugin.pk,
+                "email_1": "test2@test.foo",
+                "aldryn_form_post_ident": "1234567890",
+            }, **headers
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {'status': 'SUCCESS', 'post_ident': "1234567890", 'message': 'OK'})
+        self.assertQuerySetEqual(FormSubmission.objects.values_list('data'), [
+            ('[{"label": "Test", "name": "test", "value": 1}, '
+             '{"name": "email_1", "label": "Submit", "field_occurrence": 1, "value": "test2@test.foo"}]',)
+        ], transform=tuple)
         self.assertEqual(len(mail.outbox), 0)

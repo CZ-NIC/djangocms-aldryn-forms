@@ -590,6 +590,10 @@ class TextField(BaseTextField):
     name = _('Text Field')
 
 
+class HoneypotField(BaseTextField):
+    name = _('Honeypot Field')
+
+
 class TextAreaField(BaseTextField):
     name = _('Text Area Field')
     model = models.TextAreaFieldPlugin
@@ -1085,33 +1089,6 @@ class RadioSelectField(Field):
                 kwargs['initial'] = opt.pk
                 break
         return kwargs
-
-
-class HoneypotField(BaseTextField):
-
-    name = _('Honeypot Field')
-
-    form_field_enabled_options = [
-        'label',
-        'name',
-        'help_text',
-        'max_length',
-        'validators',
-        'placeholder',
-        'initial_value',
-    ]
-
-    # Used to configure default fieldset in admin form
-    fieldset_general_fields = [
-        'label',
-        'name',
-        'placeholder_text',
-    ]
-    fieldset_advanced_fields = [
-        'attributes',
-        'help_text',
-        'custom_classes',
-    ]
 
 
 try:

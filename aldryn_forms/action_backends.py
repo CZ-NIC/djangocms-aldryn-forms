@@ -76,3 +76,4 @@ class NoAction(BaseAction):
     ) -> None:
         form_id = form.form_plugin.id
         logger.info(f'Not persisting data for "{form_id}" since action_backend is set to "none"')
+        cmsplugin.send_success_message(instance, request)

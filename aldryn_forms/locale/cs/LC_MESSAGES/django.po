@@ -237,6 +237,9 @@ msgstr "Skryté pole"
 msgid "Hide content after submitting a form"
 msgstr "Skrýt obsah po odeslání formuláře"
 
+msgid "Honeypot Field"
+msgstr "Honeypot pole"
+
 msgid ""
 "If checkbox \"Field is required\" is set, \"Min choices\" must be at least 1."
 msgstr ""

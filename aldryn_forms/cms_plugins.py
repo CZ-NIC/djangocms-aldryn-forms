@@ -1087,6 +1087,33 @@ class RadioSelectField(Field):
         return kwargs
 
 
+class HoneypotField(BaseTextField):
+
+    name = _('Honeypot Field')
+
+    form_field_enabled_options = [
+        'label',
+        'name',
+        'help_text',
+        'max_length',
+        'validators',
+        'placeholder',
+        'initial_value',
+    ]
+
+    # Used to configure default fieldset in admin form
+    fieldset_general_fields = [
+        'label',
+        'name',
+        'placeholder_text',
+    ]
+    fieldset_advanced_fields = [
+        'attributes',
+        'help_text',
+        'custom_classes',
+    ]
+
+
 try:
     if not apps.is_installed("captcha"):  # django-simple-captcha
         raise ImportError('Module "captcha" is not in INSTALLED_APPS.')
@@ -1157,3 +1184,4 @@ plugin_pool.register_plugin(SelectField)
 plugin_pool.register_plugin(SubmitButton)
 plugin_pool.register_plugin(TextAreaField)
 plugin_pool.register_plugin(TextField)
+plugin_pool.register_plugin(HoneypotField)

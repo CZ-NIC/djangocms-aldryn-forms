@@ -605,8 +605,27 @@ class HoneypotCharField(forms.CharField):
 
 class HoneypotField(BaseTextField):
     name = _('Honeypot Field')
+    form = forms.ModelForm
     form_field = HoneypotCharField
     form_field_widget = HoneypotCharField.widget
+    form_field_enabled_options = [
+        'label',
+        'name',
+        'help_text',
+        'validators',
+        'placeholder',
+        'initial_value',
+    ]
+    fieldset_general_fields = [
+        'label',
+        'name',
+        'placeholder_text',
+    ]
+    fieldset_advanced_fields = [
+        'attributes',
+        'help_text',
+        'custom_classes',
+    ]
 
 
 class TextAreaField(BaseTextField):

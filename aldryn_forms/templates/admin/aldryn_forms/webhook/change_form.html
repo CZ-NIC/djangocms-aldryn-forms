@@ -14,15 +14,82 @@
         .see-more {
             margin-bottom: 2em;
         }
+
+        .examples table {
+            border: solid #b4b4b4 1px;
+        }
+        .examples table th, .examples table td {
+            border-bottom: solid #b4b4b4 1px;
+            border-right: solid #b4b4b4 1px;
+            padding: 0.2em 0.6em;
+        }
+        .examples table th {
+            background-color: #00bbff;
+            color: #fff;
+        }
+        .examples table td:nth-child(2) {
+            text-align: right;
+        }
     </style>
 {% endblock %}
 
 {% block content %}
     {{ block.super }}
 
-<h4>Transform example</h4>
-
 <div class="examples">
+
+<h4>Transform format</h4>
+<table>
+<tr>
+    <th>Name</th>
+    <th>Type</th>
+    <th>Description</th>
+</tr>
+<tr>
+    <td>dest</td>
+    <td>string</td>
+    <td>Name of key in destination data.</td>
+</tr>
+<tr>
+    <td>value</td>
+    <td>string</td>
+    <td>Some value (constant).</td>
+</tr>
+<tr>
+    <td>src</td>
+    <td>string / array</td>
+    <td>Query into the JSON source.</td>
+</tr>
+<tr>
+    <td>fetcher</td>
+    <td>string</td>
+    <td>
+        <div>Fetcher for a value from the query result.</div>
+        <div>Default is: <code>first</code>.</div>
+        <div>Available types: <code>first, all, text</code>.</div>
+        </td>
+</tr>
+<tr>
+    <td>sep</td>
+    <td>string</td>
+    <td>
+        <div>Separator for join multiple parts of query result.</div>
+        <div>Default is: <code>" "</code>.</div>
+    </td>
+</tr>
+<tr>
+    <td>match</td>
+    <td>string / array</td>
+    <td>
+        <div>Pattern for <code>re.mach(pattern, value).groups()</code>.</div>
+        <div>The array type is in the format <code>[pattern, flags, separator]</code></div>
+        <div>used as <code>separator.join(re.mach(pattern, value, flags).groups())</code>.</div>
+    </td>
+</tr>
+</table>
+<p></p>
+
+<h4>Transform example</h4>
 
 <pre><code>[
     {"dest": "roid", "value": "1234650"},

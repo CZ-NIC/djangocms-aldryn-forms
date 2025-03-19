@@ -1,0 +1,96 @@
+{% extends "admin/change_form.html" %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <style>
+        .examples pre {
+            background-color: #fff;
+            border: solid #00bbff 1px;
+            margin-bottom: 2em;
+            padding: 1em;
+        }
+        .examples pre code {
+            color:#004d69;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    {{ block.super }}
+
+<h4>Transform example</h4>
+
+<div class="examples">
+
+<pre><code>[
+    {"dest": "roid", "value": "1234650"},
+    {
+        "dest": "first_name",
+        "src": ".form_data[] | select(.label==\"Name\").value",
+        "match": "(.+)\\s+\\S+$"
+    },
+    {
+        "dest": "last_name",
+        "src": ".form_data[] | select(.label==\"Name\").value",
+        "match": ".+\\s+(\\S+)$"
+    },
+    {
+        "dest": "email",
+        "src": ".form_data[] | select(.name==\"email\").value"
+    },
+    {
+        "dest": "phone",
+        "src": ".form_data[] | select(.label==\"Phone\").value"
+    },
+    {
+        "dest": "company",
+        "src": ".form_data[] | select(.label==\"Company\").value"
+    },
+    {
+        "dest": "lead_source",
+        "src": ".hostname"
+    }
+]</code></pre>
+
+<h4>Source data example</h4>
+
+<pre><code>{
+    "hostname": "example.com",
+    "name": "The form name",
+    "language": "en",
+    "sent_at": "2025-03-03T02:00:48.439766Z",
+    "form_recipients": [
+        {
+            "name": "Dave",
+            "email": "dave@dwarf.red"
+        }
+    ],
+    "form_data": [
+        {
+            "name": "name",
+            "label": "Name",
+            "field_occurrence": 1,
+            "value": "Arnold Rimmer"
+        },
+        {
+            "name": "email",
+            "label": "Email",
+            "field_occurrence": 1,
+            "value": "arnold@dwarf.red"
+        }
+    ]
+}</code></pre>
+
+<h4>Result of examples</h4>
+
+<pre><code>{
+    "roid": "1234650",
+    "first_name": "Arnold",
+    "last_name": "Rimmer",
+    "email": "arnold@dwarf.red",
+    "lead_source": "example.com"
+}</code></pre>
+
+</div>
+
+{% endblock %}

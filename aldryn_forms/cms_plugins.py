@@ -423,6 +423,7 @@ class Field(FormElement):
         form_field_class = self.get_form_field_class(instance)
         form_field_kwargs = self.get_form_field_kwargs(instance)
         field = form_field_class(**form_field_kwargs)
+        field.required = instance.required
         # allow fields access to their model plugin class instance
         field._model_instance = instance
         # and also to the plugin class instance

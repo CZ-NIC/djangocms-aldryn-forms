@@ -273,6 +273,56 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
              f'Not persisting data for "{form_plugin.pk}" since action_backend is set to "none"'),
         )
 
+    def test_honeypot_field_not_filled(self):
+        self.form_plugin.action_backend = 'default'
+        self.form_plugin.save()
+        add_plugin(self.placeholder, 'HoneypotField', 'en', target=self.form_plugin, label="Trap", name="trap")
+        if CMS_3_6:
+            self.page.publish('en')
+
+        form_plugin = FormPlugin.objects.last()
+        form_plugin.webhooks.add(self.webook)
+
+        data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester"}
+        with responses.RequestsMock() as rsps:
+            rsps.add(responses.POST, self.url, body=json.dumps([{"status": "OK"}]))
+            response = self.client.post(self.page.get_absolute_url('en'), data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertQuerySetEqual(FormSubmission.objects.values_list(
+            "name", "data", "post_ident").all().order_by('pk'), [
+            ('Contact us',
+             '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester"}, '
+             '{"name": "trap", "label": "Trap", "field_occurrence": 1, "value": ""}]',
+             None),
+        ], transform=None)
+        self.assertEqual(len(mail.outbox), 1)
+        msg = mail.outbox[0].message()
+        self.assertEqual(msg.get("to"), "email@example.com")
+        self.assertEqual(msg.get("subject"), "[Form submission] Contact us")
+        self.log_handler.check()
+
+    def test_honeypot_field_filled(self):
+        self.form_plugin.action_backend = 'default'
+        self.form_plugin.save()
+        add_plugin(self.placeholder, 'HoneypotField', 'en', target=self.form_plugin, label="Trap", name="trap")
+        if CMS_3_6:
+            self.page.publish('en')
+
+        form_plugin = FormPlugin.objects.last()
+        form_plugin.webhooks.add(self.webook)
+
+        data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester", "trap": "Spam!"}
+        with responses.RequestsMock():
+            response = self.client.post(self.page.get_absolute_url('en'), data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertQuerySetEqual(FormSubmission.objects.values_list(
+            "name", "data", "post_ident").all().order_by('pk'), [])
+        self.assertEqual(len(mail.outbox), 0)
+        self.log_handler.check((
+            'aldryn_forms.cms_plugins', 'INFO', 'Post disabled due to Honeypot "Trap" value: "Spam!"'))
+
 
 class EmailNotificationFormPluginTestCase(DataMixin, CMSTestCase):
 

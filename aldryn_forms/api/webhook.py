@@ -54,8 +54,16 @@ def transform_data(transform: Optional[List[dataType]], data: dataType) -> dataT
             chunks = []
             src = [rule["src"]] if isinstance(rule["src"], str) else rule["src"]
             for query in src:
-                input = jq.compile(query).input(data)
-                value = getattr(input, rule.get("fetcher", "first"))()
+                try:
+                    input = jq.compile(query).input(data)
+                except ValueError as err:
+                    logger.error(f"{query} {err}")
+                    continue
+                try:
+                    value = getattr(input, rule.get("fetcher", "first"))()
+                except StopIteration as err:
+                    logger.error(f"StopIteration {query} {err}")
+                    continue
                 chunks.append(str(value))
             if chunks:
                 value = " ".join(chunks)
@@ -68,9 +76,17 @@ def transform_data(transform: Optional[List[dataType]], data: dataType) -> dataT
 
 def process_match(pattern: Union[str, List], value: str) -> str:
     """Process match."""
-    if isinstance(pattern, str):
-        match = re.match(pattern, value)
-    else:
-        pattern, flags = pattern
-        match = re.match(pattern, value, getattr(re, flags))
-    return match.group(1) if match else value
+    try:
+        if isinstance(pattern, str):
+            match = re.match(pattern, value)
+        else:
+            pattern, flags = pattern
+            match = re.match(pattern, value, getattr(re, flags))
+    except AttributeError as err:
+        logger.error(f"{pattern} {err}")
+        return value
+    try:
+        return match.group(1)
+    except IndexError as err:
+        logger.error(f"{pattern} {err}")
+    return value

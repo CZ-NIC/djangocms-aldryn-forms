@@ -1,7 +1,7 @@
 import json
 import logging
 import re
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from django.db.models import ManyToManyField
 
@@ -10,7 +10,7 @@ import requests
 from requests.exceptions import RequestException
 
 
-dataType = Dict[str, str]
+dataType = Dict[str, Any]
 
 if TYPE_CHECKING:  # pragma: no cover
     from aldryn_forms.models import FormSubmissionBase

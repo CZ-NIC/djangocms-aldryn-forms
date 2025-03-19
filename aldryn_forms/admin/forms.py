@@ -1,14 +1,17 @@
 from datetime import datetime, timedelta
 
+from jsonschema import validate
 from django import forms
 from django.conf import settings
 from django.contrib.admin.widgets import AdminDateWidget
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 
-from ..models import FormSubmission, Webhook
+from ..constants import TRANSFORM_SCHEMA
+from ..models import FormSubmission
 from .exporter import Exporter
 
 
@@ -134,5 +137,13 @@ class FormExportStep2Form(forms.Form):
         return self.cleaned_data
 
 
-class WebhookAdminForm(forms.Form):
-    model = Webhook
+class WebhookAdminForm(forms.ModelForm):
+
+    def clean_transform(self):
+        data = self.cleaned_data["transform"]
+        if data is not None:
+            try:
+                validate(instance=data, schema=TRANSFORM_SCHEMA)
+            except Exception as err:
+                raise ValidationError(err.message)
+        return data

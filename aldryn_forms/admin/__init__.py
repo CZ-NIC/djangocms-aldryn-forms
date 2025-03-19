@@ -4,6 +4,7 @@ from tablib import Dataset
 
 from ..models import FormSubmission, Webhook
 from .base import BaseFormSubmissionAdmin
+from .forms import WebhookAdminForm
 from .views import FormExportWizardView
 
 
@@ -26,5 +27,9 @@ class FormSubmissionAdmin(BaseFormSubmissionAdmin):
         return FormExportWizardView.as_view(admin=self, file_type=get_supported_format())
 
 
+class WebhookAdmin(admin.ModelAdmin):
+    form = WebhookAdminForm
+
+
 admin.site.register(FormSubmission, FormSubmissionAdmin)
-admin.site.register(Webhook)
+admin.site.register(Webhook, WebhookAdmin)

@@ -14,3 +14,20 @@ WEBHOOK_METHODS = (
     ('post', 'POST'),
     ('json', 'JSON'),
 )
+
+TRANSFORM_SCHEMA = {
+    "type" : "array",
+    "items": {
+        "$ref": "#/$defs/field"
+    },
+    "$defs": {
+        "field": {
+            "type": "object",
+            "required": ["dest"],
+            "oneOf": [
+                {"required": ["src"]},
+                {"required": ["value"]},
+            ]
+        }
+    }
+}

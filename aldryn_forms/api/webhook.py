@@ -35,6 +35,7 @@ def trigger_webhooks(webhooks: ManyToManyField, instance: "FormSubmissionBase", 
 
     for hook in webhooks.all():
         data = transform_data(hook.transform, serializer.data)
+        logger.debug(data)
         try:
             send_to_webhook(hook.url, hook.method, data)
         except RequestException as err:

@@ -93,10 +93,11 @@ class SerializedFormField(BaseSerializedFormField):
         return self.name.rpartition('_')[0]
 
 
-class Webook(models.Model):
+class Webhook(models.Model):
     name = models.CharField(_("Name"), max_length=255, unique=True)
     url = models.URLField(_("Webhook URL"), unique=True)
-    method = models.CharField(_("Data transfer method"), choices=WEBHOOK_METHODS, max_length=20, default=WEBHOOK_METHODS[0])
+    method = models.CharField(_("Data transfer method"), choices=WEBHOOK_METHODS, max_length=20,
+                              default=WEBHOOK_METHODS[0])
     transform = models.JSONField(_("Data transform"), null=True, blank=True)
 
     def __str__(self):
@@ -173,7 +174,7 @@ class BaseFormPlugin(CMSPlugin):
         default='default',
         choices=action_backend_choices(),
     )
-    webhooks = models.ManyToManyField(Webook, blank=True)
+    webhooks = models.ManyToManyField(Webhook, blank=True)
 
     form_attributes = AttributesField(
         verbose_name=_('Attributes'),
@@ -710,7 +711,7 @@ class FormSubmissionBase(models.Model):
     )
     sent_at = models.DateTimeField(auto_now_add=True)
     post_ident = models.CharField(max_length=64, null=True, blank=True)
-    webhooks = models.ManyToManyField(Webook, blank=True)
+    webhooks = models.ManyToManyField(Webhook, blank=True)
 
     class Meta:
         abstract = True

@@ -9,7 +9,7 @@ import responses
 from freezegun import freeze_time
 from testfixtures import LogCapture
 
-from aldryn_forms.models import FormSubmission, SubmittedToBeSent, Webook
+from aldryn_forms.models import FormSubmission, SubmittedToBeSent, Webhook
 
 
 @override_settings(ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION=30)
@@ -65,7 +65,7 @@ class SendEmailsTest(TestCase):
                 recipients=json.dumps(self.recipients),
                 post_ident="1234567890"
             )
-        webhook = Webook.objects.create(name="Test", url=self.url)
+        webhook = Webhook.objects.create(name="Test", url=self.url)
         tosent.webhooks.add(webhook)
         with freeze_time(datetime(2025, 3, 14, 9, 30, tzinfo=timezone.utc)):
             with responses.RequestsMock():
@@ -82,7 +82,7 @@ class SendEmailsTest(TestCase):
                 recipients=json.dumps(self.recipients),
                 post_ident="1234567890"
             )
-        webhook = Webook.objects.create(name="Test", url=self.url)
+        webhook = Webhook.objects.create(name="Test", url=self.url)
         tosent.webhooks.add(webhook)
         with freeze_time(datetime(2025, 3, 14, 9, 30, tzinfo=timezone.utc)):
             with responses.RequestsMock() as rsps:
@@ -104,7 +104,7 @@ class SendEmailsTest(TestCase):
                 recipients=json.dumps(self.recipients),
                 post_ident="1234567890"
             )
-        webhook = Webook.objects.create(name="Test", url=self.url)
+        webhook = Webhook.objects.create(name="Test", url=self.url)
         tosent.webhooks.add(webhook)
         with freeze_time(datetime(2025, 3, 14, 9, 30, tzinfo=timezone.utc)):
             with responses.RequestsMock() as rsps:

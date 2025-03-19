@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Webook',
+            name='Webhook',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=255, unique=True, verbose_name='Name')),
@@ -23,16 +23,16 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='formplugin',
             name='webhooks',
-            field=models.ManyToManyField(blank=True, to='aldryn_forms.webook'),
+            field=models.ManyToManyField(blank=True, to='aldryn_forms.webhook'),
         ),
         migrations.AddField(
             model_name='formsubmission',
             name='webhooks',
-            field=models.ManyToManyField(blank=True, to='aldryn_forms.webook'),
+            field=models.ManyToManyField(blank=True, to='aldryn_forms.webhook'),
         ),
         migrations.AddField(
             model_name='submittedtobesent',
             name='webhooks',
-            field=models.ManyToManyField(blank=True, to='aldryn_forms.webook'),
+            field=models.ManyToManyField(blank=True, to='aldryn_forms.webhook'),
         ),
     ]

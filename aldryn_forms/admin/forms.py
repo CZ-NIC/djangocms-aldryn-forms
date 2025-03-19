@@ -8,7 +8,7 @@ from django.utils.text import slugify
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 
-from ..models import FormSubmission
+from ..models import FormSubmission, Webhook
 from .exporter import Exporter
 
 
@@ -132,3 +132,7 @@ class FormExportStep2Form(forms.Form):
             message = gettext('Please select at least one field to export.')
             raise forms.ValidationError(message)
         return self.cleaned_data
+
+
+class WebhookAdminForm(forms.Form):
+    model = Webhook

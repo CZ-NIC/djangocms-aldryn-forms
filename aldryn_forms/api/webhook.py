@@ -3,6 +3,8 @@ import logging
 import re
 from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
+from django.db.models import ManyToManyField
+
 import jq
 import requests
 from requests.exceptions import RequestException
@@ -10,17 +12,13 @@ from requests.exceptions import RequestException
 
 dataType = Dict[str, str]
 
-
 if TYPE_CHECKING:  # pragma: no cover
     from aldryn_forms.models import FormSubmissionBase
-
-from django.db.models import ManyToManyField
-
 
 logger = logging.getLogger(__name__)
 
 
-def send_to_webook(url: str, method: str, data: dataType) -> requests.Response:
+def send_to_webhook(url: str, method: str, data: dataType) -> requests.Response:
     """Send data to URL as POST."""
     if method == "JSON":
         response = requests.post(url, json.dumps(data), headers={"Content-Type": "application/json"})
@@ -38,7 +36,7 @@ def trigger_webhooks(webhooks: ManyToManyField, instance: "FormSubmissionBase", 
     for hook in webhooks.all():
         data = transform_data(hook.transform, serializer.data)
         try:
-            send_to_webook(hook.url, hook.method, data)
+            send_to_webhook(hook.url, hook.method, data)
         except RequestException as err:
             logger.error(f"{hook.url} {err}")
 

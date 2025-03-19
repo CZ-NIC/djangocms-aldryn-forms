@@ -12,7 +12,7 @@ import responses
 from requests.exceptions import HTTPError
 from testfixtures import LogCapture
 
-from aldryn_forms.models import FormPlugin, FormSubmission, SubmittedToBeSent, Webook
+from aldryn_forms.models import FormPlugin, FormSubmission, SubmittedToBeSent, Webhook
 from tests.test_views import CMS_3_6
 
 
@@ -38,7 +38,7 @@ class DataMixin:
         add_plugin(self.placeholder, 'SubmitButton', 'en', target=self.form_plugin)
         # Webhook
         self.url = "https://host.foo/webhook/"
-        self.webook = Webook.objects.create(name="Test", url=self.url)
+        self.webhook = Webhook.objects.create(name="Test", url=self.url)
         self.log_handler = LogCapture()
         self.addCleanup(self.log_handler.uninstall)
 
@@ -125,7 +125,7 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
             self.page.publish('en')
 
         form_plugin = FormPlugin.objects.last()
-        form_plugin.webhooks.add(self.webook)
+        form_plugin.webhooks.add(self.webhook)
         data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester"}
         with responses.RequestsMock() as rsps:
             rsps.add(responses.POST, self.url, body=HTTPError("Connection failed."))
@@ -148,7 +148,7 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
             self.page.publish('en')
 
         form_plugin = FormPlugin.objects.last()
-        form_plugin.webhooks.add(self.webook)
+        form_plugin.webhooks.add(self.webhook)
         data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester"}
         with responses.RequestsMock() as rsps:
             rsps.add(responses.POST, self.url, body=json.dumps([{"status": "OK"}]))
@@ -169,7 +169,7 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
             self.page.publish('en')
 
         form_plugin = FormPlugin.objects.last()
-        form_plugin.webhooks.add(self.webook)
+        form_plugin.webhooks.add(self.webhook)
         data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester"}
         with responses.RequestsMock() as rsps:
             rsps.add(responses.POST, self.url, body=json.dumps([{"status": "OK"}]))
@@ -189,7 +189,7 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
             self.page.publish('en')
 
         form_plugin = FormPlugin.objects.last()
-        form_plugin.webhooks.add(self.webook)
+        form_plugin.webhooks.add(self.webhook)
         data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester"}
         with responses.RequestsMock():
             response = self.client.post(self.page.get_absolute_url('en'), data)
@@ -211,7 +211,7 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
             self.page.publish('en')
 
         form_plugin = FormPlugin.objects.last()
-        form_plugin.webhooks.add(self.webook)
+        form_plugin.webhooks.add(self.webhook)
         data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester"}
         with responses.RequestsMock():
             response = self.client.post(self.page.get_absolute_url('en'), data)
@@ -237,7 +237,7 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
             self.page.publish('en')
 
         form_plugin = FormPlugin.objects.last()
-        form_plugin.webhooks.add(self.webook)
+        form_plugin.webhooks.add(self.webhook)
         data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester"}
         with responses.RequestsMock():
             response = self.client.post(self.page.get_absolute_url('en'), data)
@@ -259,7 +259,7 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
             self.page.publish('en')
 
         form_plugin = FormPlugin.objects.last()
-        form_plugin.webhooks.add(self.webook)
+        form_plugin.webhooks.add(self.webhook)
         data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester"}
         with responses.RequestsMock():
             response = self.client.post(self.page.get_absolute_url('en'), data)
@@ -281,7 +281,7 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
             self.page.publish('en')
 
         form_plugin = FormPlugin.objects.last()
-        form_plugin.webhooks.add(self.webook)
+        form_plugin.webhooks.add(self.webhook)
 
         data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester"}
         with responses.RequestsMock() as rsps:
@@ -310,7 +310,7 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
             self.page.publish('en')
 
         form_plugin = FormPlugin.objects.last()
-        form_plugin.webhooks.add(self.webook)
+        form_plugin.webhooks.add(self.webhook)
 
         data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester", "trap": "Spam!"}
         with responses.RequestsMock():
@@ -395,7 +395,7 @@ class EmailNotificationFormPluginTestCase(DataMixin, CMSTestCase):
             self.page.publish('en')
 
         form_plugin = FormPlugin.objects.last()
-        form_plugin.webhooks.add(self.webook)
+        form_plugin.webhooks.add(self.webhook)
         data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester"}
         with responses.RequestsMock() as rsps:
             rsps.add(responses.POST, self.url, body=HTTPError("Connection failed."))
@@ -418,7 +418,7 @@ class EmailNotificationFormPluginTestCase(DataMixin, CMSTestCase):
             self.page.publish('en')
 
         form_plugin = FormPlugin.objects.last()
-        form_plugin.webhooks.add(self.webook)
+        form_plugin.webhooks.add(self.webhook)
         data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester"}
         with responses.RequestsMock() as rsps:
             rsps.add(responses.POST, self.url, body=json.dumps([{"status": "OK"}]))
@@ -439,7 +439,7 @@ class EmailNotificationFormPluginTestCase(DataMixin, CMSTestCase):
             self.page.publish('en')
 
         form_plugin = FormPlugin.objects.last()
-        form_plugin.webhooks.add(self.webook)
+        form_plugin.webhooks.add(self.webhook)
         data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester"}
         with responses.RequestsMock():
             response = self.client.post(self.page.get_absolute_url('en'), data)

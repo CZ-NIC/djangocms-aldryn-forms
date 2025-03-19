@@ -147,7 +147,7 @@ class PrettyJSONEncoder(json.JSONEncoder):
 
 class WebhookAdminForm(forms.ModelForm):
 
-    transform = forms.JSONField(encoder=PrettyJSONEncoder)
+    transform = forms.JSONField(encoder=PrettyJSONEncoder, required=False)
 
     def clean_transform(self):
         data = self.cleaned_data["transform"]

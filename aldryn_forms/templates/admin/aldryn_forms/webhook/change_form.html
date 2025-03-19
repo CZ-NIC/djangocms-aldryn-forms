@@ -38,7 +38,7 @@
     },
     {
         "dest": "email",
-        "src": ".form_data[] | select(.name==\"email\").value"
+        "src": ".form_data[] | select(.label==\"Email\").value"
     },
     {
         "dest": "phone",
@@ -47,6 +47,14 @@
     {
         "dest": "company",
         "src": ".form_data[] | select(.label==\"Company\").value"
+    },
+    {
+        "dest": "address",
+        "src": [
+            ".form_data[] | select(.name==\"street\").value",
+            ".form_data[] | select(.name==\"city\").value"
+        ],
+        "sep": "; "
     },
     {
         "dest": "lead_source",
@@ -80,7 +88,20 @@
             "label": "Email",
             "field_occurrence": 1,
             "value": "arnold@dwarf.red"
-        }
+        },
+        {
+            "name": "street",
+            "label": "Street and number",
+            "field_occurrence": 1,
+            "value": "Upper Deck 42"
+        },
+        {
+            "name": "city",
+            "label": "City",
+            "field_occurrence": 1,
+            "value": "Deep space"
+        },
+
     ]
 }</code></pre>
 <div class="see-more">For more see <a href="/api/v1/" target="_top">Api Root</a>.</div>
@@ -92,6 +113,7 @@
     "first_name": "Arnold",
     "last_name": "Rimmer",
     "email": "arnold@dwarf.red",
+    "address": "Upper Deck 42; Deep space",
     "lead_source": "example.com"
 }</code></pre>
 

@@ -16,7 +16,7 @@ WEBHOOK_METHODS = (
 )
 
 TRANSFORM_SCHEMA = {
-    "type" : "array",
+    "type": "array",
     "items": {
         "$ref": "#/$defs/field"
     },
@@ -34,6 +34,7 @@ TRANSFORM_SCHEMA = {
                 "src": {"type": ["string", "array"]},
                 "match": {"type": ["string", "array"]},
                 "fetcher": {"enum": ["first", "all", "text"]},
+                "sep": {"type": "string"},
             }
         }
     }

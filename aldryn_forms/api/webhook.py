@@ -66,7 +66,7 @@ def transform_data(transform: Optional[List[dataType]], data: dataType) -> dataT
                     continue
                 chunks.append(str(value))
             if chunks:
-                value = " ".join(chunks)
+                value = rule.get("sep", " ").join(chunks)
                 if "match" in rule:
                     value = process_match(rule["match"], value)
                 if value:

@@ -27,7 +27,14 @@ TRANSFORM_SCHEMA = {
             "oneOf": [
                 {"required": ["src"]},
                 {"required": ["value"]},
-            ]
+            ],
+            "properties": {
+                "dest": {"type": "string"},
+                "value": {"type": "string"},
+                "src": {"type": ["string", "array"]},
+                "match": {"type": ["string", "array"]},
+                "fetcher": {"enum": ["first", "all", "text"]},
+            }
         }
     }
 }

@@ -21,6 +21,7 @@ from djangocms_attributes_field.fields import AttributesField
 from filer.fields.folder import FilerFolderField
 
 from .compat import build_plugin_tree
+from .constants import WEBHOOK_METHODS
 from .helpers import is_form_element
 from .sizefield.models import FileSizeField
 from .utils import ALDRYN_FORMS_ACTION_BACKEND_KEY_MAX_SIZE, action_backend_choices, get_action_backends
@@ -95,6 +96,8 @@ class SerializedFormField(BaseSerializedFormField):
 class Webook(models.Model):
     name = models.CharField(_("Name"), max_length=255, unique=True)
     url = models.URLField(_("Webhook URL"), unique=True)
+    method = models.CharField(_("Data transfer method"), choices=WEBHOOK_METHODS, max_length=20, default=WEBHOOK_METHODS[0])
+    transform = models.JSONField(_("Data transform"), null=True, blank=True)
 
     def __str__(self):
         return self.name

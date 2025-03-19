@@ -76,17 +76,21 @@ def transform_data(transform: Optional[List[dataType]], data: dataType) -> dataT
 
 def process_match(pattern: Union[str, List], value: str) -> str:
     """Process match."""
+    flags = 0
+    separator = " "
+    if isinstance(pattern, list):
+        if len(pattern) > 1:
+            try:
+                for flg in pattern[1]:
+                    flags |= getattr(re, flg)
+            except AttributeError as err:
+                logger.error(f"{flg} {err}")
+        if len(pattern) > 2:
+            separator = pattern[2]
+        pattern = pattern[0]
     try:
-        if isinstance(pattern, str):
-            match = re.match(pattern, value)
-        else:
-            pattern, flags = pattern
-            match = re.match(pattern, value, getattr(re, flags))
+        match = re.match(pattern, value, flags)
     except AttributeError as err:
         logger.error(f"{pattern} {err}")
         return value
-    try:
-        return match.group(1)
-    except IndexError as err:
-        logger.error(f"{pattern} {err}")
-    return value
+    return separator.join(match.groups())

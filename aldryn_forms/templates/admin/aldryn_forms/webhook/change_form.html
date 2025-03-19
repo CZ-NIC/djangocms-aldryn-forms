@@ -57,6 +57,11 @@
         "sep": "; "
     },
     {
+        "dest": "ip",
+        "src": ".ipv4",
+        "match": ["(\\d+).+(\\d+).+(\\d+).+(\\d+)", "S", "."]
+    }
+    {
         "dest": "lead_source",
         "src": ".hostname"
     }
@@ -70,6 +75,7 @@
     "name": "The form name",
     "language": "en",
     "sent_at": "2025-03-03T02:00:48.439766Z",
+    "ipv4": "127\n0\n0\n0\n1",
     "form_recipients": [
         {
             "name": "Dave",
@@ -114,7 +120,8 @@
     "last_name": "Rimmer",
     "email": "arnold@dwarf.red",
     "address": "Upper Deck 42; Deep space",
-    "lead_source": "example.com"
+    "lead_source": "example.com",
+    "ip": "127.0.0.1"
 }</code></pre>
 
 </div>

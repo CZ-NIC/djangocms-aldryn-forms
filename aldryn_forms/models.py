@@ -740,7 +740,7 @@ class FormSubmissionBase(models.Model):
     def _recipients_hook(self, data):
         return Recipient(**data)
 
-    def get_form_data(self):
+    def get_form_data(self) -> List[SerializedFormField]:
         occurrences = defaultdict(lambda: 1)
 
         data_hook = partial(self._form_data_hook, occurrences=occurrences)
@@ -755,7 +755,7 @@ class FormSubmissionBase(models.Model):
             form_data = []
         return form_data
 
-    def get_recipients(self):
+    def get_recipients(self) -> List[Recipient]:
         try:
             recipients = json.loads(
                 self.recipients,

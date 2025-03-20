@@ -2,13 +2,15 @@ from urllib.parse import urlencode
 
 from django import forms
 from django.contrib import admin, messages
-from django.http import HttpResponseRedirect
+from django.contrib.sites.models import Site
+from django.http import HttpResponseRedirect, JsonResponse
 from django.template.response import TemplateResponse
 from django.urls import path, reverse
 from django.utils.translation import gettext_lazy as _
 
 from tablib import Dataset
 
+from ..api.webhook import collect_submissions_data
 from ..models import FormSubmission, Webhook
 from .base import BaseFormSubmissionAdmin
 from .forms import WebhookAdminForm
@@ -50,9 +52,10 @@ class FormSubmissionAdmin(BaseFormSubmissionAdmin):
             path("webhook-export/", self.admin_site.admin_view(self.webhook_export), name="webhook_export")
         ] + urls
 
-    def export_submissions_by_webhook(self, request, submissions, webhook):
-        messages.success(request, "OK")
-        return HttpResponseRedirect(reverse("admin:aldryn_forms_formsubmission_changelist"))
+    def export_submissions_by_webhook(self, submissions, webhook):
+        site = Site.objects.first()
+        data = collect_submissions_data(webhook, submissions, site.domain)
+        return JsonResponse({"data": data})
 
     def webhook_export(self, request):
         ids = request.GET.get("ids", "")
@@ -66,7 +69,7 @@ class FormSubmissionAdmin(BaseFormSubmissionAdmin):
                     except Webhook.DoesNotExist as err:
                         messages.error(request, err)
                     else:
-                        return self.export_submissions_by_webhook(request, submissions, webhook)
+                        return self.export_submissions_by_webhook(submissions, webhook)
             else:
                 messages.error(request, _("Missing items for processing."))
             return HttpResponseRedirect(reverse("admin:aldryn_forms_formsubmission_changelist"))

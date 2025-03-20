@@ -13,7 +13,7 @@ from requests.exceptions import RequestException
 dataType = Dict[str, Any]
 
 if TYPE_CHECKING:  # pragma: no cover
-    from aldryn_forms.models import FormSubmissionBase
+    from aldryn_forms.models import FormSubmission, FormSubmissionBase, Webhook
 
 logger = logging.getLogger(__name__)
 
@@ -93,4 +93,19 @@ def process_match(pattern: Union[str, List], value: str) -> str:
     except AttributeError as err:
         logger.error(f"{pattern} {err}")
         return value
+    if match is None:
+        return value
     return separator.join(match.groups())
+
+
+def collect_submissions_data(webhook: "Webhook", submissions: "FormSubmission", hostname: str) -> List[Dict[str, str]]:
+    """Collect submissions data."""
+    from aldryn_forms.api.serializers import FormSubmissionSerializer
+
+    response = []
+    for instance in submissions.all():
+        serializer = FormSubmissionSerializer(instance, context={"hostname": hostname})
+        data = transform_data(webhook.transform, serializer.data)
+        response.append(data)
+
+    return response

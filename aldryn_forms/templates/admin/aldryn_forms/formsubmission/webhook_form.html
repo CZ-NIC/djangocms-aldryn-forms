@@ -3,6 +3,8 @@
     <h1>Webhooks</h1>
     <form method="post">
         {% csrf_token %}
+        <input type="hidden" name="ids" value="{{ ids }}">
+        {{ form }}
         <input type="submit">
     </form>
 {% endblock %}

@@ -1,12 +1,13 @@
 {% extends "admin/base_site.html" %}
 {% load i18n %}
+
 {% block content %}
     <h1>Webhooks</h1>
     <p>{% translate "Number of items" %}: {{ submissins_size }}</p>
-    <form method="post">
+    <form method="post" onsubmit="aldryn_forms_process_form.disabled=true;return true">
         {% csrf_token %}
         <input type="hidden" name="ids" value="{{ ids }}">
         {{ form }}
-        <input type="submit"{% if not submissins_size %} xdisabled="xdisabled"{% endif %}>
+        <input name="aldryn_forms_process_form" type="submit"{% if not submissins_size %} xdisabled="xdisabled"{% endif %}>
     </form>
 {% endblock %}

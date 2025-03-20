@@ -3,6 +3,7 @@ from urllib.parse import urlencode
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.sites.models import Site
+from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponseRedirect, JsonResponse
 from django.template.response import TemplateResponse
 from django.urls import path, reverse
@@ -29,8 +30,11 @@ def get_supported_format():
     return 'csv'
 
 
-class SelectWebhookForm(forms.Form):
-    webhook = forms.ChoiceField(choices=Webhook.objects.values_list("pk", "name").order_by("name"))
+class PrettyJsonEncoder(DjangoJSONEncoder):
+
+    def __init__(self, *args, **kwargs):
+        kwargs["indent"] = 2
+        super().__init__(*args, **kwargs)
 
 
 class FormSubmissionAdmin(BaseFormSubmissionAdmin):
@@ -52,14 +56,22 @@ class FormSubmissionAdmin(BaseFormSubmissionAdmin):
             path("webhook-export/", self.admin_site.admin_view(self.webhook_export), name="webhook_export")
         ] + urls
 
+    def get_select_webhook_form(self) -> forms.Form:
+        return type("SelectWebhookForm", (forms.Form,), {
+            "webhook": forms.ChoiceField(choices=Webhook.objects.values_list("pk", "name").order_by("name")),
+        })
+
     def export_submissions_by_webhook(self, submissions, webhook):
         site = Site.objects.first()
         data = collect_submissions_data(webhook, submissions, site.domain)
-        return JsonResponse({"data": data})
+        response = JsonResponse({"data": data}, encoder=PrettyJsonEncoder, json_dumps_params={"ensure_ascii": False})
+        response["Content-Disposition"] = f"attachment; filename=submissions-webhook.json"
+        return response
 
     def webhook_export(self, request):
         ids = request.GET.get("ids", "")
         submissions = FormSubmission.objects.filter(pk__in=ids.split("."))
+        SelectWebhookForm = self.get_select_webhook_form()
         if request.method == "POST":
             if submissions.count():
                 form = SelectWebhookForm(request.POST)

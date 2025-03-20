@@ -337,6 +337,9 @@ msgstr "Min hodnota"
 msgid "Min value can not be greater than max value."
 msgstr "Nejmenší hodnota nesmí být větší než největší hodnota."
 
+msgid "Missing items for processing."
+msgstr "Chybí položky pro zpracování."
+
 msgid "Multiple Checkbox Field"
 msgstr "Pole zaškrtávacích políček"
 
@@ -360,6 +363,9 @@ msgstr "Záznamy nenalezeny"
 
 msgid "Number Field"
 msgstr "Pole Číslo"
+
+msgid "Number of items"
+msgstr "Počet položek"
 
 msgid "Only send email"
 msgstr "Jen poslat e-mail"

@@ -9,7 +9,7 @@ from django.utils.translation import gettext_lazy as _
 
 from tablib import Dataset
 
-from ..models import Webhook
+from ..models import FormSubmission, Webhook
 from .base import BaseFormSubmissionAdmin
 from .forms import WebhookAdminForm
 from .views import FormExportWizardView
@@ -50,18 +50,32 @@ class FormSubmissionAdmin(BaseFormSubmissionAdmin):
             path("webhook-export/", self.admin_site.admin_view(self.webhook_export), name="webhook_export")
         ] + urls
 
+    def export_submissions_by_webhook(self, request, submissions, webhook):
+        messages.success(request, "OK")
+        return HttpResponseRedirect(reverse("admin:aldryn_forms_formsubmission_changelist"))
+
     def webhook_export(self, request):
+        ids = request.GET.get("ids", "")
+        submissions = FormSubmission.objects.filter(pk__in=ids.split("."))
         if request.method == "POST":
-            form = SelectWebhookForm(request.POST)
-            if form.is_valid():
-                webhook_id = form.cleaned_data["webhook"]
-                messages.success(request, _("An success message that will be displayed."))
-                return HttpResponseRedirect(reverse("admin:aldryn_forms_formsubmission_changelist"))
+            if submissions.count():
+                form = SelectWebhookForm(request.POST)
+                if form.is_valid():
+                    try:
+                        webhook = Webhook.objects.get(pk=form.cleaned_data["webhook"])
+                    except Webhook.DoesNotExist as err:
+                        messages.error(request, err)
+                    else:
+                        return self.export_submissions_by_webhook(request, submissions, webhook)
+            else:
+                messages.error(request, _("Missing items for processing."))
+            return HttpResponseRedirect(reverse("admin:aldryn_forms_formsubmission_changelist"))
         else:
             form = SelectWebhookForm()
         data = {
-            "ids": request.GET.get("ids"),
+            "ids": ids,
             "form": form,
+            "submissins_size": submissions.count(),
         }
         context = dict(self.admin_site.each_context(request), **data)
         return TemplateResponse(request, "admin/aldryn_forms/formsubmission/webhook_form.html", context)

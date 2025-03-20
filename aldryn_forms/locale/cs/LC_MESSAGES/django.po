@@ -70,6 +70,9 @@ msgstr "Pole Captcha"
 msgid "Continue"
 msgstr "Pokračovat"
 
+msgid "Data sending completed."
+msgstr "Odeslání dat ukončeno."
+
 msgid "Data transfer method"
 msgstr "Metoda přenosu dat"
 

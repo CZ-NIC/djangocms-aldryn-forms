@@ -109,3 +109,17 @@ def collect_submissions_data(webhook: "Webhook", submissions: "FormSubmission", 
         response.append(data)
 
     return response
+
+
+def send_submissions_data(webhook: "Webhook", submissions: "FormSubmission", hostname: str) -> None:
+    """Send submissions data to webhook."""
+    from aldryn_forms.api.serializers import FormSubmissionSerializer
+
+    for instance in submissions.all():
+        serializer = FormSubmissionSerializer(instance, context={"hostname": hostname})
+        data = transform_data(webhook.transform, serializer.data)
+        logger.debug(data)
+        try:
+            send_to_webhook(webhook.url, webhook.method, data)
+        except RequestException as err:
+            logger.error(f"{webhook.url} {err}")

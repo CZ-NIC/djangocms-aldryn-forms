@@ -179,6 +179,9 @@ msgstr "Export"
 msgid "Export Form Entries"
 msgstr "Exportovat položky formuláře"
 
+msgid "Export data via webhook"
+msgstr "Exportovat data přes webhook"
+
 msgid ""
 "Export failed! More than 65,536 entries found, exceeded Excel limitation!"
 msgstr ""
@@ -450,6 +453,9 @@ msgid ""
 msgstr ""
 "Zvolte složku, kam budou nahrány všechny soubory přiložené pomocí tohoto "
 "pole."
+
+msgid "Send data via webhook"
+msgstr "Odeslat data přes webhook"
 
 #, python-format
 msgid "Size '%s' has incorrect format"

@@ -1,3 +1,4 @@
+from typing import Callable
 from urllib.parse import urlencode
 
 from django import forms
@@ -82,7 +83,7 @@ class FormSubmissionAdmin(BaseFormSubmissionAdmin):
         messages.success(request, _("Data sending completed."))
         return HttpResponseRedirect(reverse("admin:aldryn_forms_formsubmission_changelist"))
 
-    def process_webhook(self, request: HttpRequest, process_fnc) -> HttpResponse:
+    def process_webhook(self, request: HttpRequest, process_fnc: Callable, process_title: str) -> HttpResponse:
         ids = request.GET.get("ids", "")
         submissions = FormSubmission.objects.filter(pk__in=ids.split("."))
         SelectWebhookForm = self.get_select_webhook_form()
@@ -105,15 +106,16 @@ class FormSubmissionAdmin(BaseFormSubmissionAdmin):
             "ids": ids,
             "form": form,
             "submissins_size": submissions.count(),
+            "process_title": process_title,
         }
         context = dict(self.admin_site.each_context(request), **data)
         return TemplateResponse(request, "admin/aldryn_forms/formsubmission/webhook_form.html", context)
 
     def webhook_export(self, request: HttpRequest) -> HttpResponse:
-        return self.process_webhook(request, self.export_submissions_by_webhook)
+        return self.process_webhook(request, self.export_submissions_by_webhook, _("Export data via webhook"))
 
     def webhook_send(self, request: HttpRequest) -> HttpResponse:
-        return self.process_webhook(request, self.send_submissions_data)
+        return self.process_webhook(request, self.send_submissions_data, _("Send data via webhook"))
 
     def process_response_redirect(self, queryset: QuerySet, path_name: str) -> HttpResponseRedirect:
         selected = queryset.values_list("pk", flat=True)
@@ -121,15 +123,15 @@ class FormSubmissionAdmin(BaseFormSubmissionAdmin):
         path = reverse(path_name)
         return HttpResponseRedirect(f"{path}?{params}")
 
-    @admin.action(description='Export formatted by webhook', permissions=['change'])
+    @admin.action(description=_("Export data via webhook"), permissions=['change'])
     def export_webhook(self, request: HttpRequest, queryset: QuerySet) -> HttpResponseRedirect:
         return self.process_response_redirect(queryset, "admin:webhook_export")
-    export_webhook.short_description = 'Export formatted by webhook'
+    export_webhook.short_description = _("Export data via webhook")
 
-    @admin.action(description='Send to webhook', permissions=['change'])
+    @admin.action(description=_("Send data via webhook"), permissions=['change'])
     def send_webhook(self, request: HttpRequest, queryset: QuerySet) -> HttpResponseRedirect:
         return self.process_response_redirect(queryset, "admin:webhook_send")
-    send_webhook.short_description = 'Send to webhook'
+    send_webhook.short_description = _("Send data via webhook")
 
 
 class WebhookAdmin(admin.ModelAdmin):

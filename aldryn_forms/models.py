@@ -691,7 +691,8 @@ class FormSubmissionBase(models.Model):
         editable=False
     )
 
-    data = models.TextField(blank=True, editable=False)
+    # https://docs.djangoproject.com/en/4.2/topics/db/queries/#kt-expressions
+    data = models.JSONField(blank=True, editable=False)
     recipients = models.TextField(
         verbose_name=_('users notified'),
         blank=True,
@@ -740,14 +741,14 @@ class FormSubmissionBase(models.Model):
     def _recipients_hook(self, data):
         return Recipient(**data)
 
-    def get_form_data(self):
+    def get_form_data(self) -> List[SerializedFormField]:
         occurrences = defaultdict(lambda: 1)
 
         data_hook = partial(self._form_data_hook, occurrences=occurrences)
 
         try:
             form_data = json.loads(
-                self.data,
+                json.dumps(self.data),
                 object_hook=data_hook,
             )
         except ValueError:
@@ -769,8 +770,7 @@ class FormSubmissionBase(models.Model):
     def set_form_data(self, form):
         fields = form.get_serialized_fields(is_confirmation=False)
         fields_as_dicts = [field._asdict() for field in fields]
-
-        self.data = json.dumps(fields_as_dicts)
+        self.data = fields_as_dicts
 
     def set_recipients(self, recipients):
         raw_recipients = [
@@ -783,7 +783,7 @@ class FormSubmissionBase(models.Model):
 
     def form_data(self) -> List[Dict[str, str]]:
         """Form data for API."""
-        return [field._asdict() for field in self.get_form_data()]
+        return self.data
 
 
 class FormSubmission(FormSubmissionBase):

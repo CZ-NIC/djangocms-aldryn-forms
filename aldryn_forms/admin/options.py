@@ -7,6 +7,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponseRedirect, JsonResponse
 from django.template.response import TemplateResponse
 from django.urls import path, reverse
+from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
 from tablib import Dataset
@@ -65,7 +66,8 @@ class FormSubmissionAdmin(BaseFormSubmissionAdmin):
         site = Site.objects.first()
         data = collect_submissions_data(webhook, submissions, site.domain)
         response = JsonResponse({"data": data}, encoder=PrettyJsonEncoder, json_dumps_params={"ensure_ascii": False})
-        response["Content-Disposition"] = f"attachment; filename=submissions-webhook.json"
+        filename = f"form-submissions-webhook-{slugify(webhook.name)}.json"
+        response["Content-Disposition"] = f"attachment; filename={filename}"
         return response
 
     def webhook_export(self, request):

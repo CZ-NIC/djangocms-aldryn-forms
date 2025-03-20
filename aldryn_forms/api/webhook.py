@@ -62,7 +62,7 @@ def transform_data(transform: Optional[List[dataType]], data: dataType) -> dataT
                 try:
                     value = getattr(input, rule.get("fetcher", "first"))()
                 except StopIteration as err:
-                    logger.error(f"StopIteration {query} {err}")
+                    logger.debug(f"StopIteration {query} {err}")
                     continue
                 chunks.append(str(value))
             if chunks:

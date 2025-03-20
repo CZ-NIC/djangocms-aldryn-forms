@@ -26,6 +26,11 @@ class FormSubmissionAdmin(BaseFormSubmissionAdmin):
     def get_form_export_view(self):
         return FormExportWizardView.as_view(admin=self, file_type=get_supported_format())
 
+    def get_search_results(self, request, queryset, search_term):
+        queryset, may_have_duplicates = super().get_search_results(request, queryset, search_term)
+        queryset |= self.model.objects.filter(data__regex=search_term)
+        return queryset, may_have_duplicates
+
 
 class WebhookAdmin(admin.ModelAdmin):
     form = WebhookAdminForm

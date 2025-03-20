@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.template.response import TemplateResponse
+from django.urls import path
 
 from tablib import Dataset
 
@@ -30,6 +32,18 @@ class FormSubmissionAdmin(BaseFormSubmissionAdmin):
         queryset, may_have_duplicates = super().get_search_results(request, queryset, search_term)
         queryset |= self.model.objects.filter(data__regex=search_term)
         return queryset, may_have_duplicates
+
+    def get_urls(self):
+        urls = super().get_urls()
+        return [
+            path("webhooks-export/", self.admin_site.admin_view(self.webhook_export), name="webhook_export")
+        ] + urls
+
+    def webhook_export(self, request):
+        # http://localhost:8222/en/admin/aldryn_forms/formsubmission/webhooks-export/
+        form = None
+        context = dict(self.admin_site.each_context(request), form=form)
+        return TemplateResponse(request, "admin/aldryn_forms/formsubmission/webhook_form.html", context)
 
 
 class WebhookAdmin(admin.ModelAdmin):

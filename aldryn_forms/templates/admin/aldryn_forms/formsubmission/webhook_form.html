@@ -1,0 +1,8 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+    <h1>Webhooks</h1>
+    <form method="post">
+        {% csrf_token %}
+        <input type="submit">
+    </form>
+{% endblock %}

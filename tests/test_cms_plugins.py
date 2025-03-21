@@ -1,4 +1,5 @@
 import json
+from datetime import datetime, timezone
 from unittest.mock import patch
 
 from django.contrib.auth.models import User
@@ -9,6 +10,7 @@ from cms.api import add_plugin, create_page
 from cms.test_utils.testcases import CMSTestCase
 
 import responses
+from freezegun import freeze_time
 from requests.exceptions import HTTPError
 from testfixtures import LogCapture
 
@@ -54,6 +56,7 @@ class DataMixin:
             part_html.get_payload())
 
 
+@freeze_time(datetime(2025, 3, 13, 8, 10, tzinfo=timezone.utc))
 class FormPluginTestCase(DataMixin, CMSTestCase):
 
     plugin_name = "FormPlugin"
@@ -138,6 +141,11 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
         ], transform=None)
         self._check_mailbox()
         self.log_handler.check(
+            ('aldryn_forms.api.webhook', 'DEBUG',
+            "{'hostname': 'example.com', 'name': 'Contact us', 'language': 'en', "
+            "'sent_at': '2025-03-13T03:10:00-05:00', 'form_recipients': [{'name': '', "
+            "'email': 'email@example.com'}], 'form_data': [{'name': 'name', 'label': "
+            "'Name', 'field_occurrence': 1, 'value': 'Tester'}]}"),
             ('aldryn_forms.api.webhook', 'ERROR', 'https://host.foo/webhook/ Connection failed.')
         )
 
@@ -160,7 +168,13 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
             ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester"}]', None),
         ], transform=None)
         self._check_mailbox()
-        self.log_handler.check()
+        self.log_handler.check(
+            ('aldryn_forms.api.webhook', 'DEBUG',
+            "{'hostname': 'example.com', 'name': 'Contact us', 'language': 'en', "
+            "'sent_at': '2025-03-13T03:10:00-05:00', 'form_recipients': [{'name': '', "
+            "'email': 'email@example.com'}], 'form_data': [{'name': 'name', 'label': "
+            "'Name', 'field_occurrence': 1, 'value': 'Tester'}]}")
+        )
 
     def test_form_submission_email_action_webhook(self):
         self.form_plugin.action_backend = 'email_only'
@@ -180,6 +194,9 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
         self._check_mailbox()
         self.log_handler.check(
             ('aldryn_forms.action_backends', 'INFO', 'Sent email notifications to 1 recipients.'),
+            ('aldryn_forms.api.webhook', 'DEBUG',
+            "{'hostname': 'example.com', 'name': 'Contact us', 'language': 'en', "
+            "'sent_at': None, 'form_recipients': [], 'form_data': []}"),
         )
 
     def test_form_submission_no_action_webhook(self):
@@ -300,7 +317,14 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
         msg = mail.outbox[0].message()
         self.assertEqual(msg.get("to"), "email@example.com")
         self.assertEqual(msg.get("subject"), "[Form submission] Contact us")
-        self.log_handler.check()
+        self.log_handler.check(
+            ('aldryn_forms.api.webhook', 'DEBUG',
+            "{'hostname': 'example.com', 'name': 'Contact us', 'language': 'en', "
+            "'sent_at': '2025-03-13T03:10:00-05:00', 'form_recipients': [{'name': '', "
+            "'email': 'email@example.com'}], 'form_data': [{'name': 'name', 'label': "
+            "'Name', 'field_occurrence': 1, 'value': 'Tester'}, {'name': 'trap', "
+            "'label': 'Trap', 'field_occurrence': 1, 'value': ''}]}")
+        )
 
     def test_honeypot_field_filled(self):
         self.form_plugin.action_backend = 'default'
@@ -324,6 +348,7 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
             'aldryn_forms.cms_plugins', 'INFO', 'Post disabled due to Honeypot "Trap" value: "Spam!"'))
 
 
+@freeze_time(datetime(2025, 3, 13, 8, 10, tzinfo=timezone.utc))
 class EmailNotificationFormPluginTestCase(DataMixin, CMSTestCase):
 
     plugin_name = "EmailNotificationForm"
@@ -408,6 +433,11 @@ class EmailNotificationFormPluginTestCase(DataMixin, CMSTestCase):
         ], transform=None)
         self._check_mailbox()
         self.log_handler.check(
+            ('aldryn_forms.api.webhook', 'DEBUG',
+            "{'hostname': 'example.com', 'name': 'Contact us', 'language': 'en', "
+            "'sent_at': '2025-03-13T03:10:00-05:00', 'form_recipients': [{'name': '', "
+            "'email': 'email@example.com'}], 'form_data': [{'name': 'name', 'label': "
+            "'Name', 'field_occurrence': 1, 'value': 'Tester'}]}"),
             ('aldryn_forms.api.webhook', 'ERROR', 'https://host.foo/webhook/ Connection failed.')
         )
 
@@ -430,7 +460,13 @@ class EmailNotificationFormPluginTestCase(DataMixin, CMSTestCase):
             ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester"}]', None),
         ], transform=None)
         self._check_mailbox()
-        self.log_handler.check()
+        self.log_handler.check((
+            'aldryn_forms.api.webhook', 'DEBUG',
+            "{'hostname': 'example.com', 'name': 'Contact us', 'language': 'en', "
+            "'sent_at': '2025-03-13T03:10:00-05:00', 'form_recipients': [{'name': '', "
+            "'email': 'email@example.com'}], 'form_data': [{'name': 'name', 'label': "
+            "'Name', 'field_occurrence': 1, 'value': 'Tester'}]}"
+        ))
 
     def test_form_submission_no_action_webhook(self):
         self.form_plugin.action_backend = 'none'

@@ -346,6 +346,8 @@ class FormSubmissionBaseForm(forms.Form):
         fields_as_dicts = [field._asdict() for field in fields if field.name != ALDRYN_FORMS_POST_IDENT_NAME]
         data.extend(fields_as_dicts)
         previous_submit.data = json.dumps(data)
+        if self.instance.honeypot_filled:
+            previous_submit.honeypot_filled = True
         previous_submit.save()
 
     def save(self, commit=False):

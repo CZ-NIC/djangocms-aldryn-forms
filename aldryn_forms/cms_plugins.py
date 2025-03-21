@@ -251,7 +251,8 @@ class FormPlugin(FieldContainer):
             language=form.instance.language,
             form_url=form.instance.form_url,
             sent_at=form.instance.sent_at,
-            post_ident=post_ident
+            post_ident=post_ident,
+            honeypot_filled=form.instance.honeypot_filled
         )
 
     def postpone_send_notifications(

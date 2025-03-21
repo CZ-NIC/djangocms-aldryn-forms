@@ -17,4 +17,4 @@ class Command(BaseCommand):
             FormSubmission.objects.filter(
                 post_ident__isnull=False, sent_at__lt=expire
             ).update(post_ident=None)
-            FormSubmission.objects.filter(post_ident__isnull=False, honeypot_filled=True).delete()
+            FormSubmission.objects.filter(post_ident__isnull=True, honeypot_filled=True).delete()

@@ -96,6 +96,7 @@ Available Plug-ins
 - ``MultipleSelectField``
 - ``MultipleCheckboxSelectField`` renders multiple checkboxes.
 - ``CaptchaField``
+- ``HoneypotField``
 - ``HideContentWhenPostPlugin``
 
 

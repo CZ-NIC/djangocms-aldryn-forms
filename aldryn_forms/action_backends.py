@@ -33,14 +33,14 @@ class DefaultAction(BaseAction):
         duration = getattr(settings, ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION, 0)
         if duration:
             recipients = cmsplugin.postpone_send_notifications(instance, form)
-        elif not form.instance.honeypot_filled:
-            recipients = cmsplugin.send_notifications(instance, form)
-        if not form.instance.honeypot_filled:
             form.instance.set_recipients(recipients)
             form.save()
-            if not duration:
-                site = Site.objects.first()
-                trigger_webhooks(instance.webhooks, form.instance, site.domain)
+        elif not form.instance.honeypot_filled:
+            recipients = cmsplugin.send_notifications(instance, form)
+            form.instance.set_recipients(recipients)
+            form.save()
+            site = Site.objects.first()
+            trigger_webhooks(instance.webhooks, form.instance, site.domain)
         cmsplugin.send_success_message(instance, request)
 
 

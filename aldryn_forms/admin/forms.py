@@ -1,4 +1,3 @@
-import json
 from datetime import datetime, timedelta
 
 from django import forms
@@ -15,6 +14,7 @@ from jsonschema import validate
 from ..constants import TRANSFORM_SCHEMA
 from ..models import FormSubmission
 from .exporter import Exporter
+from .utils import PrettyJsonEncoder
 
 
 def form_choices(modelClass):
@@ -139,15 +139,9 @@ class FormExportStep2Form(forms.Form):
         return self.cleaned_data
 
 
-class PrettyJSONEncoder(json.JSONEncoder):
-
-    def __init__(self, *args, indent, sort_keys, **kwargs):
-        super().__init__(*args, indent=2, sort_keys=True, **kwargs)
-
-
 class WebhookAdminForm(forms.ModelForm):
 
-    transform = forms.JSONField(encoder=PrettyJSONEncoder, required=False)
+    transform = forms.JSONField(encoder=PrettyJsonEncoder, required=False)
 
     def clean_transform(self):
         data = self.cleaned_data["transform"]

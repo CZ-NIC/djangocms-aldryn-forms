@@ -5,7 +5,6 @@ from urllib.parse import urlencode
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.sites.models import Site
-from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models.query import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.template.response import TemplateResponse
@@ -19,6 +18,7 @@ from ..api.webhook import collect_submissions_data, send_submissions_data
 from ..models import FormSubmission, Webhook
 from .base import BaseFormSubmissionAdmin
 from .forms import WebhookAdminForm
+from .utils import PrettyJsonEncoder
 from .views import FormExportWizardView
 
 
@@ -32,13 +32,6 @@ def get_supported_format():
         except (ImportError, AttributeError):
             pass
     return 'csv'
-
-
-class PrettyJsonEncoder(DjangoJSONEncoder):
-
-    def __init__(self, *args, **kwargs):
-        kwargs["indent"] = 2
-        super().__init__(*args, **kwargs)
 
 
 class FormSubmissionAdmin(BaseFormSubmissionAdmin):

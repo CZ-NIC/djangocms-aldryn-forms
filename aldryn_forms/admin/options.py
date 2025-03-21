@@ -1,3 +1,4 @@
+import re
 from typing import Callable
 from urllib.parse import urlencode
 
@@ -50,7 +51,11 @@ class FormSubmissionAdmin(BaseFormSubmissionAdmin):
 
     def get_search_results(self, request, queryset, search_term):
         queryset, may_have_duplicates = super().get_search_results(request, queryset, search_term)
-        queryset |= self.model.objects.filter(data__regex=search_term)
+        try:
+            re.match(search_term, "")
+            queryset |= self.model.objects.filter(data__regex=search_term)
+        except Exception:
+            pass
         return queryset, may_have_duplicates
 
     def get_urls(self):

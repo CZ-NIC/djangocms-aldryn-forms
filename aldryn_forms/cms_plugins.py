@@ -219,11 +219,15 @@ class FormPlugin(FieldContainer):
     def get_success_url(self, instance: models.FormPlugin, post_ident: Optional[str]) -> str:
         duration = getattr(settings, ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION, 0)
         if duration and post_ident is not None:
-            result = urlparse(instance.success_url)
-            params = parse_qs(result.query)
-            params[ALDRYN_FORMS_POST_IDENT_NAME] = post_ident
-            result = result._replace(query=urlencode(params))
-            return result.geturl()
+            if instance.success_url is None:
+                url = "?" + urlencode({ALDRYN_FORMS_POST_IDENT_NAME: post_ident})
+            else:
+                result = urlparse(instance.success_url)
+                params = parse_qs(result.query)
+                params[ALDRYN_FORMS_POST_IDENT_NAME] = post_ident
+                result = result._replace(query=urlencode(params))
+                url = result.geturl()
+            return url
         return instance.success_url
 
     def send_success_message(self, instance, request):

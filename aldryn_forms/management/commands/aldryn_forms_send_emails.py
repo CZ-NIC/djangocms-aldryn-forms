@@ -23,6 +23,7 @@ class Command(BaseCommand):
 
         site = Site.objects.first()
         for instance in queryset:
-            if send_postponed_notifications(instance):
-                trigger_webhooks(instance.webhooks, instance, site.domain)
-                instance.delete()
+            if not instance.honeypot_filled:
+                if send_postponed_notifications(instance):
+                    trigger_webhooks(instance.webhooks, instance, site.domain)
+            instance.delete()

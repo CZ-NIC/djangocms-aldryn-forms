@@ -33,13 +33,14 @@ class DefaultAction(BaseAction):
         duration = getattr(settings, ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION, 0)
         if duration:
             recipients = cmsplugin.postpone_send_notifications(instance, form)
-        else:
+        elif not form.instance.honeypot_filled:
             recipients = cmsplugin.send_notifications(instance, form)
-        form.instance.set_recipients(recipients)
-        form.save()
-        if not duration:
-            site = Site.objects.first()
-            trigger_webhooks(instance.webhooks, form.instance, site.domain)
+        if not form.instance.honeypot_filled:
+            form.instance.set_recipients(recipients)
+            form.save()
+            if not duration:
+                site = Site.objects.first()
+                trigger_webhooks(instance.webhooks, form.instance, site.domain)
         cmsplugin.send_success_message(instance, request)
 
 
@@ -56,7 +57,7 @@ class EmailAction(BaseAction):
         duration = getattr(settings, ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION, 0)
         if duration:
             recipients = cmsplugin.postpone_send_notifications(instance, form)
-        else:
+        elif not form.instance.honeypot_filled:
             recipients = cmsplugin.send_notifications(instance, form)
             logger.info(f'Sent email notifications to {len(recipients)} recipients.')
             site = Site.objects.first()
@@ -76,4 +77,3 @@ class NoAction(BaseAction):
     ) -> None:
         form_id = form.form_plugin.id
         logger.info(f'Not persisting data for "{form_id}" since action_backend is set to "none"')
-        cmsplugin.send_success_message(instance, request)

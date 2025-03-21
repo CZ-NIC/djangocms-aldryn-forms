@@ -712,6 +712,7 @@ class FormSubmissionBase(models.Model):
     sent_at = models.DateTimeField(auto_now_add=True)
     post_ident = models.CharField(max_length=64, null=True, blank=True)
     webhooks = models.ManyToManyField(Webhook, blank=True)
+    honeypot_filled = models.BooleanField(default=False)
 
     class Meta:
         abstract = True

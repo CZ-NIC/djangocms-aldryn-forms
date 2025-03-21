@@ -47,6 +47,7 @@ class BaseFormSubmissionAdmin(admin.ModelAdmin):
         'get_recipients_for_display',
         'post_ident',
         'webhooks',
+        'honeypot_filled',
     ]
 
     # (Field name, Field label, json data)

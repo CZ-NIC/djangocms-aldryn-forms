@@ -37,7 +37,7 @@ from .forms import (
     TextFieldForm, TimeFieldForm,
 )
 from .helpers import get_user_name
-from .models import SerializedFormField, SubmittedToBeSent
+from .models import FieldPluginBase, SerializedFormField, SubmittedToBeSent
 from .signals import form_post_save, form_pre_save
 from .sizefield.utils import filesizeformat
 from .utils import get_action_backends
@@ -65,6 +65,7 @@ class FormPlugin(FieldContainer):
     form = FormPluginForm
     filter_horizontal = ['recipients']
     ident_field_name = None
+    honeypot_filled = False
 
     fieldsets = (
         (None, {
@@ -107,9 +108,8 @@ class FormPlugin(FieldContainer):
         return instance.form_template
 
     def form_valid(self, instance: models.FormPlugin, request: HttpRequest, form: FormSubmissionBaseForm) -> Any:
-        if form.form_plugin.action_backend is not None:
-            action_backend = get_action_backends()[form.form_plugin.action_backend]()
-            return action_backend.form_valid(self, instance, request, form)
+        action_backend = get_action_backends()[form.form_plugin.action_backend]()
+        return action_backend.form_valid(self, instance, request, form)
 
     def form_invalid(self, instance: models.FormPlugin, request: HttpRequest, form: FormSubmissionBaseForm) -> None:
         if instance.error_message:
@@ -124,7 +124,7 @@ class FormPlugin(FieldContainer):
 
         form_class = self.get_form_class(instance)
         form_kwargs = self.get_form_kwargs(instance, request)
-        form = form_class(**form_kwargs)
+        form = form_class(**form_kwargs)  # django.forms.widgets.AldrynDynamicForm
         form.ident_field_name = self.ident_field_name
 
         processed_forms_dict[instance.pk] = form
@@ -141,6 +141,8 @@ class FormPlugin(FieldContainer):
                 form.cleaned_data[self.ident_field_name] = request.POST.get(self.ident_field_name, "")[:MAX_IDENT_SIZE]
             fields = [field for field in form.base_fields.values()
                       if hasattr(field, '_plugin_instance')]
+
+            form.instance.honeypot_filled = self.honeypot_filled
 
             # pre save field hooks
             for field in fields:
@@ -195,10 +197,10 @@ class FormPlugin(FieldContainer):
         fields = instance.get_form_fields()
 
         for field in fields:
-            plugin_instance = field.plugin_instance
-            field_plugin = plugin_instance.get_plugin_class_instance()
+            plugin_instance = field.plugin_instance                     # aldryn_forms.models.FieldPlugin
+            field_plugin = plugin_instance.get_plugin_class_instance()  # aldryn_forms.cms_plugins.TextField
             form_fields[field.name] = field_plugin.get_form_field(plugin_instance)
-            form_fields[field.name]._form_plugin_instance = instance
+            form_fields[field.name]._cms_form_plugin = self
         return form_fields
 
     def get_form_kwargs(self, instance, request):
@@ -419,7 +421,7 @@ class Field(FormElement):
         )
         return serialized_field
 
-    def get_form_field(self, instance):
+    def get_form_field(self, instance: FieldPluginBase) -> forms.Field:
         form_field_class = self.get_form_field_class(instance)
         form_field_kwargs = self.get_form_field_kwargs(instance)
         field = form_field_class(**form_field_kwargs)
@@ -428,7 +430,7 @@ class Field(FormElement):
         field._model_instance = instance
         # and also to the plugin class instance
         field._plugin_instance = self
-        field._form_plugin_instance = None
+        field._cms_form_plugin = None
         return field
 
     def get_form_field_class(self, instance):
@@ -600,7 +602,7 @@ class HoneypotCharField(forms.CharField):
         cleaned_value = super().clean(value)
         if cleaned_value:
             logger.info(f'Post disabled due to Honeypot "{self.label}" value: "{value}"')
-            self._form_plugin_instance.action_backend = None
+            self._cms_form_plugin.honeypot_filled = True
         return cleaned_value
 
 
@@ -806,7 +808,11 @@ class EmailField(BaseTextField):
         except smtplib.SMTPException as err:
             logger.error(err)
 
-    def form_post_save(self, instance, form, **kwargs):
+    def form_post_save(self, instance: models.EmailFieldPlugin, form: forms.Form, **kwargs):
+        # form: <class 'django.forms.widgets.AldrynDynamicForm'>
+        # form.instance: <class 'aldryn_forms.models.FormSubmission'>
+        if form.instance.honeypot_filled:
+            return
         field_name = form.form_plugin.get_form_field_name(field=instance)
 
         email = form.cleaned_data.get(field_name)

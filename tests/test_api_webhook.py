@@ -56,6 +56,7 @@ class SendToWebhookTest(Mixin, TestCase):
         self.log_handler.check()
 
 
+@freeze_time(datetime(2025, 3, 13, 8, 10, tzinfo=timezone.utc))
 class TriggerWebhookTest(Mixin, TestCase):
 
     def setUp(self):
@@ -72,6 +73,10 @@ class TriggerWebhookTest(Mixin, TestCase):
             rsps.add(responses.POST, self.url, body=HTTPError("Connection failed."))
             trigger_webhooks(webhooks, submission, "testserver")
         self.log_handler.check(
+            ('aldryn_forms.api.webhook', 'DEBUG',
+            "{'hostname': 'testserver', 'name': 'Test', 'language': 'en', 'sent_at': "
+            "'2025-03-13T03:10:00-05:00', 'form_recipients': [], 'form_data': "
+            "[{'name': 'test', 'label': 'Test', 'field_occurrence': 1, 'value': 1}]}"),
             ('aldryn_forms.api.webhook', 'ERROR', 'https://host.foo/webhook/ Connection failed.')
         )
 
@@ -84,4 +89,9 @@ class TriggerWebhookTest(Mixin, TestCase):
         with responses.RequestsMock() as rsps:
             rsps.add(responses.POST, self.url, body=json.dumps([{"status": "OK"}]))
             trigger_webhooks(webhooks, submission, "testserver")
-        self.log_handler.check()
+        self.log_handler.check((
+            'aldryn_forms.api.webhook', 'DEBUG',
+            "{'hostname': 'testserver', 'name': 'Test', 'language': 'en', 'sent_at': "
+            "'2025-03-13T03:10:00-05:00', 'form_recipients': [], 'form_data': "
+            "[{'name': 'test', 'label': 'Test', 'field_occurrence': 1, 'value': 1}]}"
+        ))

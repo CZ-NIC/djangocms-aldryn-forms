@@ -6,6 +6,11 @@
   <link rel="stylesheet" href="{% static "aldryn_forms/css/admin-list.css" %}">
 {% endblock %}
 
+{% block extrahead %}
+    {{ block.super }}
+    <script src="{% static "aldryn_forms/js/admin_list.js" %}" defer></script>
+{% endblock %}
+
 {% block object-tools %}
 	<ul class="object-tools">
         {% block object-tools-items %}

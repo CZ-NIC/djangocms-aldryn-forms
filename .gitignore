@@ -81,3 +81,5 @@ local.sqlite
 
 aldryn_forms/static/aldryn_forms/js/main.js
 aldryn_forms/static/aldryn_forms/js/main.js.map
+aldryn_forms/static/aldryn_forms/js/admin_list.js
+aldryn_forms/static/aldryn_forms/js/admin_list.js.map

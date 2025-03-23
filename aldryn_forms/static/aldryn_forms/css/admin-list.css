@@ -1,5 +1,23 @@
+table thead th .text span:has(+ .item-after),
+table thead th .text span.item-after
+{
+    display: inline;
+}
+
+table thead th .text span.item-after {
+    margin-left: 1em;
+}
+
+td.field-display_data > br {
+    display: none;
+}
+
 .aldryn-forms-data .item {
     display: flex;
+}
+
+.aldryn-forms-data .item.d-none {
+    display: none;
 }
 
 .aldryn-forms-data .label {
@@ -12,4 +30,8 @@
 
 .aldryn-forms-data .label::after {
     content: ":";
+}
+
+.aldryn-forms-data .item .value {
+    white-space: normal;
 }

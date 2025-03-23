@@ -50,8 +50,10 @@ class AldrynFormExportField(Field):
 
 class BaseFormSubmissionAdmin(admin.ModelAdmin):
     date_hierarchy = 'sent_at'
-    list_display = [str_dunder_method, 'sent_at', 'language', 'display_data']
-    list_filter = ['name', 'language']
+    list_display = [
+        str_dunder_method, 'sent_at', 'display_honeypot_filled', 'display_post_ident', 'language', 'display_data'
+    ]
+    list_filter = ['name', 'language', 'sent_at']
     search_fields = ["data"]
     actions = ["export_webhook", "send_webhook"]
     readonly_fields = [
@@ -318,3 +320,11 @@ class BaseFormSubmissionAdmin(admin.ModelAdmin):
     def send_webhook(self, request: HttpRequest, queryset: QuerySet) -> HttpResponseRedirect:
         return self.process_response_redirect(queryset, "admin:webhook_send")
     send_webhook.short_description = _("Send data via webhook")
+
+    @admin.display(boolean=True, description=_("Is spam"))
+    def display_honeypot_filled(self, obj) -> bool:
+        return obj.honeypot_filled
+
+    @admin.display(boolean=True, description=_("Ready"))
+    def display_post_ident(self, obj) -> bool:
+        return obj.post_ident is None

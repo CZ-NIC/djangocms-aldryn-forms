@@ -286,6 +286,9 @@ msgstr "Nesprávný typ id formuláře."
 msgid "Initial value"
 msgstr "Počáteční hodnota"
 
+msgid "Is spam"
+msgstr "Je spam"
+
 msgid "Label"
 msgstr "Jmenovka"
 
@@ -425,6 +428,9 @@ msgstr "Pole přepínačů"
 
 msgid "Read only"
 msgstr "Pouze pro čtení"
+
+msgid "Ready"
+msgstr "Hotovo"
 
 msgid "Recipients"
 msgstr "Příjemci"

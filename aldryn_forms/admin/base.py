@@ -47,7 +47,16 @@ class BaseFormSubmissionAdmin(admin.ModelAdmin):
         'get_recipients_for_display',
         'post_ident',
         'webhooks',
-        'honeypot_filled',
+    ]
+    fieldsets = [
+        (
+            None,
+            {
+                "fields": [
+                    "name", "get_data_for_display", "language", "sent_at", "webhooks", "form_url", "honeypot_filled"
+                ]
+            }
+        )
     ]
 
     # (Field name, Field label, json data)

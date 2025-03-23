@@ -47,8 +47,8 @@ class FormSubmissionAdmin(BaseFormSubmissionAdmin):
         try:
             re.match(search_term, "")
             queryset |= self.model.objects.filter(data__regex=search_term)
-        except Exception:
-            pass
+        except Exception as err:
+            messages.error(request, err)
         return queryset, may_have_duplicates
 
     def get_urls(self):

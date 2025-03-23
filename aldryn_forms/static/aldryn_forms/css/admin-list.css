@@ -8,10 +8,6 @@ table thead th .text span.item-after {
     margin-left: 1em;
 }
 
-td.field-display_data > br {
-    display: none;
-}
-
 .aldryn-forms-data .item {
     display: flex;
 }

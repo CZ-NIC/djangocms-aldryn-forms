@@ -55,7 +55,7 @@ class BaseFormSubmissionAdmin(admin.ModelAdmin):
     ]
     list_filter = ['name', 'language', 'sent_at']
     search_fields = ["data"]
-    actions = ["export_webhook", "send_webhook"]
+    actions = ["export_webhook", "send_webhook", "honeypot_filled_on", "honeypot_filled_off"]
     readonly_fields = [
         'name',
         'get_data_for_display',
@@ -241,12 +241,20 @@ class BaseFormSubmissionAdmin(admin.ModelAdmin):
 
         return getattr(resource.export(dataset), export_type)
 
-    def display_data(self, obj):
+    @admin.display(description=_("data"))
+    def display_data(self, obj) -> str:
         if hasattr(settings, 'ALDRYN_FORMS_SUBMISSION_LIST_DISPLAY_FIELD'):
             submission_field = import_string(settings.ALDRYN_FORMS_SUBMISSION_LIST_DISPLAY_FIELD)
             return submission_field(obj)
         return ''
-    display_data.short_description = _('data')
+
+    @admin.display(boolean=True, description=_("Is spam"))
+    def display_honeypot_filled(self, obj) -> bool:
+        return obj.honeypot_filled
+
+    @admin.display(boolean=True, description=_("Ready"))
+    def display_post_ident(self, obj) -> bool:
+        return obj.post_ident is None
 
     def get_select_webhook_form(self) -> forms.Form:
         return type("SelectWebhookForm", (forms.Form,), {
@@ -314,17 +322,15 @@ class BaseFormSubmissionAdmin(admin.ModelAdmin):
     @admin.action(description=_("Export data via webhook"), permissions=['change'])
     def export_webhook(self, request: HttpRequest, queryset: QuerySet) -> HttpResponseRedirect:
         return self.process_response_redirect(queryset, "admin:webhook_export")
-    export_webhook.short_description = _("Export data via webhook")
 
     @admin.action(description=_("Send data via webhook"), permissions=['change'])
     def send_webhook(self, request: HttpRequest, queryset: QuerySet) -> HttpResponseRedirect:
         return self.process_response_redirect(queryset, "admin:webhook_send")
-    send_webhook.short_description = _("Send data via webhook")
 
-    @admin.display(boolean=True, description=_("Is spam"))
-    def display_honeypot_filled(self, obj) -> bool:
-        return obj.honeypot_filled
+    @admin.action(description=_("Set as spam"), permissions=['change'])
+    def honeypot_filled_on(self, request: HttpRequest, queryset: QuerySet) -> HttpResponseRedirect:
+        queryset.update(honeypot_filled=True)
 
-    @admin.display(boolean=True, description=_("Ready"))
-    def display_post_ident(self, obj) -> bool:
-        return obj.post_ident is None
+    @admin.action(description=_("Set not to spam"), permissions=['change'])
+    def honeypot_filled_off(self, request: HttpRequest, queryset: QuerySet) -> HttpResponseRedirect:
+        queryset.update(honeypot_filled=False)

@@ -463,6 +463,12 @@ msgstr ""
 msgid "Send data via webhook"
 msgstr "Odeslat data přes webhook"
 
+msgid "Set as spam"
+msgstr "Nastavit není to spam"
+
+msgid "Set not to spam"
+msgstr "Nastavit není to spam"
+
 #, python-format
 msgid "Size '%s' has incorrect format"
 msgstr "Velikost '%s' má nesprávný formát."

@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import admin
 from django.template.loader import render_to_string
 
@@ -35,6 +36,12 @@ class FormSubmissionAdmin(BaseFormSubmissionAdmin):
 
 class WebhookAdmin(admin.ModelAdmin):
     form = WebhookAdminForm
+
+    def changeform_view(self, request, object_id=None, form_url="", extra_context=None):
+        if extra_context is None:
+            extra_context = {}
+        extra_context["SITE_API_ROOT"] = getattr(settings, "SITE_API_ROOT", "")
+        return super().changeform_view(request, object_id, form_url, extra_context)
 
 
 admin.site.register(FormSubmission, FormSubmissionAdmin)

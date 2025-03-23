@@ -1,0 +1,8 @@
+{# settings: ALDRYN_FORMS_SUBMISSION_LIST_DISPLAY_FIELD = "aldryn_forms.admin.display_form_submission_data" #}
+{% filter linebreaksbr %}{% spaceless %}<span class="aldryn-forms-data">{% for field in data %}
+<span class="item">
+    <span class="label">{{ field.label }}</span>
+    <span class="value">{{ field.value }}</span>
+</span>
+{% endfor %}</span>{% endspaceless %}
+{% endfilter %}

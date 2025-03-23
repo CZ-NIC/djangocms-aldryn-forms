@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.template.loader import render_to_string
 
 from tablib import Dataset
 
@@ -18,6 +19,11 @@ def get_supported_format():
         except (ImportError, AttributeError):
             pass
     return 'csv'
+
+
+def display_form_submission_data(instance: FormSubmission) -> str:
+    context = {"data": instance.get_form_data()}
+    return render_to_string("admin/aldryn_forms/display/submission_display_fields.html", context)
 
 
 class FormSubmissionAdmin(BaseFormSubmissionAdmin):

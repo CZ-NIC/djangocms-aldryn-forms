@@ -100,6 +100,14 @@ Available Plug-ins
 - ``HideContentWhenPostPlugin``
 
 
+Custom submissions list
+=======================
+
+To display data in the submissions list, enter in settings: ::
+
+    ALDRYN_FORMS_SUBMISSION_LIST_DISPLAY_FIELD = "aldryn_forms.admin.display_form_submission_data"
+
+
 Middleware
 ==========
 

@@ -1,0 +1,15 @@
+.aldryn-forms-data .item {
+    display: flex;
+}
+
+.aldryn-forms-data .label {
+    color: #00bbff;
+}
+
+.aldryn-forms-data .label {
+    margin-right: 0.2em;
+}
+
+.aldryn-forms-data .label::after {
+    content: ":";
+}

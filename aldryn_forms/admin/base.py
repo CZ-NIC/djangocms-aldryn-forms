@@ -90,11 +90,12 @@ class BaseFormSubmissionAdmin(admin.ModelAdmin):
 
     def get_search_results(self, request, queryset, search_term):
         queryset, may_have_duplicates = super().get_search_results(request, queryset, search_term)
-        try:
-            re.match(search_term, "")
-            queryset |= self.model.objects.filter(data__regex=search_term)
-        except Exception as err:
-            messages.error(request, err)
+        if search_term:
+            try:
+                re.match(search_term, "")
+                queryset |= self.model.objects.filter(data__regex=search_term)
+            except Exception as err:
+                messages.error(request, err)
         return queryset, may_have_duplicates
 
     def get_data_for_display(self, obj):

@@ -53,7 +53,13 @@ class BaseFormSubmissionAdmin(admin.ModelAdmin):
     list_display = [
         str_dunder_method, 'sent_at', 'display_honeypot_filled', 'display_post_ident', 'language', 'display_data'
     ]
-    list_filter = ['name', 'language', 'sent_at']
+    list_filter = [
+        'name',
+        'language',
+        'sent_at',
+        ("honeypot_filled", admin.BooleanFieldListFilter),
+        ("post_ident", admin.BooleanFieldListFilter),
+    ]
     search_fields = ["data"]
     actions = ["export_webhook", "send_webhook", "honeypot_filled_on", "honeypot_filled_off"]
     readonly_fields = [

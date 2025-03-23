@@ -1,7 +1,7 @@
 {# settings: ALDRYN_FORMS_SUBMISSION_LIST_DISPLAY_FIELD = "aldryn_forms.admin.display_form_submission_data" #}
 {% filter linebreaksbr %}{% spaceless %}<span class="aldryn-forms-data">{% for field in data %}
 {% if field.value %}
-    <span class="item{% if not forloop.first %} more d-none{% endif %}">
+    <span class="item{% if not forloop.first %} more{% endif %}">
         <span class="label">{{ field.label }}</span>
         <span class="value">{{ field.value }}</span>
     </span>

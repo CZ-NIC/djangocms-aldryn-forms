@@ -12,7 +12,7 @@ const toggleVisibility = (node) => {
 document.addEventListener('DOMContentLoaded', () => {
     for (const data of document.getElementsByClassName("aldryn-forms-data")) {
         data.style.cursor = "pointer"
-        data.title = "Display more."
+        data.title = "Display less."
         data.addEventListener("click", (event) => {
             toggleVisibility(event.target.closest(".aldryn-forms-data"))
         })

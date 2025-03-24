@@ -88,6 +88,20 @@
         <div>used as <code>separator.join(re.mach(pattern, value, flags).groups())</code>.</div>
     </td>
 </tr>
+<tr>
+    <td>fnc</td>
+    <td>string</td>
+    <td>
+        <div>A function that processes the data.</div>
+        <div>
+<pre><code>def remove_identical_value(rule: dataType, src: dataType, dest: dataType) -&gt; None:
+    """Remove value if it is identical to another."""
+    data = [dest.get(key) for key in rule.get("params", {}).get("fields", [])]
+    if len(set(data)) &lt; len(data) and rule["dest"] in dest:
+        del dest[rule["dest"]]
+</code></pre></div>
+    </td>
+</tr>
 </table>
 <div class="see-more">
     You can verify the transformation result via the "Export data via webhook" command in the <a href="{% url "admin:aldryn_forms_formsubmission_changelist" %}">Form submission</a> post administration.
@@ -135,6 +149,13 @@
     {
         "dest": "lead_source",
         "src": ".hostname"
+    },
+    {
+        "fnc": "aldryn_forms.api.utils.remove_identical_value",
+        "dest": "first_name",
+        "params": {
+            "fields": ["first_name", "last_name"]
+        }
     }
 ]</code></pre>
 <div class="see-more">For more see <a href="https://jqlang.github.io/jq/manual/" target="_top" title="Go to ./jq Manual.">./jq Manual</a>.</div>

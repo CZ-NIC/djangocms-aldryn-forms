@@ -27,6 +27,7 @@ TRANSFORM_SCHEMA = {
             "oneOf": [
                 {"required": ["src"]},
                 {"required": ["value"]},
+                {"required": ["fnc"]},
             ],
             "properties": {
                 "dest": {"type": "string"},
@@ -35,6 +36,8 @@ TRANSFORM_SCHEMA = {
                 "match": {"type": ["string", "array"]},
                 "fetcher": {"enum": ["first", "all", "text"]},
                 "sep": {"type": "string"},
+                "fnc": {"type": "string"},
+                "params": {"type": "object"},
             }
         }
     }

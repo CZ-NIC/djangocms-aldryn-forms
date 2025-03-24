@@ -4,6 +4,7 @@ import re
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from django.db.models import ManyToManyField
+from django.utils.module_loading import import_string
 
 import jq
 import requests
@@ -48,6 +49,12 @@ def transform_data(transform: Optional[List[dataType]], data: dataType) -> dataT
         return data
     out: dataType = {}
     for rule in transform:
+        if "fnc" in rule:
+            try:
+                import_string(rule["fnc"])(rule, data, out)
+            except Exception as err:
+                logger.error(f"{rule['fnc']} {err}")
+            continue
         if "value" in rule:
             out[rule["dest"]] = rule["value"]
         else:

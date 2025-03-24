@@ -2,11 +2,17 @@
 Changelog
 =========
 
-7.6.0 (2025-03-18)
+7.6.0 (2025-03-26)
 ==================
 
 * Add REST API support.
 * Add Honeypot Field.
+* Add Webhook and its transformation.
+* Add field honeypot_filled into Form Submission.
+* Add Admin filters.
+* Add Admin search field.
+* Add Admin actions: export_webhook, send_webhook, honeypot_filled_on, honeypot_filled_off.
+* Add aldryn_forms.admin.display_form_submission_data.
 
 7.5.2 (2025-02-20)
 ==================

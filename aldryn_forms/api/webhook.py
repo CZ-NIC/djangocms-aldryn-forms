@@ -49,14 +49,13 @@ def transform_data(transform: Optional[List[dataType]], data: dataType) -> dataT
         return data
     out: dataType = {}
     for rule in transform:
-        if "fnc" in rule:
+        if "value" in rule:
+            out[rule["dest"]] = rule["value"]
+        elif "fnc" in rule:
             try:
                 import_string(rule["fnc"])(rule, data, out)
             except Exception as err:
                 logger.error(f"{rule['fnc']} {err}")
-            continue
-        if "value" in rule:
-            out[rule["dest"]] = rule["value"]
         else:
             chunks = []
             src = [rule["src"]] if isinstance(rule["src"], str) else rule["src"]

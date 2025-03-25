@@ -288,18 +288,20 @@ class BaseFormSubmissionAdmin(admin.ModelAdmin):
 
     def process_webhook(self, request: HttpRequest, process_fnc: Callable, process_title: str) -> HttpResponse:
         ids = request.GET.get("ids", "")
+        if not ids:
+            messages.warning(
+                request, "Items must be selected in order to perform actions on them. No items have been changed.")
+            return HttpResponseRedirect(reverse("admin:aldryn_forms_formsubmission_changelist"))
         submissions = FormSubmission.objects.filter(pk__in=ids.split("."))
         SelectWebhookForm = self.get_select_webhook_form()
         if request.method == "POST":
             if submissions.count():
                 form = SelectWebhookForm(request.POST)
                 if form.is_valid():
-                    try:
-                        webhook = Webhook.objects.get(pk=form.cleaned_data["webhook"])
-                    except Webhook.DoesNotExist as err:
-                        messages.error(request, err)
-                    else:
-                        return process_fnc(request, submissions, webhook)
+                    webhook = Webhook.objects.get(pk=form.cleaned_data["webhook"])
+                    return process_fnc(request, submissions, webhook)
+                else:
+                    messages.error(request, form.errors.as_text())
             else:
                 messages.error(request, _("Missing items for processing."))
             return HttpResponseRedirect(reverse("admin:aldryn_forms_formsubmission_changelist"))

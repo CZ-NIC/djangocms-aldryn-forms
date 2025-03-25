@@ -102,6 +102,25 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
             ('aldryn_forms.action_backends', 'INFO', 'Sent email notifications to 1 recipients.'),
         )
 
+    def test_form_submission_email_action_honeypot_filled(self):
+        add_plugin(self.placeholder, 'HoneypotField', 'en', target=self.form_plugin, label="Trap", name="trap")
+        self.form_plugin.action_backend = 'email_only'
+        self.form_plugin.save()
+        if CMS_3_6:
+            self.page.publish('en')
+
+        form_plugin = FormPlugin.objects.last()
+        data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester", "trap": "Catched!"}
+        with responses.RequestsMock():
+            response = self.client.post(self.page.get_absolute_url('en'), data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(FormSubmission.objects.count(), 0)
+        self.assertEqual(len(mail.outbox), 0)
+        self.log_handler.check(
+            ('aldryn_forms.cms_plugins', 'INFO', 'Post disabled due to Honeypot "Trap" value: "Catched!"'),
+        )
+
     def test_form_submission_no_action(self):
         self.form_plugin.action_backend = 'none'
         self.form_plugin.save()

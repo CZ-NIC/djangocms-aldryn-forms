@@ -14,7 +14,7 @@ from cms.api import add_plugin, create_page
 from cms.appresolver import clear_app_resolvers
 from cms.test_utils.testcases import CMSTestCase
 
-from aldryn_forms.models import FormPlugin, FormSubmission
+from aldryn_forms.models import FormPlugin, FormSubmission, SubmittedToBeSent
 
 
 # These means "less than or equal"
@@ -135,7 +135,7 @@ class SubmitFormViewTest(CMSTestCase):
     def test_form_view_and_submission_with_apphook_django_gte_111_multiple_steps(self):
         self._form_view_and_submission_with_apphook_django_gte_111(self.redirect_url_with_params)
 
-    def _submit_one_form_instead_multiple(self, redirect_url):
+    def _submit_one_form_instead_multiple(self, redirect_url, form_plugin_name="FormPlugin", post_ident=None):
         """Test checks if only one form is send instead of multiple on page together"""
         page = create_page(
             "multiple forms",
@@ -178,8 +178,17 @@ class SubmitFormViewTest(CMSTestCase):
             "url": redirect_url,
         }
 
-        form_plugin2 = add_plugin(placeholder, "FormPlugin", "en", **plugin_data2)  # noqa: E501
+        form_plugin2 = add_plugin(placeholder, form_plugin_name, "en", **plugin_data2)  # noqa: E501
 
+        add_plugin(
+            placeholder,
+            "EmailField",
+            "en",
+            name="email",
+            required=True,
+            target=form_plugin2,
+            label="Email",
+        )
         add_plugin(
             placeholder,
             "SubmitButton",
@@ -195,13 +204,14 @@ class SubmitFormViewTest(CMSTestCase):
         self.reload_urls()
         self.apphook_clear()
 
-        response = self.client.post(
-            page.get_absolute_url("en"),
-            {
-                "form_plugin_id": form_plugin2.id,
-                "email_1": "test@test",
-            },
-        )
+        post = {
+            "form_plugin_id": form_plugin2.id,
+            "email_1": "test@test",
+            "email": "test2@test.foo",
+        }
+        if post_ident is not None:
+            post["aldryn_form_post_ident"] = post_ident
+        response = self.client.post(page.get_absolute_url("en"), post)
         self.assertRedirects(
             response, plugin_data2["url"], fetch_redirect_response=False
         )  # noqa: E501
@@ -213,9 +223,30 @@ class SubmitFormViewTest(CMSTestCase):
     @override_settings(ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION=30)
     def test_view_submit_one_form_instead_multiple_multiple_steps(self):
         self._submit_one_form_instead_multiple(self.redirect_url_with_params)
+        self.assertQuerySetEqual(SubmittedToBeSent.objects.values_list("name", "data"), [
+            ('', '[{"name": "email", "label": "Email", "field_occurrence": 1, "value": "test2@test.foo"}]'),
+        ])
+
+    @patch(
+        "aldryn_forms.forms.get_random_string",
+        lambda length: "aBH7hWEGAihsg9KxctpNRfvEXUoOFpJZigmZETqWWNVs4gENFsL3qva1d4Q93URg",
+    )
+    @override_settings(ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION=30)
+    def test_view_append_into_previous_submission(self):
+        post_ident = "aBH7hWEGAihsg9KxctpNRfvEXUoOFpJZigmZETqWWNVs4gENFsL3qva1d4Q93URg"
+        data = [
+            {"label": "Test", "name": "test", "value": 1},
+        ]
+        SubmittedToBeSent.objects.create(name="Test", data=json.dumps(data), post_ident=post_ident)
+        self._submit_one_form_instead_multiple(self.redirect_url_with_params, "FormWithIdentPlugin", post_ident)
+        self.assertQuerySetEqual(SubmittedToBeSent.objects.values_list("name", "data"), [
+            ('Test', '[{"label": "Test", "name": "test", "value": 1}, '
+             '{"name": "email", "label": "Email", "field_occurrence": 1, "value": "test2@test.foo"}]'),
+        ])
 
     def test_view_submit_one_form_instead_multiple(self):
         self._submit_one_form_instead_multiple(self.redirect_url)
+        self.assertQuerySetEqual(SubmittedToBeSent.objects.values_list("name", "data"), [])
 
     def test_view_submit_one_valid_form_instead_multiple(self):
         """Test checks if only one form is validated instead multiple on a page"""

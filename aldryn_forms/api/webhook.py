@@ -67,7 +67,7 @@ def transform_data(transform: Optional[List[dataType]], data: dataType) -> dataT
                     continue
                 try:
                     value = getattr(input, rule.get("fetcher", "first"))()
-                except StopIteration as err:
+                except (StopIteration, ValueError) as err:
                     logger.debug(f"StopIteration {query} {err}")
                     continue
                 chunks.append(str(value))
@@ -96,7 +96,7 @@ def process_match(pattern: Union[str, List], value: str) -> str:
         pattern = pattern[0]
     try:
         match = re.match(pattern, value, flags)
-    except AttributeError as err:
+    except (AttributeError, re.error) as err:
         logger.error(f"{pattern} {err}")
         return value
     if match is None:

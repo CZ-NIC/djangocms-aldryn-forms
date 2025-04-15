@@ -20,6 +20,9 @@ msgstr ""
 msgid "Correct the errors first, please."
 msgstr "Prosím, nejdříve opravte chyby."
 
+msgid "Max. size"
+msgstr "Max. velikost"
+
 msgid "Please wait. Submitting form..."
 msgstr "Prosím čekejte. Formulář se odesílá..."
 

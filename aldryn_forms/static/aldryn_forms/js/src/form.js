@@ -140,6 +140,10 @@ function removeMessages(form) {
     }
 }
 
+function humanFileSize(size) {
+    var i = size == 0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
+    return +((size / Math.pow(1024, i)).toFixed(2)) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
+}
 
 function handleChangeFilesList(nodeInputFile) {
     const listFileNames = nodeInputFile.closest(".upload-file-frame").querySelector('ul.upload-file-names')
@@ -249,6 +253,21 @@ export function enableFieldUploadDragAndDrop() {
             const dragAndDrop = document.createElement("div")
             dragAndDrop.classList.add("drag-and-drop")
             uploadFileFrame.appendChild(dragAndDrop)
+
+            const label = document.createElement("div")
+            label.classList.add("label")
+
+            if (input.placeholder) {
+                const title = document.createElement("h4")
+                title.appendChild(document.createTextNode(input.placeholder))
+                label.appendChild(title)
+            }
+            if (input.dataset.max_size) {
+                const description = document.createElement("div")
+                description.appendChild(document.createTextNode(gettext("Max. size") + " " + humanFileSize(input.dataset.max_size)))
+                label.appendChild(description)
+            }
+            dragAndDrop.appendChild(label)
 
             input.parentNode.insertBefore(uploadFileFrame, input)
             input.parentElement.removeChild(input)

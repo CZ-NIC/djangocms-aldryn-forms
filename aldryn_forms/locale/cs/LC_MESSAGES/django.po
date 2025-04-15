@@ -104,6 +104,9 @@ msgstr ""
 msgid "Default value of field."
 msgstr "Základní hodnota pole."
 
+msgid "Drag and drop files Field"
+msgstr "Pole pro přetažení a nahrání souborů"
+
 msgid "E-mail"
 msgstr "E-mail"
 

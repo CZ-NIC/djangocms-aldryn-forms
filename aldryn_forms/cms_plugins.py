@@ -1092,6 +1092,12 @@ class MultipleSelectField(SelectField):
         return kwargs
 
 
+class DragAndDropFilesField(MultipleSelectField):
+    name = _('Drag and drop files Field')
+
+
+
+
 class MultipleCheckboxSelectField(MultipleSelectField):
     name = _('Multiple Checkbox Field')
 
@@ -1197,6 +1203,7 @@ plugin_pool.register_plugin(Fieldset)
 plugin_pool.register_plugin(FormPlugin)
 plugin_pool.register_plugin(FormWithIdentPlugin)
 plugin_pool.register_plugin(MultipleSelectField)
+plugin_pool.register_plugin(DragAndDropFilesField)
 plugin_pool.register_plugin(MultipleCheckboxSelectField)
 plugin_pool.register_plugin(RadioSelectField)
 plugin_pool.register_plugin(SelectField)

@@ -28,6 +28,7 @@ from emailit.utils import get_template_names
 from filer.models import filemodels, imagemodels
 from PIL import Image
 
+from .fields import DragAndDropFilesInput
 from . import models
 from .constants import ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION, ALDRYN_FORMS_POST_IDENT_NAME, MAX_IDENT_SIZE
 from .forms import (
@@ -947,6 +948,11 @@ class MultipleFilesField(FileField):
         return kwargs
 
 
+class DragAndDropFilesField(MultipleFilesField):
+    name = _('Drag and drop files Field')
+    form_field_widget = DragAndDropFilesInput
+
+
 class ImageField(FileField):
     name = _('Image upload field')
     model = models.ImageUploadFieldPlugin
@@ -1090,12 +1096,6 @@ class MultipleSelectField(SelectField):
 
         kwargs['initial'] = [o.pk for o in kwargs['queryset'] if o.default_value]
         return kwargs
-
-
-class DragAndDropFilesField(MultipleSelectField):
-    name = _('Drag and drop files Field')
-
-
 
 
 class MultipleCheckboxSelectField(MultipleSelectField):

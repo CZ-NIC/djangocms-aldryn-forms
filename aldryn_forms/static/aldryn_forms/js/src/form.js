@@ -142,7 +142,7 @@ function removeMessages(form) {
 
 
 function handleChangeFilesList(nodeInputFile) {
-    const listFileNames = nodeInputFile.parentNode.querySelector('ul.upload-file-names')
+    const listFileNames = nodeInputFile.closest(".upload-file-frame").querySelector('ul.upload-file-names')
     if (listFileNames === null) {
         return
     }
@@ -245,9 +245,15 @@ export function enableFieldUploadDragAndDrop() {
             // <div class="upload-file-frame">
             const uploadFileFrame = document.createElement("div")
             uploadFileFrame.classList.add("upload-file-frame")
+
+            const dragAndDrop = document.createElement("div")
+            dragAndDrop.classList.add("drag-and-drop")
+            uploadFileFrame.appendChild(dragAndDrop)
+
             input.parentNode.insertBefore(uploadFileFrame, input)
             input.parentElement.removeChild(input)
-            uploadFileFrame.appendChild(input)
+            dragAndDrop.appendChild(input)
+
             // <ul class="upload-file-names"></ul>
             const listFileNames = document.createElement("ul")
             listFileNames.classList.add("upload-file-names")

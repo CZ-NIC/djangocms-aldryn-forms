@@ -145,10 +145,12 @@ function humanFileSize(size) {
     return +((size / Math.pow(1024, i)).toFixed(2)) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
 }
 
-function handleChangeFilesList(nodeInputFile, listFileNames) {
+function handleChangeFilesList(nodeInputFile, listFileNames, asyncFetch) {
     unblockSubmit(nodeInputFile)
 
-    listFileNames.innerHTML = ''
+    if (!asyncFetch) {
+        listFileNames.innerHTML = ''
+    }
     const accept = nodeInputFile.accept.length ? nodeInputFile.accept.split(',') : []
     const extensions = [],
         mimetypes = [],
@@ -191,22 +193,36 @@ function handleChangeFilesList(nodeInputFile, listFileNames) {
     for (let i = 0; i < nodeInputFile.files.length; i++) {
         console.log("file type:", nodeInputFile.files[i].type)
 
-        const item = document.createElement("li")
+        const listItem = document.createElement("li")
+        listItem.file = nodeInputFile.files[i]
 
         const file_name = nodeInputFile.files[i].name
 
         const status = document.createElement("div")
         status.classList.add("status")
-        item.appendChild(status)
+        listItem.appendChild(status)
 
         const content = document.createElement("div")
         content.classList.add("content")
-        item.appendChild(content)
+        listItem.appendChild(content)
 
         const name = document.createElement("div")
         name.classList.add("file-name")
         name.appendChild(document.createTextNode(file_name + " "))
         content.appendChild(name)
+
+        if (asyncFetch) {
+            const trash = document.createElement("img")
+            trash.src = "/static/aldryn_forms/img/trash.svg"
+            trash.classList.add("trash")
+            trash.style.cursor = "pointer"
+            trash.alt = trash.title = gettext("Remove file.")
+            listItem.appendChild(trash)
+            trash.addEventListener("click", (event) => {
+                event.target.closest("li").remove()
+                // TODO: walk over others li and check errors.
+            })
+        }
 
         const message = document.createElement("div")
         message.classList.add("error")
@@ -218,6 +234,7 @@ function handleChangeFilesList(nodeInputFile, listFileNames) {
             const msg = document.createElement("div")
             msg.appendChild(document.createTextNode(gettext('This file exceeds the uploaded files limit.')))
             message.appendChild(msg)
+            listItem.classList.add("error")
             is_valid = false
         }
 
@@ -246,6 +263,7 @@ function handleChangeFilesList(nodeInputFile, listFileNames) {
             const msg = document.createElement("div")
             msg.appendChild(document.createTextNode(gettext('The file type is not among the accpeted types.')))
             message.appendChild(msg)
+            listItem.classList.add("error")
             is_valid = false
         }
 
@@ -257,7 +275,7 @@ function handleChangeFilesList(nodeInputFile, listFileNames) {
         }
         status.appendChild(icon)
 
-        listFileNames.appendChild(item)
+        listFileNames.appendChild(listItem)
     }
 
     if (!is_valid) {
@@ -266,9 +284,12 @@ function handleChangeFilesList(nodeInputFile, listFileNames) {
 }
 
 
+const uploadFilesFrame = "upload-files-frame"
+
+
 function dragAndDropFields(input) {
     const uploadFileFrame = document.createElement("div")
-    uploadFileFrame.classList.add("upload-files-frame")
+    uploadFileFrame.classList.add(uploadFilesFrame)
     if (input.classList.contains("drag-and-drop")) {
         uploadFileFrame.classList.add("drag-and-drop")
     }
@@ -316,7 +337,9 @@ function dragAndDropFields(input) {
     listFileNames.classList.add("upload-file-names")
     uploadFileFrame.appendChild(listFileNames)
 
-    input.addEventListener('change', (event) => handleChangeFilesList(event.target, listFileNames), false)
+    const form = input.closest("form")
+    form.classList.add("adjust-uploads")
+    input.addEventListener('change', (event) => handleChangeFilesList(event.target, listFileNames, form.classList.contains("submit-by-fetch")), false)
 }
 
 
@@ -328,10 +351,31 @@ export function enableFieldUploadDragAndDrop() {
     }
 }
 
+function adjustUploads(form) {
+    const formData = new FormData(form)
+    const attachment_names = []
+    for (const pair of formData.entries()) {
+        if (pair[1] instanceof File && !attachment_names.includes(pair[0])) {
+            attachment_names.push(pair[0])
+        }
+    }
+    for(const name of attachment_names) {
+        formData.delete(name)
+    }
+    for(const name of attachment_names) {
+        const input = form.querySelector(`input[name=${name}]`)
+        const frame = input.closest("." + uploadFilesFrame)
+        for(const attachment of frame.querySelectorAll(".upload-file-names li")) {
+            formData.append(name, attachment.file)
+        }
+    }
+    return formData
+}
+
 
 export async function sendData(form) {
     removeMessages(form)
-    const formData = new FormData(form)
+    const formData = form.classList.contains("adjust-uploads") ? adjustUploads(form) : new FormData(form)
     try {
         const response = await fetch(form.action, {
             method: "POST",

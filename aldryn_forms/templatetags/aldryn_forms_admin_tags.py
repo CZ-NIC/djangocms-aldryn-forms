@@ -2,6 +2,7 @@ import re
 
 from django import template
 from django.contrib.sites.models import Site
+from django.utils.html import escape
 from django.utils.safestring import mark_safe
 
 
@@ -24,8 +25,10 @@ def media_filer_public_link(value):
     content = []
     for word in re.split(r"(\s+)", value):
         if re.match(link_pattern, word):
-            filename = word.split("/")[-1]
+            filename = escape(word.split("/")[-1])
             word = f"""<a href="{word}" target="_blank">{filename}</a>"""
+        else:
+            word = escape(word)
         content.append(word)
 
     return mark_safe("".join(content))

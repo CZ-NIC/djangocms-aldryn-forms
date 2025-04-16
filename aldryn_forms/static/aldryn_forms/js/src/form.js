@@ -297,19 +297,25 @@ function addFilesSequentially(nodeInputFile, listFileNames) {
         status.classList.add("status")
         item.appendChild(status)
 
+        const content = document.createElement("div")
+        content.classList.add("content")
+        item.appendChild(content)
+
         const name = document.createElement("div")
         name.classList.add("file-name")
         name.appendChild(document.createTextNode(file_name + " "))
-        item.appendChild(name)
+        content.appendChild(name)
 
         const message = document.createElement("div")
         message.classList.add("error")
-        item.appendChild(message)
+        content.appendChild(message)
 
         const errors = []
         if (i >= nodeInputFile.dataset.max_files) {
             errors.push(gettext('This file exceeds the uploaded files limit.'))
-            message.appendChild(document.createTextNode(gettext('This file exceeds the uploaded files limit.')))
+            const msg = document.createElement("div")
+            msg.appendChild(document.createTextNode(gettext('This file exceeds the uploaded files limit.')))
+            message.appendChild(msg)
         }
 
         let is_expected_type = accept.length ? false : true
@@ -334,7 +340,9 @@ function addFilesSequentially(nodeInputFile, listFileNames) {
 
         if (!is_expected_type) {
             errors.push(gettext('The file type is not among the accpeted types.'))
-            message.appendChild(document.createTextNode(gettext('The file type is not among the accpeted types.')))
+            const msg = document.createElement("div")
+            msg.appendChild(document.createTextNode(gettext('The file type is not among the accpeted types.')))
+            message.appendChild(msg)
         }
 
         const icon = document.createElement("img")

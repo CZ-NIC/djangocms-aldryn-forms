@@ -20,3 +20,11 @@
 #formsubmission_form .readonly .submitted-data tr:hover td {
     background-color: #e8f8ff;
 }
+
+#formsubmission_form .readonly .submitted-data td a {
+    display: block;
+}
+
+#formsubmission_form .readonly .submitted-data td a:hover {
+    text-decoration: underline;
+}

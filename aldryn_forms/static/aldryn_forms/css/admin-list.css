@@ -36,6 +36,15 @@ table thead th .text span.item-after {
     white-space: normal;
 }
 
+.aldryn-forms-data .item .value a {
+    display: block;
+    margin-top: 0.2em;
+}
+
+.aldryn-forms-data .item .value a:hover {
+    text-decoration: underline;
+}
+
 table td .aldryn-forms-data .item-after {
     position: relative;
 }

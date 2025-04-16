@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n aldryn_forms_admin_tags %}
 <table class="submitted-data">
 <thead>
     <tr>
@@ -12,7 +12,7 @@
         <tr>
             <td>{{ field.label }}</td>
             <td>{{ field.name }}</td>
-            <td>{{ field.value }}</td>
+            <td>{{ field.value|media_filer_public_link }}</td>
         </tr>
     {% endfor %}
 </tbody>

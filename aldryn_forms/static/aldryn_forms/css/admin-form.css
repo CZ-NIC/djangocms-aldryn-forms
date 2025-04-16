@@ -1,0 +1,22 @@
+#formsubmission_form .readonly {
+    max-width: max-content;
+    width: auto;
+}
+
+#formsubmission_form .readonly .submitted-data th {
+    color: #fff;
+    background-color: #00bbff;
+}
+
+#formsubmission_form .readonly .submitted-data td {
+    line-height: normal;
+    padding: 1em;
+}
+
+#formsubmission_form .readonly .submitted-data td:first-child {
+    color: #00bbff;
+}
+
+#formsubmission_form .readonly .submitted-data tr:hover td {
+    background-color: #e8f8ff;
+}

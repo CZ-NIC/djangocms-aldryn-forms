@@ -1,7 +1,19 @@
 {% load i18n %}
-{% filter linebreaksbr %}{% spaceless %}{% for field in data %}
-{% translate "Field" %}: {{ field.name }}
-{% translate "Label" %}: {{ field.label }}
-{% translate "Value" %}: {{ field.value }}
-{% endfor %}{% endspaceless %}
-{% endfilter %}
+<table class="submitted-data">
+<thead>
+    <tr>
+        <th>{% translate "Label" %}</th>
+        <th>{% translate "Field" %}</th>
+        <th>{% translate "Value" %}</th>
+    </tr>
+</thead>
+<tbody>
+    {% for field in data %}
+        <tr>
+            <td>{{ field.label }}</td>
+            <td>{{ field.name }}</td>
+            <td>{{ field.value }}</td>
+        </tr>
+    {% endfor %}
+</tbody>
+</table>

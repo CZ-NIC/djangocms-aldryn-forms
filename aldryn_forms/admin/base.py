@@ -91,6 +91,11 @@ class BaseFormSubmissionAdmin(admin.ModelAdmin):
         ('recipients', _('users notified'), True),
     )
 
+    class Media:
+        css = {
+            "all": ["aldryn_forms/css/admin-form.css"],
+        }
+
     def has_add_permission(self, request):
         return False
 

@@ -218,6 +218,7 @@ function handleChangeFilesList(nodeInputFile, listFileNames) {
             const msg = document.createElement("div")
             msg.appendChild(document.createTextNode(gettext('This file exceeds the uploaded files limit.')))
             message.appendChild(msg)
+            is_valid = false
         }
 
         let is_expected_type = accept.length ? false : true
@@ -245,6 +246,7 @@ function handleChangeFilesList(nodeInputFile, listFileNames) {
             const msg = document.createElement("div")
             msg.appendChild(document.createTextNode(gettext('The file type is not among the accpeted types.')))
             message.appendChild(msg)
+            is_valid = false
         }
 
         const icon = document.createElement("img")

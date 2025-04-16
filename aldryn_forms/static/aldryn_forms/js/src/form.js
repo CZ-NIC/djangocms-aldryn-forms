@@ -147,6 +147,7 @@ function humanFileSize(size) {
 
 function handleChangeFilesList(nodeInputFile) {
     const listFileNames = nodeInputFile.closest(".upload-file-frame").querySelector('ul.upload-file-names')
+    console.log("listFileNames:", listFileNames)
     if (listFileNames === null) {
         return
     }
@@ -243,42 +244,164 @@ function handleChangeFilesList(nodeInputFile) {
 }
 
 
+function extendedHandleChangeFilesList(nodeInputFile, class_name) {
+    const parentFrame = nodeInputFile.closest(class_name)
+    console.log("parentFrame:", parentFrame)
+    if (parentFrame === null) {
+        return
+    }
+    const listFileNames = parentFrame.querySelector('ul.upload-file-names')
+    console.log("listFileNames:", listFileNames)
+    if (listFileNames === null) {
+        return
+    }
+    listFileNames.innerHTML = ''
+    unblockSubmit(nodeInputFile)
+
+    const accept = nodeInputFile.accept.length ? nodeInputFile.accept.split(',') : []
+    const extensions = [],
+        mimetypes = [],
+        maim_mimes = []
+    let is_valid = true
+
+    let files_size_summary = null
+    if (nodeInputFile.dataset.max_size !== null) {
+        files_size_summary = 0
+        for (let i = 0; i < nodeInputFile.files.length; i++) {
+            files_size_summary += nodeInputFile.files[i].size
+        }
+    }
+    if (nodeInputFile.dataset.max_size !== null && files_size_summary > nodeInputFile.dataset.max_size) {
+        is_valid = false
+        const msg = document.createElement("li")
+        msg.classList.add("text-danger")
+        msg.appendChild(document.createTextNode(gettext('The total file size has exceeded the specified limit.')))
+        listFileNames.appendChild(msg)
+    }
+
+    if (nodeInputFile.accept.length) {
+        for (let i = 0; i < accept.length; i++) {
+            if (accept[i][0] === '.') {
+                extensions.push(accept[i])
+            } else {
+                const mtypes = accept[i].split('/')
+                if (mtypes[1] === '*') {
+                    maim_mimes.push(mtypes[0])
+                } else {
+                    mimetypes.push(accept[i])
+                }
+            }
+        }
+    }
+
+    for (let i = 0; i < nodeInputFile.files.length; i++) {
+        const item = document.createElement("li")
+        const file_name = nodeInputFile.files[i].name
+        const name = document.createElement("span")
+        name.appendChild(document.createTextNode(file_name + " "))
+        item.appendChild(name)
+        const errors = []
+        if (i >= nodeInputFile.dataset.max_files) {
+            errors.push(gettext('This file exceeds the uploaded files limit.'))
+        }
+
+        let is_expected_type = accept.length ? false : true
+
+        if (!is_expected_type && extensions) {
+            const ext = file_name.toLowerCase().match(/\.\w+$/)
+            if (ext !== null && extensions.includes(ext[0])) {
+                is_expected_type = true
+            }
+        }
+        if (!is_expected_type && mimetypes) {
+            if (mimetypes.includes(nodeInputFile.files[i].type)) {
+                is_expected_type = true
+            }
+        }
+        if (!is_expected_type && maim_mimes) {
+            const mt = nodeInputFile.files[i].type.split('/')
+            if (maim_mimes.includes(mt[0])) {
+                is_expected_type = true
+            }
+        }
+
+        if (!is_expected_type) {
+            errors.push(gettext('The file type is not among the accpeted types.'))
+        }
+
+        if (errors.length) {
+            is_valid = false
+            name.title = errors.join(" ")
+            name.classList.add("fail-upload")
+            const icon = document.createElement("img")
+            icon.src = '/static/admin/img/icon-alert.svg'
+            icon.width = 16
+            icon.height = 16
+            name.insertBefore(icon, name.firstChild)
+        }
+        listFileNames.appendChild(item)
+    }
+
+    if (!is_valid) {
+        blockSubmit(nodeInputFile)
+    }
+}
+
+
+function extendedDragAndDrop(input) {
+    const class_name = "drop-and-upload-file-frame"
+    const uploadFileFrame = document.createElement("div")
+    uploadFileFrame.classList.add(class_name)
+
+    const dragAndDrop = document.createElement("div")
+    dragAndDrop.classList.add("drag-and-drop")
+    uploadFileFrame.appendChild(dragAndDrop)
+
+    const label = document.createElement("div")
+    label.classList.add("label")
+
+    if (input.placeholder) {
+        const title = document.createElement("h4")
+        title.appendChild(document.createTextNode(input.placeholder))
+        label.appendChild(title)
+    }
+    if (input.dataset.max_size) {
+        const description = document.createElement("div")
+        description.appendChild(document.createTextNode(gettext("Max. size") + " " + humanFileSize(input.dataset.max_size)))
+        label.appendChild(description)
+    }
+    dragAndDrop.appendChild(label)
+
+    input.parentNode.insertBefore(uploadFileFrame, input)
+    input.parentElement.removeChild(input)
+    dragAndDrop.appendChild(input)
+
+    // <ul class="upload-file-names"></ul>
+    const listFileNames = document.createElement("ul")
+    listFileNames.classList.add("upload-file-names")
+    uploadFileFrame.appendChild(listFileNames)
+    input.addEventListener('change', (event) => extendedHandleChangeFilesList(event.target, "." + class_name), false)
+}
+
+
 export function enableFieldUploadDragAndDrop() {
     for (const input of document.querySelectorAll('input[type=file]')) {
-        if (input.dataset.enable_js !== undefined) {
+        if (input.classList.contains("drag-and-drop")) {
+            extendedDragAndDrop(input)
+        } else if (input.dataset.enable_js !== undefined) {
             // <div class="upload-file-frame">
             const uploadFileFrame = document.createElement("div")
             uploadFileFrame.classList.add("upload-file-frame")
 
-            const dragAndDrop = document.createElement("div")
-            dragAndDrop.classList.add("drag-and-drop")
-            uploadFileFrame.appendChild(dragAndDrop)
-
-            const label = document.createElement("div")
-            label.classList.add("label")
-
-            if (input.placeholder) {
-                const title = document.createElement("h4")
-                title.appendChild(document.createTextNode(input.placeholder))
-                label.appendChild(title)
-            }
-            if (input.dataset.max_size) {
-                const description = document.createElement("div")
-                description.appendChild(document.createTextNode(gettext("Max. size") + " " + humanFileSize(input.dataset.max_size)))
-                label.appendChild(description)
-            }
-            dragAndDrop.appendChild(label)
-
             input.parentNode.insertBefore(uploadFileFrame, input)
             input.parentElement.removeChild(input)
-            dragAndDrop.appendChild(input)
+            uploadFileFrame.appendChild(input)
 
             // <ul class="upload-file-names"></ul>
             const listFileNames = document.createElement("ul")
             listFileNames.classList.add("upload-file-names")
             uploadFileFrame.appendChild(listFileNames)
             input.addEventListener('change', (event) => handleChangeFilesList(event.target), false)
-            handleChangeFilesList(input)
         }
     }
 }

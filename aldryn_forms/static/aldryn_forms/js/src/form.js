@@ -147,7 +147,6 @@ function humanFileSize(size) {
 
 function handleChangeFilesList(nodeInputFile) {
     const listFileNames = nodeInputFile.closest(".upload-file-frame").querySelector('ul.upload-file-names')
-    console.log("listFileNames:", listFileNames)
     if (listFileNames === null) {
         return
     }
@@ -244,20 +243,10 @@ function handleChangeFilesList(nodeInputFile) {
 }
 
 
-function extendedHandleChangeFilesList(nodeInputFile, class_name) {
-    const parentFrame = nodeInputFile.closest(class_name)
-    console.log("parentFrame:", parentFrame)
-    if (parentFrame === null) {
-        return
-    }
-    const listFileNames = parentFrame.querySelector('ul.upload-file-names')
-    console.log("listFileNames:", listFileNames)
-    if (listFileNames === null) {
-        return
-    }
-    listFileNames.innerHTML = ''
+function addFilesSequentially(nodeInputFile, listFileNames) {
     unblockSubmit(nodeInputFile)
 
+    listFileNames.innerHTML = ''
     const accept = nodeInputFile.accept.length ? nodeInputFile.accept.split(',') : []
     const extensions = [],
         mimetypes = [],
@@ -294,15 +283,33 @@ function extendedHandleChangeFilesList(nodeInputFile, class_name) {
         }
     }
 
+    console.log("extensions:", extensions)
+    console.log("mimetypes:", mimetypes)
+
     for (let i = 0; i < nodeInputFile.files.length; i++) {
+        console.log("file type:", nodeInputFile.files[i].type)
+
         const item = document.createElement("li")
+
         const file_name = nodeInputFile.files[i].name
-        const name = document.createElement("span")
+
+        const status = document.createElement("div")
+        status.classList.add("status")
+        item.appendChild(status)
+
+        const name = document.createElement("div")
+        name.classList.add("file-name")
         name.appendChild(document.createTextNode(file_name + " "))
         item.appendChild(name)
+
+        const message = document.createElement("div")
+        message.classList.add("error")
+        item.appendChild(message)
+
         const errors = []
         if (i >= nodeInputFile.dataset.max_files) {
             errors.push(gettext('This file exceeds the uploaded files limit.'))
+            message.appendChild(document.createTextNode(gettext('This file exceeds the uploaded files limit.')))
         }
 
         let is_expected_type = accept.length ? false : true
@@ -327,18 +334,17 @@ function extendedHandleChangeFilesList(nodeInputFile, class_name) {
 
         if (!is_expected_type) {
             errors.push(gettext('The file type is not among the accpeted types.'))
+            message.appendChild(document.createTextNode(gettext('The file type is not among the accpeted types.')))
         }
 
+        const icon = document.createElement("img")
         if (errors.length) {
-            is_valid = false
-            name.title = errors.join(" ")
-            name.classList.add("fail-upload")
-            const icon = document.createElement("img")
-            icon.src = '/static/admin/img/icon-alert.svg'
-            icon.width = 16
-            icon.height = 16
-            name.insertBefore(icon, name.firstChild)
+            icon.src = "/static/aldryn_forms/img/exclamation-mark.svg"
+        } else {
+            icon.src = "/static/aldryn_forms/img/attach-file.svg"
         }
+        status.appendChild(icon)
+
         listFileNames.appendChild(item)
     }
 
@@ -348,7 +354,7 @@ function extendedHandleChangeFilesList(nodeInputFile, class_name) {
 }
 
 
-function extendedDragAndDrop(input) {
+function dragAndDropSequentially(input) {
     const class_name = "drop-and-upload-file-frame"
     const uploadFileFrame = document.createElement("div")
     uploadFileFrame.classList.add(class_name)
@@ -359,6 +365,10 @@ function extendedDragAndDrop(input) {
 
     const label = document.createElement("div")
     label.classList.add("label")
+
+    const icon = document.createElement("img")
+    icon.src = "/static/aldryn_forms/img/upload-one.svg"
+    label.appendChild(icon)
 
     if (input.placeholder) {
         const title = document.createElement("h4")
@@ -380,14 +390,15 @@ function extendedDragAndDrop(input) {
     const listFileNames = document.createElement("ul")
     listFileNames.classList.add("upload-file-names")
     uploadFileFrame.appendChild(listFileNames)
-    input.addEventListener('change', (event) => extendedHandleChangeFilesList(event.target, "." + class_name), false)
+
+    input.addEventListener('change', (event) => addFilesSequentially(event.target, listFileNames), false)
 }
 
 
 export function enableFieldUploadDragAndDrop() {
     for (const input of document.querySelectorAll('input[type=file]')) {
         if (input.classList.contains("drag-and-drop")) {
-            extendedDragAndDrop(input)
+            dragAndDropSequentially(input)
         } else if (input.dataset.enable_js !== undefined) {
             // <div class="upload-file-frame">
             const uploadFileFrame = document.createElement("div")

@@ -10,7 +10,7 @@ export function validateForm(form) {
 
     const validateFieldset = () => {
         const allValid = Array.from(requiredInputs).every(input => input.checkValidity())
-        console.log("allValid:", allValid)
+        console.log("validateFieldset() allValid:", allValid)
         if (form.dataset.validate_result) {
             form.dataset.validate_result(allValid)
         } else {
@@ -24,6 +24,11 @@ export function validateForm(form) {
         input.addEventListener('input', validateFieldset)   // for text inputs
         input.addEventListener('change', validateFieldset)  // for checkboxes, selects, etc.
     })
+
+    // Disable submit buttons.
+    for(const submit of form.querySelectorAll('[type="submit"]')) {
+        submit.disabled = true
+    }
 }
 
 
@@ -203,6 +208,7 @@ function handleChangeFilesList(nodeInputFile, listFileNames, asyncFetch) {
         listItem.classList.add("error")
         // nodeInputFile.classList.add("error")
         nodeInputFile.setCustomValidity(text)
+        console.log("nodeInputFile.setCustomValidity", text)
     }
 
     // let is_valid = true
@@ -241,6 +247,8 @@ function handleChangeFilesList(nodeInputFile, listFileNames, asyncFetch) {
     console.log("extensions:", extensions)
     console.log("mimetypes:", mimetypes)
 
+    let number_items_exceeded = false
+
     for (let i = 0; i < nodeInputFile.files.length; i++) {
         console.log("file type:", nodeInputFile.files[i].type)
         attachmetns += 1
@@ -278,6 +286,7 @@ function handleChangeFilesList(nodeInputFile, listFileNames, asyncFetch) {
         content.appendChild(message)
 
         // const errors = []
+        console.log("nodeInputFile.dataset.max_files:", nodeInputFile.dataset.max_files, "attachmetns:", attachmetns)
         let valid = true
         if (nodeInputFile.dataset.max_files !== null && attachmetns > nodeInputFile.dataset.max_files) {
             // const text = gettext('This file exceeds the uploaded files limit.')
@@ -290,7 +299,7 @@ function handleChangeFilesList(nodeInputFile, listFileNames, asyncFetch) {
             // nodeInputFile.setCustomValidity(text)
             valid = false
             appendError(listItem, message, gettext('This file exceeds the uploaded files limit.'))
-            break
+            number_items_exceeded = true
         }
 
         let is_expected_type = accept.length ? false : true
@@ -349,6 +358,13 @@ function handleChangeFilesList(nodeInputFile, listFileNames, asyncFetch) {
         status.appendChild(icon)
 
         listFileNames.appendChild(listItem)
+
+        const event = new Event("change")
+        nodeInputFile.dispatchEvent(event)
+
+        if (number_items_exceeded) {
+            break
+        }
     }
 
     // if (!is_valid) {

@@ -10,6 +10,7 @@ export function validateForm(form) {
 
     const validateFieldset = () => {
         const allValid = Array.from(requiredInputs).every(input => input.checkValidity())
+        console.log("allValid:", allValid)
         if (form.dataset.validate_result) {
             form.dataset.validate_result(allValid)
         } else {
@@ -170,15 +171,42 @@ function humanFileSize(size) {
 function handleChangeFilesList(nodeInputFile, listFileNames, asyncFetch) {
     // unblockSubmit(nodeInputFile)
 
-    if (!asyncFetch) {
-        listFileNames.innerHTML = ''
+    let attachmetns = 0
+    let total_size = 0
+
+    if (asyncFetch) {
+        // attachmetns = listFileNames.querySelectorAll("li").length
+        for(const item of listFileNames.querySelectorAll("li")) {
+            attachmetns += 1
+            total_size += item.file.size
+        }
+    } else {
+        // attachmetns = 0
+        // total_size = 0
+        listFileNames.innerHTML = ""
     }
+    console.log("attachmetns:", attachmetns)
+    console.log("total_size:", total_size)
+
     const accept = nodeInputFile.accept.length ? nodeInputFile.accept.split(',') : []
     const extensions = [],
         mimetypes = [],
-        maim_mimes = []
-    let is_valid = true
+        maim_mimes = [];
 
+    // let total_size = 0;
+
+    const appendError = (listItem, message, text) => {
+        // errors.push(text)
+        const msg = document.createElement("div")
+        msg.appendChild(document.createTextNode(text))
+        message.appendChild(msg)
+        listItem.classList.add("error")
+        // nodeInputFile.classList.add("error")
+        nodeInputFile.setCustomValidity(text)
+    }
+
+    // let is_valid = true
+    /*
     let files_size_summary = null
     if (nodeInputFile.dataset.max_size !== null) {
         files_size_summary = 0
@@ -193,6 +221,7 @@ function handleChangeFilesList(nodeInputFile, listFileNames, asyncFetch) {
         msg.appendChild(document.createTextNode(gettext('The total file size has exceeded the specified limit.')))
         listFileNames.appendChild(msg)
     }
+    */
 
     if (nodeInputFile.accept.length) {
         for (let i = 0; i < accept.length; i++) {
@@ -214,6 +243,7 @@ function handleChangeFilesList(nodeInputFile, listFileNames, asyncFetch) {
 
     for (let i = 0; i < nodeInputFile.files.length; i++) {
         console.log("file type:", nodeInputFile.files[i].type)
+        attachmetns += 1
 
         const listItem = document.createElement("li")
         listItem.file = nodeInputFile.files[i]
@@ -247,14 +277,20 @@ function handleChangeFilesList(nodeInputFile, listFileNames, asyncFetch) {
         message.classList.add("error")
         content.appendChild(message)
 
-        const errors = []
-        if (i >= nodeInputFile.dataset.max_files) {
-            errors.push(gettext('This file exceeds the uploaded files limit.'))
-            const msg = document.createElement("div")
-            msg.appendChild(document.createTextNode(gettext('This file exceeds the uploaded files limit.')))
-            message.appendChild(msg)
-            listItem.classList.add("error")
-            is_valid = false
+        // const errors = []
+        let valid = true
+        if (nodeInputFile.dataset.max_files !== null && attachmetns > nodeInputFile.dataset.max_files) {
+            // const text = gettext('This file exceeds the uploaded files limit.')
+            // errors.push(text)
+            // const msg = document.createElement("div")
+            // msg.appendChild(document.createTextNode(text))
+            // message.appendChild(msg)
+            // listItem.classList.add("error")
+            // // is_valid = false
+            // nodeInputFile.setCustomValidity(text)
+            valid = false
+            appendError(listItem, message, gettext('This file exceeds the uploaded files limit.'))
+            break
         }
 
         let is_expected_type = accept.length ? false : true
@@ -278,19 +314,37 @@ function handleChangeFilesList(nodeInputFile, listFileNames, asyncFetch) {
         }
 
         if (!is_expected_type) {
-            errors.push(gettext('The file type is not among the accpeted types.'))
-            const msg = document.createElement("div")
-            msg.appendChild(document.createTextNode(gettext('The file type is not among the accpeted types.')))
-            message.appendChild(msg)
-            listItem.classList.add("error")
-            is_valid = false
+            // const text = gettext('The file type is not among the accpeted types.')
+            // errors.push(text)
+            // const msg = document.createElement("div")
+            // msg.appendChild(document.createTextNode(text))
+            // message.appendChild(msg)
+            // listItem.classList.add("error")
+            // // is_valid = false
+            // nodeInputFile.setCustomValidity(text)
+            valid = false
+            appendError(listItem, message, gettext('The file type is not among the accpeted types.'))
+        }
+
+        total_size += nodeInputFile.files[i].size
+        if (nodeInputFile.dataset.max_size !== null && total_size > nodeInputFile.dataset.max_size) {
+            // const text = gettext('The file size has exceeded the specified limit.')
+            // errors.push(text)
+            // const msg = document.createElement("div")
+            // msg.appendChild(document.createTextNode(text))
+            // message.appendChild(msg)
+            // listItem.classList.add("error")
+            // // is_valid = false
+            // nodeInputFile.setCustomValidity(text)
+            valid = false
+            appendError(listItem, message, gettext('The file size has exceeded the specified limit.'))
         }
 
         const icon = document.createElement("img")
-        if (errors.length) {
-            icon.src = "/static/aldryn_forms/img/exclamation-mark.svg"
-        } else {
+        if (valid) {
             icon.src = "/static/aldryn_forms/img/attach-file.svg"
+        } else {
+            icon.src = "/static/aldryn_forms/img/exclamation-mark.svg"
         }
         status.appendChild(icon)
 
@@ -310,31 +364,31 @@ function handleChangeFilesList(nodeInputFile, listFileNames, asyncFetch) {
     //     nodeInputFile.setCustomValidity("Invalid attachment")
     //     console.log("setCustomValidity to ERROR")
     // }
-    checkIsValid(nodeInputFile, listFileNames)
+    // checkIsValid(nodeInputFile, listFileNames)
 }
 
-function checkIsValid(nodeInputFile, listFileNames) {
-    if (listFileNames.querySelectorAll("li.error").length) {
-        nodeInputFile.classList.add("error")
-        nodeInputFile.setCustomValidity("Invalid attachment")
-        console.log("setCustomValidity to ERROR")
-    } else {
-        nodeInputFile.classList.remove("error")
-        nodeInputFile.setCustomValidity("")
-        console.log("setCustomValidity to OK")
-    }
-}
+// function checkIsValid(nodeInputFile, listFileNames) {
+//     if (listFileNames.querySelectorAll("li.error").length) {
+//         // nodeInputFile.classList.add("error")
+//         // nodeInputFile.validity
+//         nodeInputFile.setCustomValidity("Invalid attachment")
+//         console.log("setCustomValidity to ERROR")
+//     } else {
+//         // nodeInputFile.classList.remove("error")
+//         nodeInputFile.setCustomValidity("")
+//         console.log("setCustomValidity to OK")
+//     }
+// }
 
 function removeAttachment(event) {
-    const ul = event.target.closest("ul")
-    const frame = ul.closest("." + uploadFilesFrame)
-    const nodeInputFile = frame.querySelector("input[type=file]")
+    // const frame = listFileNames.closest("." + uploadFilesFrame)
+    // const nodeInputFile = frame.querySelector("input[type=file]")
     // console.log("ul:", ul)
     // console.log("frame:", frame)
     // console.log("nodeInputFile:", nodeInputFile)
     // console.log("li.error:", ul.querySelectorAll("li.error").length)
     event.target.closest("li").remove()
-    checkIsValid(ul, nodeInputFile)
+    // checkIsValid(ul, nodeInputFile)
     // if (ul.querySelectorAll("li.error").length) {
     //     nodeInputFile.classList.add("error")
     //     nodeInputFile.setCustomValidity("Invalid attachment")
@@ -344,6 +398,13 @@ function removeAttachment(event) {
     //     nodeInputFile.setCustomValidity("")
     //     console.log("setCustomValidity to OK")
     // }
+    const listFileNames = event.target.closest("ul")
+    if (!listFileNames.querySelectorAll("li.error").length) {
+        const frame = listFileNames.closest("." + uploadFilesFrame)
+        const nodeInputFile = frame.querySelector("input[type=file]")
+        nodeInputFile.setCustomValidity("")
+        console.log("setCustomValidity to OK")
+    }
 }
 
 

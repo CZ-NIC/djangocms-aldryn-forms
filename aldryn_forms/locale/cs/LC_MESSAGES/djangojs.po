@@ -29,6 +29,9 @@ msgstr "Prosím čekejte. Formulář se odesílá..."
 msgid "Remove file."
 msgstr "Odebrat soubor."
 
+msgid "The file size has exceeded the specified limit."
+msgstr "Velikost souboru přesáhla stanovený limit."
+
 msgid "The file type is not among the accpeted types."
 msgstr "Typ souboru není mezi povolenými typy."
 

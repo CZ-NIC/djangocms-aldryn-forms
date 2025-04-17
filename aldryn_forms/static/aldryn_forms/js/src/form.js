@@ -5,6 +5,27 @@ if (typeof gettext !== "function") {
     window.gettext = text => text
 }
 
+export function validateForm(form) {
+    const requiredInputs = form.querySelectorAll('input[required], select[required], textarea[required], input.check-validity')
+
+    const validateFieldset = () => {
+        const allValid = Array.from(requiredInputs).every(input => input.checkValidity())
+        if (form.dataset.validate_result) {
+            form.dataset.validate_result(allValid)
+        } else {
+            for(const submit of form.querySelectorAll('[type="submit"]')) {
+                submit.disabled = !allValid
+            }
+        }
+    }
+    // Add event listeners to all required inputs
+    requiredInputs.forEach(input => {
+        input.addEventListener('input', validateFieldset)   // for text inputs
+        input.addEventListener('change', validateFieldset)  // for checkboxes, selects, etc.
+    })
+}
+
+
 function populate(text, obj) {
     // Map values to the text. E.g. "Text %(value)s."
     for (const [key, value] of Object.entries(obj)) {
@@ -95,7 +116,7 @@ export function handleRequiredFields(event) {
     }
 }
 
-
+/*
 function blockSubmit(nodeInput) {
     const form = nodeInput.closest("form")
     for (const button of form.querySelectorAll('[type=submit]')) {
@@ -116,6 +137,7 @@ function unblockSubmit(nodeInput) {
         element.remove()
     }
 }
+*/
 
 function displayNodeMessages(node, messages, class_name) {
     node.insertAdjacentHTML(
@@ -146,7 +168,7 @@ function humanFileSize(size) {
 }
 
 function handleChangeFilesList(nodeInputFile, listFileNames, asyncFetch) {
-    unblockSubmit(nodeInputFile)
+    // unblockSubmit(nodeInputFile)
 
     if (!asyncFetch) {
         listFileNames.innerHTML = ''
@@ -218,10 +240,7 @@ function handleChangeFilesList(nodeInputFile, listFileNames, asyncFetch) {
             trash.style.cursor = "pointer"
             trash.alt = trash.title = gettext("Remove file.")
             listItem.appendChild(trash)
-            trash.addEventListener("click", (event) => {
-                event.target.closest("li").remove()
-                // TODO: walk over others li and check errors.
-            })
+            trash.addEventListener("click", removeAttachment)
         }
 
         const message = document.createElement("div")
@@ -278,9 +297,53 @@ function handleChangeFilesList(nodeInputFile, listFileNames, asyncFetch) {
         listFileNames.appendChild(listItem)
     }
 
-    if (!is_valid) {
-        blockSubmit(nodeInputFile)
+    // if (!is_valid) {
+    //     // blockSubmit(nodeInputFile)
+    // }
+    // nodeInputFile.required = !is_valid
+    // if (is_valid) {
+    //     nodeInputFile.classList.remove("error")
+    //     nodeInputFile.setCustomValidity("")
+    //     console.log("setCustomValidity to OK")
+    // } else {
+    //     nodeInputFile.classList.add("error")
+    //     nodeInputFile.setCustomValidity("Invalid attachment")
+    //     console.log("setCustomValidity to ERROR")
+    // }
+    checkIsValid(nodeInputFile, listFileNames)
+}
+
+function checkIsValid(nodeInputFile, listFileNames) {
+    if (listFileNames.querySelectorAll("li.error").length) {
+        nodeInputFile.classList.add("error")
+        nodeInputFile.setCustomValidity("Invalid attachment")
+        console.log("setCustomValidity to ERROR")
+    } else {
+        nodeInputFile.classList.remove("error")
+        nodeInputFile.setCustomValidity("")
+        console.log("setCustomValidity to OK")
     }
+}
+
+function removeAttachment(event) {
+    const ul = event.target.closest("ul")
+    const frame = ul.closest("." + uploadFilesFrame)
+    const nodeInputFile = frame.querySelector("input[type=file]")
+    // console.log("ul:", ul)
+    // console.log("frame:", frame)
+    // console.log("nodeInputFile:", nodeInputFile)
+    // console.log("li.error:", ul.querySelectorAll("li.error").length)
+    event.target.closest("li").remove()
+    checkIsValid(ul, nodeInputFile)
+    // if (ul.querySelectorAll("li.error").length) {
+    //     nodeInputFile.classList.add("error")
+    //     nodeInputFile.setCustomValidity("Invalid attachment")
+    //     console.log("setCustomValidity to ERROR")
+    // } else {
+    //     nodeInputFile.classList.remove("error")
+    //     nodeInputFile.setCustomValidity("")
+    //     console.log("setCustomValidity to OK")
+    // }
 }
 
 
@@ -288,6 +351,7 @@ const uploadFilesFrame = "upload-files-frame"
 
 
 function dragAndDropFields(input) {
+    input.classList.add("check-validity")
     const uploadFileFrame = document.createElement("div")
     uploadFileFrame.classList.add(uploadFilesFrame)
     if (input.classList.contains("drag-and-drop")) {

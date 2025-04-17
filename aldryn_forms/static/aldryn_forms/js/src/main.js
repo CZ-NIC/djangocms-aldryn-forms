@@ -5,6 +5,7 @@ import {
     handleFormRequiredCheckbox,
     enableSubmitFromByFetch,
     sendData,
+    validateForm
 } from './form'
 
 
@@ -18,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 form.addEventListener('submit', (event) => disableButtonSubmit(event, true))
             }
         } else {
+            validateForm(form)
             // Skip forms with class skip-disable-submit.
             if (!form.classList.contains("skip-disable-submit")) {
                 form.addEventListener('submit', (event) => disableButtonSubmit(event, false))

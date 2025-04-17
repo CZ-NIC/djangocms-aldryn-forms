@@ -6,7 +6,7 @@ if (typeof gettext !== "function") {
 }
 
 export function validateForm(form) {
-    const requiredInputs = form.querySelectorAll('input[required], select[required], textarea[required]')  // , input.check-validity
+    const requiredInputs = form.querySelectorAll('input[required], select[required], textarea[required], input[type=file]')  // , input.check-validity
 
     const validateFieldset = () => {
         const allValid = Array.from(requiredInputs).every(input => input.checkValidity())
@@ -26,11 +26,12 @@ export function validateForm(form) {
     })
 
     // DEBUG:
-    const node = form.querySelector("input.check-validity")
-    console.log("NODE: input.check-validity:", node)
+    const node = form.querySelector("input[type=file]")
+    console.log("NODE: input[type=file]:", node)
     if (node) {
         node.addEventListener('change', (event) => {
-            console.log("Dispatch event CHANGE", event.target)
+            console.log("Dispatch event CHANGE", event)
+            console.log("this.files:", this.files)
         })
     }
 

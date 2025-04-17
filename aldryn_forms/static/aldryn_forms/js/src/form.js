@@ -6,7 +6,7 @@ if (typeof gettext !== "function") {
 }
 
 export function validateForm(form) {
-    const requiredInputs = form.querySelectorAll('input[required], select[required], textarea[required], input.check-validity')
+    const requiredInputs = form.querySelectorAll('input[required], select[required], textarea[required]')  // , input.check-validity
 
     const validateFieldset = () => {
         const allValid = Array.from(requiredInputs).every(input => input.checkValidity())
@@ -24,6 +24,15 @@ export function validateForm(form) {
         input.addEventListener('input', validateFieldset)   // for text inputs
         input.addEventListener('change', validateFieldset)  // for checkboxes, selects, etc.
     })
+
+    // DEBUG:
+    const node = form.querySelector("input.check-validity")
+    console.log("NODE: input.check-validity:", node)
+    if (node) {
+        node.addEventListener('change', (event) => {
+            console.log("Dispatch event CHANGE", event.target)
+        })
+    }
 
     // Disable submit buttons.
     for(const submit of form.querySelectorAll('[type="submit"]')) {
@@ -173,8 +182,19 @@ function humanFileSize(size) {
     return +((size / Math.pow(1024, i)).toFixed(2)) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
 }
 
-function handleChangeFilesList(nodeInputFile, listFileNames, asyncFetch) {
+function getAttachmentsList(nodeInputFile) {
+    const frame = nodeInputFile.closest("." + uploadFilesFrame)
+    return frame.querySelector("ul.upload-file-names")
+}
+
+function handleChangeFilesList(nodeInputFile) {
     // unblockSubmit(nodeInputFile)
+
+    const listFileNames = getAttachmentsList(nodeInputFile)
+    const form = nodeInputFile.closest("form")
+    const asyncFetch = form.classList.contains("submit-by-fetch")
+    console.log("listFileNames:", listFileNames)
+    console.log("asyncFetch:", asyncFetch)
 
     let attachmetns = 0
     let total_size = 0
@@ -248,6 +268,8 @@ function handleChangeFilesList(nodeInputFile, listFileNames, asyncFetch) {
     console.log("mimetypes:", mimetypes)
 
     let number_items_exceeded = false
+
+    console.log("nodeInputFile.files.length:", nodeInputFile.files.length)
 
     for (let i = 0; i < nodeInputFile.files.length; i++) {
         console.log("file type:", nodeInputFile.files[i].type)
@@ -359,8 +381,8 @@ function handleChangeFilesList(nodeInputFile, listFileNames, asyncFetch) {
 
         listFileNames.appendChild(listItem)
 
-        const event = new Event("change")
-        nodeInputFile.dispatchEvent(event)
+        // const event = new Event("change")
+        // nodeInputFile.dispatchEvent(event)
 
         if (number_items_exceeded) {
             break
@@ -397,6 +419,9 @@ function handleChangeFilesList(nodeInputFile, listFileNames, asyncFetch) {
 // }
 
 function removeAttachment(event) {
+    const listFileNames = event.target.closest("ul")
+    console.log("listFileNames:", listFileNames)
+
     // const frame = listFileNames.closest("." + uploadFilesFrame)
     // const nodeInputFile = frame.querySelector("input[type=file]")
     // console.log("ul:", ul)
@@ -414,7 +439,6 @@ function removeAttachment(event) {
     //     nodeInputFile.setCustomValidity("")
     //     console.log("setCustomValidity to OK")
     // }
-    const listFileNames = event.target.closest("ul")
     if (!listFileNames.querySelectorAll("li.error").length) {
         const frame = listFileNames.closest("." + uploadFilesFrame)
         const nodeInputFile = frame.querySelector("input[type=file]")
@@ -480,7 +504,7 @@ function dragAndDropFields(input) {
 
     const form = input.closest("form")
     form.classList.add("adjust-uploads")
-    input.addEventListener('change', (event) => handleChangeFilesList(event.target, listFileNames, form.classList.contains("submit-by-fetch")), false)
+    input.addEventListener('change', (event) => handleChangeFilesList(event.target), false)
 }
 
 

@@ -295,12 +295,15 @@ function handleChangeFilesList(nodeInputFile) {
         content.appendChild(name)
 
         if (asyncFetch) {
+            const remove = document.createElement("div")
+            remove.classList.add("remove")
             const trash = document.createElement("img")
             trash.src = "/static/aldryn_forms/img/trash.svg"
             trash.classList.add("trash")
             trash.style.cursor = "pointer"
             trash.alt = trash.title = gettext("Remove file.")
-            listItem.appendChild(trash)
+            remove.appendChild(trash)
+            listItem.appendChild(remove)
             trash.addEventListener("click", removeAttachment)
         }
 

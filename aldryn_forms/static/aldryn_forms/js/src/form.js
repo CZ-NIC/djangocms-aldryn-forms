@@ -543,7 +543,13 @@ function adjustUploads(form) {
     }
     for(const name of attachment_names) {
         const input = form.querySelector(`input[name=${name}]`)
+        if (!input) {
+            continue
+        }
         const frame = input.closest("." + uploadFilesFrame)
+        if (!frame) {
+            continue
+        }
         for(const attachment of frame.querySelectorAll(".upload-file-names li")) {
             formData.append(name, attachment.file)
         }

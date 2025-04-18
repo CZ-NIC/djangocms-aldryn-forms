@@ -10,6 +10,8 @@ import {
 
 
 document.addEventListener('DOMContentLoaded', () => {
+    enableFieldUploadDragAndDrop()
+    enableSubmitFromByFetch()
     // Disable button submit to prevent user click more than once.
     // Do not submit the form if any required fields are missing.
     for (const form of document.getElementsByTagName("form")) {
@@ -33,8 +35,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
-    enableFieldUploadDragAndDrop()
-    enableSubmitFromByFetch()
 })
 
 // Allow access from the entire document.

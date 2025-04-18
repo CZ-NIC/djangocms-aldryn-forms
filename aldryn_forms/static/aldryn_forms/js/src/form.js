@@ -6,12 +6,12 @@ if (typeof gettext !== "function") {
 }
 
 export function validateForm(form) {
-    const requiredInputs = form.querySelectorAll('input[required], select[required], textarea[required], input[type=file]')  // input[type=file], input.check-validity
+    const requiredInputs = form.querySelectorAll('input[required], select[required], textarea[required], input[type=file]')
 
     const validateFieldset = () => {
-        console.log("requiredInputs:", requiredInputs)
+        // console.log("requiredInputs:", requiredInputs)
         const allValid = Array.from(requiredInputs).every(input => input.checkValidity())
-        console.log("validateFieldset() allValid:", allValid)
+        // console.log("validateFieldset() allValid:", allValid)
         if (form.dataset.validate_result) {
             form.dataset.validate_result(allValid)
         } else {
@@ -26,19 +26,19 @@ export function validateForm(form) {
         input.addEventListener('change', validateFieldset)  // for checkboxes, selects, etc.
     })
 
-    // DEBUG:
-    for(const node of form.querySelectorAll('input[type=file]')) {
-        node.addEventListener('change', (event) => {
-            console.log("Dispatch event CHANGE", event)
-            console.log("this.files:", event.target.files)
-            // console.log("validateFieldset")
-            // validateFieldset(event)
-        })
-        node.addEventListener('drop', (event) => {
-            console.log("Dispatch event DROP", event)
-            console.log("this.files:", event.target.files)
-        })
-    }
+    // // DEBUG:
+    // for(const node of form.querySelectorAll('input[type=file]')) {
+    //     node.addEventListener('change', (event) => {
+    //         console.log("Dispatch event CHANGE", event)
+    //         console.log("this.files:", event.target.files)
+    //         // console.log("validateFieldset")
+    //         // validateFieldset()
+    //     })
+    //     node.addEventListener('drop', (event) => {
+    //         console.log("Dispatch event DROP", event)
+    //         console.log("this.files:", event.target.files)
+    //     })
+    // }
 
     // Disable submit buttons.
     for(const submit of form.querySelectorAll('[type="submit"]')) {
@@ -234,7 +234,7 @@ function handleChangeFilesList(nodeInputFile) {
         listItem.classList.add("error")
         // nodeInputFile.classList.add("error")
         nodeInputFile.setCustomValidity(text)
-        console.log("nodeInputFile.setCustomValidity", text)
+        // console.log("nodeInputFile.setCustomValidity", text)
     }
 
     // let is_valid = true
@@ -452,7 +452,12 @@ function removeAttachment(event) {
         const frame = listFileNames.closest("." + uploadFilesFrame)
         const nodeInputFile = frame.querySelector("input[type=file]")
         nodeInputFile.setCustomValidity("")
-        console.log("setCustomValidity to OK")
+        // console.log("setCustomValidity to OK")
+        // console.log("nodeInputFile to validate:", nodeInputFile)
+        // Trigger event Change to validate form.
+        nodeInputFile.value = null
+        nodeInputFile.dispatchEvent(new Event("change"))
+
     }
 }
 

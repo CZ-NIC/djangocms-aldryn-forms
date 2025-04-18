@@ -298,7 +298,9 @@ function handleChangeFilesList(nodeInputFile) {
 
         const name = document.createElement("div")
         name.classList.add("file-name")
-        name.appendChild(document.createTextNode(file_name + " "))
+        name.title = humanFileSize(nodeInputFile.files[i].size)
+        name.appendChild(document.createTextNode(file_name))
+        // name.appendChild(document.createTextNode(" " + humanFileSize(nodeInputFile.files[i].size)))
         content.appendChild(name)
 
         if (asyncFetch) {
@@ -353,7 +355,7 @@ function handleChangeFilesList(nodeInputFile) {
         total_size += nodeInputFile.files[i].size
         if (nodeInputFile.dataset.max_size !== null && total_size > nodeInputFile.dataset.max_size) {
             valid = false
-            appendError(listItem, message, "file-size", gettext('The file size has exceeded the specified limit.'))
+            appendError(listItem, message, "file-size", gettext('The total size of all files has exceeded the specified limit.'))
         }
 
         const icon = document.createElement("img")
@@ -402,12 +404,10 @@ function removeAttachment(event) {
     let total_size = 0
     let attachments = 0
     for (const nodeLi of listFileNames.querySelectorAll("li")) {
-        attachments += 1
-        total_size += nodeLi.file.size
-        console.log("nodeLi:", nodeLi, "attachments:", attachments, "total_size:", total_size)
-        console.log("? limit:", nodeLi.classList.contains("files-limit"))
-        console.log("? nodeInputFile.dataset.max_files:", nodeInputFile.dataset.max_files, "attachments:", attachments)
-        if (nodeLi.classList.contains("files-limit") && nodeInputFile.dataset.max_files !== null && attachments <= nodeInputFile.dataset.max_files) {
+        // console.log("nodeLi:", nodeLi, "attachments:", attachments, "total_size:", total_size)
+        // console.log("? limit:", nodeLi.classList.contains("files-limit"))
+        // console.log("? nodeInputFile.dataset.max_files:", nodeInputFile.dataset.max_files, "attachments:", attachments)
+        if (nodeLi.classList.contains("files-limit") && nodeInputFile.dataset.max_files !== null && attachments < nodeInputFile.dataset.max_files) {
             // TODO: remove message, remove parent, if is empty.
             console.log("!!! removeError", nodeLi)
             removeError(nodeLi, "files-limit")
@@ -421,10 +421,17 @@ function removeAttachment(event) {
             //     }
             //     nodeLi.classList.remove("error")
             // }
+        } else {
+            attachments += 1
         }
-        if (nodeLi.classList.contains("file-size") && nodeInputFile.dataset.max_size !== null && total_size <= nodeInputFile.dataset.max_size) {
+        console.log("??? file-size:", nodeLi.classList.contains("file-size"))
+        console.log("??? nodeInputFile.dataset.max_size:", nodeInputFile.dataset.max_size, "total_size:", total_size)
+        total_size += nodeLi.file.size
+        if (nodeLi.classList.contains("file-size") && nodeInputFile.dataset.max_size !== null && total_size < nodeInputFile.dataset.max_size) {
             // TODO: remove message, remove parent, if is empty.
-            removeError(nodeLi, "files-size")
+            total_size -= nodeLi.file.size
+            console.log("!!! REMOVE file-size !!!", nodeLi)
+            removeError(nodeLi, "file-size")
         }
         // TODO: remove class error from li, if it does not have errors.
     }
@@ -438,16 +445,16 @@ function removeAttachment(event) {
 
 
 function removeError(nodeLi, name) {
-    // document.xxx = nodeLi
-    // console.log("----------------------------")
-    // console.log("removeError", nodeLi, name)
-    for (const node of nodeLi.querySelectorAll("." + name)) {
-        // console.log("1.node.remove():", node)
+    document.xxx = nodeLi
+    console.log("----------------------------")
+    console.log("removeError", nodeLi, name)
+    for (const node of nodeLi.querySelectorAll(".content > .error > div." + name)) {
+        console.log("1.node.remove():", node)
         node.remove()
     }
     nodeLi.classList.remove(name)
-    // console.log("??? .error div:", nodeLi.querySelectorAll(".error div").length)
-    // document.xxx.querySelectorAll(".content > .error")
+    console.log("??? .content > .error > div:", nodeLi.querySelectorAll(".content > .error > div").length)
+    document.xxx.querySelectorAll(".content > .error")
     if (!nodeLi.querySelectorAll(".content > .error > div").length) {
         // for (const node of nodeLi.querySelectorAll(".error")) {
         //     console.log("2.node.remove():", node)

@@ -35,8 +35,8 @@ msgstr "Velikost souboru přesáhla stanovený limit."
 msgid "The file type is not among the accpeted types."
 msgstr "Typ souboru není mezi povolenými typy."
 
-msgid "The total file size has exceeded the specified limit."
-msgstr "Celková velikost souborů přesáhla stanovený limit."
+msgid "The total size of all files has exceeded the specified limit."
+msgstr "Celková velikost všech souborů přesáhla stanovený limit."
 
 msgid "This file exceeds the uploaded files limit."
 msgstr "Tento soubor překračuje limit souborů pro nahrání."

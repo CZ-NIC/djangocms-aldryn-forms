@@ -226,12 +226,14 @@ function handleChangeFilesList(nodeInputFile) {
 
     // let total_size = 0;
 
-    const appendError = (listItem, message, text) => {
+    const appendError = (listItem, message, name, text) => {
         // errors.push(text)
         const msg = document.createElement("div")
+        msg.classList.add(name)
         msg.appendChild(document.createTextNode(text))
         message.appendChild(msg)
         listItem.classList.add("error")
+        listItem.classList.add(name)
         // nodeInputFile.classList.add("error")
         nodeInputFile.setCustomValidity(text)
         // console.log("nodeInputFile.setCustomValidity", text)
@@ -316,20 +318,10 @@ function handleChangeFilesList(nodeInputFile) {
         message.classList.add("error")
         content.appendChild(message)
 
-        // const errors = []
-        // console.log("nodeInputFile.dataset.max_files:", nodeInputFile.dataset.max_files, "attachmetns:", attachmetns)
         let valid = true
         if (nodeInputFile.dataset.max_files !== null && attachmetns > nodeInputFile.dataset.max_files) {
-            // const text = gettext('This file exceeds the uploaded files limit.')
-            // errors.push(text)
-            // const msg = document.createElement("div")
-            // msg.appendChild(document.createTextNode(text))
-            // message.appendChild(msg)
-            // listItem.classList.add("error")
-            // // is_valid = false
-            // nodeInputFile.setCustomValidity(text)
             valid = false
-            appendError(listItem, message, gettext('This file exceeds the uploaded files limit.'))
+            appendError(listItem, message, "files-limit", gettext('This file exceeds the uploaded files limit.'))
             number_items_exceeded = true
         }
 
@@ -354,30 +346,14 @@ function handleChangeFilesList(nodeInputFile) {
         }
 
         if (!is_expected_type) {
-            // const text = gettext('The file type is not among the accpeted types.')
-            // errors.push(text)
-            // const msg = document.createElement("div")
-            // msg.appendChild(document.createTextNode(text))
-            // message.appendChild(msg)
-            // listItem.classList.add("error")
-            // // is_valid = false
-            // nodeInputFile.setCustomValidity(text)
             valid = false
-            appendError(listItem, message, gettext('The file type is not among the accpeted types.'))
+            appendError(listItem, message, "file-type", gettext('The file type is not among the accpeted types.'))
         }
 
         total_size += nodeInputFile.files[i].size
         if (nodeInputFile.dataset.max_size !== null && total_size > nodeInputFile.dataset.max_size) {
-            // const text = gettext('The file size has exceeded the specified limit.')
-            // errors.push(text)
-            // const msg = document.createElement("div")
-            // msg.appendChild(document.createTextNode(text))
-            // message.appendChild(msg)
-            // listItem.classList.add("error")
-            // // is_valid = false
-            // nodeInputFile.setCustomValidity(text)
             valid = false
-            appendError(listItem, message, gettext('The file size has exceeded the specified limit.'))
+            appendError(listItem, message, "file-size", gettext('The file size has exceeded the specified limit.'))
         }
 
         const icon = document.createElement("img")
@@ -390,74 +366,52 @@ function handleChangeFilesList(nodeInputFile) {
 
         listFileNames.appendChild(listItem)
 
-        // const event = new Event("change")
-        // nodeInputFile.dispatchEvent(event)
-
         if (number_items_exceeded) {
             break
         }
     }
-
-    // if (!is_valid) {
-    //     // blockSubmit(nodeInputFile)
-    // }
-    // nodeInputFile.required = !is_valid
-    // if (is_valid) {
-    //     nodeInputFile.classList.remove("error")
-    //     nodeInputFile.setCustomValidity("")
-    //     console.log("setCustomValidity to OK")
-    // } else {
-    //     nodeInputFile.classList.add("error")
-    //     nodeInputFile.setCustomValidity("Invalid attachment")
-    //     console.log("setCustomValidity to ERROR")
-    // }
-    // checkIsValid(nodeInputFile, listFileNames)
 }
 
-// function checkIsValid(nodeInputFile, listFileNames) {
-//     if (listFileNames.querySelectorAll("li.error").length) {
-//         // nodeInputFile.classList.add("error")
-//         // nodeInputFile.validity
-//         nodeInputFile.setCustomValidity("Invalid attachment")
-//         console.log("setCustomValidity to ERROR")
-//     } else {
-//         // nodeInputFile.classList.remove("error")
-//         nodeInputFile.setCustomValidity("")
-//         console.log("setCustomValidity to OK")
-//     }
-// }
-
 function removeAttachment(event) {
-    const listFileNames = event.target.closest("ul")
-    // console.log("listFileNames:", listFileNames)
-
-    // const frame = listFileNames.closest("." + uploadFilesFrame)
-    // const nodeInputFile = frame.querySelector("input[type=file]")
-    // console.log("ul:", ul)
-    // console.log("frame:", frame)
-    // console.log("nodeInputFile:", nodeInputFile)
-    // console.log("li.error:", ul.querySelectorAll("li.error").length)
-    event.target.closest("li").remove()
-    // checkIsValid(ul, nodeInputFile)
-    // if (ul.querySelectorAll("li.error").length) {
-    //     nodeInputFile.classList.add("error")
-    //     nodeInputFile.setCustomValidity("Invalid attachment")
-    //     console.log("setCustomValidity to ERROR")
-    // } else {
-    //     nodeInputFile.classList.remove("error")
-    //     nodeInputFile.setCustomValidity("")
-    //     console.log("setCustomValidity to OK")
-    // }
-    if (!listFileNames.querySelectorAll("li.error").length) {
+    let nodeInputFile
+    try {
+        const listFileNames = event.target.closest("ul")
         const frame = listFileNames.closest("." + uploadFilesFrame)
-        const nodeInputFile = frame.querySelector("input[type=file]")
-        nodeInputFile.setCustomValidity("")
-        // console.log("setCustomValidity to OK")
-        // console.log("nodeInputFile to validate:", nodeInputFile)
+        nodeInputFile = frame.querySelector("input[type=file]")
+    } catch (error) {
+        console.error(error)
+        return
+    }
+    event.target.closest("li").remove()
+
+    // TODO: recalculate all items for limit and size.
+    // if (!listFileNames.querySelectorAll("li.error").length) {
+    //     const frame = listFileNames.closest("." + uploadFilesFrame)
+    //     const nodeInputFile = frame.querySelector("input[type=file]")
+    //     nodeInputFile.setCustomValidity("")
+    //     // Trigger event Change to validate form.
+    //     nodeInputFile.value = null
+    //     nodeInputFile.dispatchEvent(new Event("change"))
+    // }
+
+    // Recalculate all items for limit and size.
+    let total_size = 0
+    let attachmetns = 0
+    for (const nodeLi of listFileNames.querySelectorAll("li")) {
+        attachmetns += 1
+        total_size += nodeLi.file.size
+        if (nodeLi.classList.contains("files-limit" && nodeInputFile.dataset.max_files !== null && attachmetns < nodeInputFile.dataset.max_files)) {
+            // TODO: remove message, remove parent, if is empty.
+        }
+        if (nodeLi.classList.contains("file-size") && nodeInputFile.dataset.max_size !== null && total_size < nodeInputFile.dataset.max_size) {
+            // TODO: remove message, remove parent, if is empty.
+        }
+        // TODO: remove class error from li, if it does not have errors.
+    }
+    if (!listFileNames.querySelectorAll("li.error").length) {
         // Trigger event Change to validate form.
         nodeInputFile.value = null
         nodeInputFile.dispatchEvent(new Event("change"))
-
     }
 }
 
@@ -494,6 +448,9 @@ function dragAndDropFields(input) {
             description.appendChild(document.createTextNode(gettext("Max. size") + " " + humanFileSize(input.dataset.max_size)))
             label.appendChild(description)
         }
+        // TODO:
+        // Celkem max. velikost 5 MB
+        // Max 3 souborů o celkem max. velikosti 5 MB
         dragAndDrop.appendChild(label)
     }
 

@@ -373,9 +373,9 @@ function handleChangeFilesList(nodeInputFile) {
 }
 
 function removeAttachment(event) {
-    let nodeInputFile
+    let nodeInputFile, listFileNames
     try {
-        const listFileNames = event.target.closest("ul")
+        listFileNames = event.target.closest("ul")
         const frame = listFileNames.closest("." + uploadFilesFrame)
         nodeInputFile = frame.querySelector("input[type=file]")
     } catch (error) {
@@ -410,6 +410,7 @@ function removeAttachment(event) {
     }
     if (!listFileNames.querySelectorAll("li.error").length) {
         // Trigger event Change to validate form.
+        nodeInputFile.setCustomValidity("")
         nodeInputFile.value = null
         nodeInputFile.dispatchEvent(new Event("change"))
     }

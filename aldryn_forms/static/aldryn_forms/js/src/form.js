@@ -6,9 +6,10 @@ if (typeof gettext !== "function") {
 }
 
 export function validateForm(form) {
-    const requiredInputs = form.querySelectorAll('input[required], select[required], textarea[required], input[type=file]')  // , input.check-validity
+    const requiredInputs = form.querySelectorAll('input[required], select[required], textarea[required], input[type=file]')  // input[type=file], input.check-validity
 
     const validateFieldset = () => {
+        console.log("requiredInputs:", requiredInputs)
         const allValid = Array.from(requiredInputs).every(input => input.checkValidity())
         console.log("validateFieldset() allValid:", allValid)
         if (form.dataset.validate_result) {
@@ -26,12 +27,16 @@ export function validateForm(form) {
     })
 
     // DEBUG:
-    const node = form.querySelector("input[type=file]")
-    console.log("NODE: input[type=file]:", node)
-    if (node) {
+    for(const node of form.querySelectorAll('input[type=file]')) {
         node.addEventListener('change', (event) => {
             console.log("Dispatch event CHANGE", event)
-            console.log("this.files:", this.files)
+            console.log("this.files:", event.target.files)
+            // console.log("validateFieldset")
+            // validateFieldset(event)
+        })
+        node.addEventListener('drop', (event) => {
+            console.log("Dispatch event DROP", event)
+            console.log("this.files:", event.target.files)
         })
     }
 
@@ -194,8 +199,8 @@ function handleChangeFilesList(nodeInputFile) {
     const listFileNames = getAttachmentsList(nodeInputFile)
     const form = nodeInputFile.closest("form")
     const asyncFetch = form.classList.contains("submit-by-fetch")
-    console.log("listFileNames:", listFileNames)
-    console.log("asyncFetch:", asyncFetch)
+    // console.log("listFileNames:", listFileNames)
+    // console.log("asyncFetch:", asyncFetch)
 
     let attachmetns = 0
     let total_size = 0
@@ -211,8 +216,8 @@ function handleChangeFilesList(nodeInputFile) {
         // total_size = 0
         listFileNames.innerHTML = ""
     }
-    console.log("attachmetns:", attachmetns)
-    console.log("total_size:", total_size)
+    // console.log("attachmetns:", attachmetns)
+    // console.log("total_size:", total_size)
 
     const accept = nodeInputFile.accept.length ? nodeInputFile.accept.split(',') : []
     const extensions = [],
@@ -270,10 +275,10 @@ function handleChangeFilesList(nodeInputFile) {
 
     let number_items_exceeded = false
 
-    console.log("nodeInputFile.files.length:", nodeInputFile.files.length)
+    // console.log("nodeInputFile.files.length:", nodeInputFile.files.length)
 
     for (let i = 0; i < nodeInputFile.files.length; i++) {
-        console.log("file type:", nodeInputFile.files[i].type)
+        // console.log("file type:", nodeInputFile.files[i].type)
         attachmetns += 1
 
         const listItem = document.createElement("li")
@@ -312,7 +317,7 @@ function handleChangeFilesList(nodeInputFile) {
         content.appendChild(message)
 
         // const errors = []
-        console.log("nodeInputFile.dataset.max_files:", nodeInputFile.dataset.max_files, "attachmetns:", attachmetns)
+        // console.log("nodeInputFile.dataset.max_files:", nodeInputFile.dataset.max_files, "attachmetns:", attachmetns)
         let valid = true
         if (nodeInputFile.dataset.max_files !== null && attachmetns > nodeInputFile.dataset.max_files) {
             // const text = gettext('This file exceeds the uploaded files limit.')
@@ -424,7 +429,7 @@ function handleChangeFilesList(nodeInputFile) {
 
 function removeAttachment(event) {
     const listFileNames = event.target.closest("ul")
-    console.log("listFileNames:", listFileNames)
+    // console.log("listFileNames:", listFileNames)
 
     // const frame = listFileNames.closest("." + uploadFilesFrame)
     // const nodeInputFile = frame.querySelector("input[type=file]")

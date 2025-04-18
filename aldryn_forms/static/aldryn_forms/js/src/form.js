@@ -373,9 +373,9 @@ function handleChangeFilesList(nodeInputFile) {
 }
 
 function removeAttachment(event) {
-    let nodeInputFile, listFileNames
+    let nodeInputFile
     try {
-        listFileNames = event.target.closest("ul")
+        const listFileNames = event.target.closest("ul")
         const frame = listFileNames.closest("." + uploadFilesFrame)
         nodeInputFile = frame.querySelector("input[type=file]")
     } catch (error) {
@@ -384,6 +384,8 @@ function removeAttachment(event) {
     }
     event.target.closest("li").remove()
 
+    // const listFileNames = event.target.closest("ul")
+    const listFileNames = getAttachmentsList(nodeInputFile)
     console.log("listFileNames:", listFileNames)
 
     // TODO: recalculate all items for limit and size.
@@ -403,8 +405,11 @@ function removeAttachment(event) {
         attachments += 1
         total_size += nodeLi.file.size
         console.log("nodeLi:", nodeLi, "attachments:", attachments, "total_size:", total_size)
-        if (nodeLi.classList.contains("files-limit" && nodeInputFile.dataset.max_files !== null && attachments < nodeInputFile.dataset.max_files)) {
+        console.log("? limit:", nodeLi.classList.contains("files-limit"))
+        console.log("? nodeInputFile.dataset.max_files:", nodeInputFile.dataset.max_files, "attachments:", attachments)
+        if (nodeLi.classList.contains("files-limit") && nodeInputFile.dataset.max_files !== null && attachments <= nodeInputFile.dataset.max_files) {
             // TODO: remove message, remove parent, if is empty.
+            console.log("!!! removeError", nodeLi)
             removeError(nodeLi, "files-limit")
             // for (const node of nodeLi.querySelectorAll(".files-limit")) {
             //     node.remove()
@@ -417,7 +422,7 @@ function removeAttachment(event) {
             //     nodeLi.classList.remove("error")
             // }
         }
-        if (nodeLi.classList.contains("file-size") && nodeInputFile.dataset.max_size !== null && total_size < nodeInputFile.dataset.max_size) {
+        if (nodeLi.classList.contains("file-size") && nodeInputFile.dataset.max_size !== null && total_size <= nodeInputFile.dataset.max_size) {
             // TODO: remove message, remove parent, if is empty.
             removeError(nodeLi, "files-size")
         }
@@ -433,19 +438,27 @@ function removeAttachment(event) {
 
 
 function removeError(nodeLi, name) {
-    console.log("removeError", nodeLi, name)
+    // document.xxx = nodeLi
+    // console.log("----------------------------")
+    // console.log("removeError", nodeLi, name)
     for (const node of nodeLi.querySelectorAll("." + name)) {
-        console.log("1.node.remove():", node)
+        // console.log("1.node.remove():", node)
         node.remove()
     }
     nodeLi.classList.remove(name)
-    if (!nodeLi.querySelectorAll(".error div").length) {
-        for (const node of nodeLi.querySelectorAll(".error")) {
-            console.log("2.node.remove():", node)
-            node.remove()
-        }
+    // console.log("??? .error div:", nodeLi.querySelectorAll(".error div").length)
+    // document.xxx.querySelectorAll(".content > .error")
+    if (!nodeLi.querySelectorAll(".content > .error > div").length) {
+        // for (const node of nodeLi.querySelectorAll(".error")) {
+        //     console.log("2.node.remove():", node)
+        //     node.remove()
+        // }
         nodeLi.classList.remove("error")
+        for (const node of nodeLi.querySelectorAll(".status img")) {
+            node.src = "/static/aldryn_forms/img/attach-file.svg"
+        }
     }
+// document.xxx.classList.remove("error")
 }
 
 

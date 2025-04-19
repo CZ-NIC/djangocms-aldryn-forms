@@ -218,6 +218,30 @@ The function must have one boolean parameter, which determines whether the form 
 After submitting the form, the Submit button is automatically deactivated to prevent clicking the button repeatedly and submitting the form multiple times.
 This behavior can be disabled by specifying the ``skip-disable-submit`` class in the ``Form`` plugin.
 
+Input type File
+===============
+
+For the File form field, you can display the names of the attached files using javascript.
+This feature is activated in the ``File upload field`` or ``Multiple files upload field`` plugin by activating the ``Enable js`` switch.
+It is also possible to use the ``drag-and-drop`` class to add an area to drag and drop files onto this field.
+The drop icon, placeholder text, and text for the maximum size allowed, if specified, will be displayed on the area.
+In the case of a field of type ``multiple``, the maximum number of items allowed, if specified, will also be displayed.
+If the form is submitted asynchronously (enabled by the ``submit-by-fetch`` class), the icon for removing
+the file from the list will automatically appear next to the attached files.
+This makes it possible for the ``multiple`` field type to insert files multiple times.
+
+Pole typu File
+==============
+
+U formulářového pole typu File lze zobrazit názvy přiložených souborů pomocí javascriptu.
+Tato funkce se aktivuje v pluginu ``File upload field`` nebo ``Multiple files upload field`` aktivováním přepínače ``Zapnout js``.
+Dále je možné pomocí třídy ``drag-and-drop`` přidat plochu pro přetažení souborů na toto pole.
+Na ploše se zobrazí drop ikona, text placeholderu a text pro maximální povolenou velikost, je-li stanovena.
+V přípdadě pole typu ``multiple`` se zobrazí i maximální povolený počet položek, pokud je stanoven.
+
+Je-li formulář odesílán asynchronně (zapíná se třídou ``submit-by-fetch``), tak se u přiložených souborů automaticky
+objeví ikona pro odebrání souboru ze seznamu. Tak je možné u typu pole ``multiple`` vkládat soubory vícenásobně.
+
 
 Multiple post save commands
 ===========================

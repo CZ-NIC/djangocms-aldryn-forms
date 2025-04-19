@@ -23,6 +23,13 @@ msgstr "Prosím, nejdříve opravte chyby."
 msgid "File size"
 msgstr "Velikost souboru"
 
+#, python-format
+msgid "Max. %s file with a total size of max. %s"
+msgid_plural "Max. %s files with a total size of max. %s"
+msgstr[0] "Max. %s soubor o celkové velikosti max. %s"
+msgstr[1] "Max. %s soubory o celkové velikosti max. %s"
+msgstr[2] "Max. %s souborů o celkové velikosti max. %s"
+
 msgid "Max. size"
 msgstr "Max. velikost"
 

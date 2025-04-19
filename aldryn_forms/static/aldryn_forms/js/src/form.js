@@ -4,6 +4,13 @@
 if (typeof gettext !== "function") {
     window.gettext = text => text
 }
+if (typeof ngettext !== "function") {
+    window.ngettext = singular, plural, count => singular
+}
+if (typeof interpolate !== "function") {
+    window.interpolate = formats, values, names => formats[0]
+}
+
 
 export function validateForm(form) {
     const requiredInputs = form.querySelectorAll('input[required], select[required], textarea[required], input[type=file]')
@@ -378,14 +385,20 @@ function dragAndDropFields(input) {
             title.appendChild(document.createTextNode(input.placeholder))
             label.appendChild(title)
         }
-        if (input.dataset.max_size) {
+        let labelText
+        if (input.dataset.max_size && input.dataset.max_files) {
+            labelText = interpolate(ngettext(
+                "Max. %s file with a total size of max. %s",
+                "Max. %s files with a total size of max. %s"
+            ), [input.dataset.max_files, humanFileSize(input.dataset.max_size)])
+        } else if (input.dataset.max_size) {
+            labelText = gettext("Max. size") + " " + humanFileSize(input.dataset.max_size)
+        }
+        if (labelText) {
             const description = document.createElement("div")
-            description.appendChild(document.createTextNode(gettext("Max. size") + " " + humanFileSize(input.dataset.max_size)))
+            description.appendChild(document.createTextNode(labelText))
             label.appendChild(description)
         }
-        // TODO:
-        // Celkem max. velikost 5 MB
-        // Max 3 souborů o celkem max. velikosti 5 MB
         dragAndDrop.appendChild(label)
     }
 

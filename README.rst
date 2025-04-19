@@ -230,18 +230,6 @@ If the form is submitted asynchronously (enabled by the ``submit-by-fetch`` clas
 the file from the list will automatically appear next to the attached files.
 This makes it possible for the ``multiple`` field type to insert files multiple times.
 
-Pole typu File
-==============
-
-U formulářového pole typu File lze zobrazit názvy přiložených souborů pomocí javascriptu.
-Tato funkce se aktivuje v pluginu ``File upload field`` nebo ``Multiple files upload field`` aktivováním přepínače ``Zapnout js``.
-Dále je možné pomocí třídy ``drag-and-drop`` přidat plochu pro přetažení souborů na toto pole.
-Na ploše se zobrazí drop ikona, text placeholderu a text pro maximální povolenou velikost, je-li stanovena.
-V přípdadě pole typu ``multiple`` se zobrazí i maximální povolený počet položek, pokud je stanoven.
-
-Je-li formulář odesílán asynchronně (zapíná se třídou ``submit-by-fetch``), tak se u přiložených souborů automaticky
-objeví ikona pro odebrání souboru ze seznamu. Tak je možné u typu pole ``multiple`` vkládat soubory vícenásobně.
-
 
 Multiple post save commands
 ===========================

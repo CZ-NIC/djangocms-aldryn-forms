@@ -162,7 +162,7 @@ function handleChangeFilesList(nodeInputFile) {
     let attachments = 0
     let total_size = 0
 
-    if (asyncFetch) {
+    if (asyncFetch && nodeInputFile.multiple) {
         for(const item of listFileNames.querySelectorAll("li")) {
             attachments += 1
             total_size += item.file.size

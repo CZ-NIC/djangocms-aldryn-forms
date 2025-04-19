@@ -20,6 +20,9 @@ msgstr ""
 msgid "Correct the errors first, please."
 msgstr "Prosím, nejdříve opravte chyby."
 
+msgid "File size"
+msgstr "Velikost souboru"
+
 msgid "Max. size"
 msgstr "Max. velikost"
 

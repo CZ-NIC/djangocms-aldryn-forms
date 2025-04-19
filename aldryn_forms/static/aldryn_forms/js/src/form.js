@@ -9,9 +9,7 @@ export function validateForm(form) {
     const requiredInputs = form.querySelectorAll('input[required], select[required], textarea[required], input[type=file]')
 
     const validateFieldset = () => {
-        // console.log("requiredInputs:", requiredInputs)
         const allValid = Array.from(requiredInputs).every(input => input.checkValidity())
-        // console.log("validateFieldset() allValid:", allValid)
         if (form.dataset.validate_result) {
             form.dataset.validate_result(allValid)
         } else {
@@ -25,21 +23,6 @@ export function validateForm(form) {
         input.addEventListener('input', validateFieldset)   // for text inputs
         input.addEventListener('change', validateFieldset)  // for checkboxes, selects, etc.
     })
-
-    // // DEBUG:
-    // for(const node of form.querySelectorAll('input[type=file]')) {
-    //     node.addEventListener('change', (event) => {
-    //         console.log("Dispatch event CHANGE", event)
-    //         console.log("this.files:", event.target.files)
-    //         // console.log("validateFieldset")
-    //         // validateFieldset()
-    //     })
-    //     node.addEventListener('drop', (event) => {
-    //         console.log("Dispatch event DROP", event)
-    //         console.log("this.files:", event.target.files)
-    //     })
-    // }
-
     // Disable submit buttons.
     for(const submit of form.querySelectorAll('[type="submit"]')) {
         submit.disabled = true
@@ -137,29 +120,6 @@ export function handleRequiredFields(event) {
     }
 }
 
-/*
-function blockSubmit(nodeInput) {
-    const form = nodeInput.closest("form")
-    for (const button of form.querySelectorAll('[type=submit]')) {
-        button.disabled = true
-        button.insertAdjacentHTML(
-            'afterend', '<div class="text-danger aldryn-forms aldryn-forms-submit-msg">'
-            + gettext("Correct the errors first, please.") + '</div>')
-    }
-}
-
-
-function unblockSubmit(nodeInput) {
-    const form = nodeInput.closest("form")
-    for (const button of form.querySelectorAll('[type=submit]')) {
-        button.disabled = false
-    }
-    for (const element of form.getElementsByClassName('aldryn-forms-submit-msg')) {
-        element.remove()
-    }
-}
-*/
-
 function displayNodeMessages(node, messages, class_name) {
     node.insertAdjacentHTML(
         'afterend',
@@ -194,68 +154,37 @@ function getAttachmentsList(nodeInputFile) {
 }
 
 function handleChangeFilesList(nodeInputFile) {
-    // unblockSubmit(nodeInputFile)
 
     const listFileNames = getAttachmentsList(nodeInputFile)
     const form = nodeInputFile.closest("form")
     const asyncFetch = form.classList.contains("submit-by-fetch")
-    // console.log("listFileNames:", listFileNames)
-    // console.log("asyncFetch:", asyncFetch)
 
     let attachments = 0
     let total_size = 0
 
     if (asyncFetch) {
-        // attachments = listFileNames.querySelectorAll("li").length
         for(const item of listFileNames.querySelectorAll("li")) {
             attachments += 1
             total_size += item.file.size
         }
     } else {
-        // attachments = 0
-        // total_size = 0
         listFileNames.innerHTML = ""
     }
-    // console.log("attachments:", attachments)
-    // console.log("total_size:", total_size)
 
     const accept = nodeInputFile.accept.length ? nodeInputFile.accept.split(',') : []
     const extensions = [],
         mimetypes = [],
         maim_mimes = [];
 
-    // let total_size = 0;
-
     const appendError = (listItem, message, name, text) => {
-        // errors.push(text)
         const msg = document.createElement("div")
         msg.classList.add(name)
         msg.appendChild(document.createTextNode(text))
         message.appendChild(msg)
         listItem.classList.add("error")
         listItem.classList.add(name)
-        // nodeInputFile.classList.add("error")
         nodeInputFile.setCustomValidity(text)
-        // console.log("nodeInputFile.setCustomValidity", text)
     }
-
-    // let is_valid = true
-    /*
-    let files_size_summary = null
-    if (nodeInputFile.dataset.max_size !== null) {
-        files_size_summary = 0
-        for (let i = 0; i < nodeInputFile.files.length; i++) {
-            files_size_summary += nodeInputFile.files[i].size
-        }
-    }
-    if (nodeInputFile.dataset.max_size !== null && files_size_summary > nodeInputFile.dataset.max_size) {
-        is_valid = false
-        const msg = document.createElement("li")
-        msg.classList.add("text-danger")
-        msg.appendChild(document.createTextNode(gettext('The total file size has exceeded the specified limit.')))
-        listFileNames.appendChild(msg)
-    }
-    */
 
     if (nodeInputFile.accept.length) {
         for (let i = 0; i < accept.length; i++) {
@@ -277,10 +206,7 @@ function handleChangeFilesList(nodeInputFile) {
 
     let number_items_exceeded = false
 
-    // console.log("nodeInputFile.files.length:", nodeInputFile.files.length)
-
     for (let i = 0; i < nodeInputFile.files.length; i++) {
-        // console.log("file type:", nodeInputFile.files[i].type)
         attachments += 1
 
         const listItem = document.createElement("li")
@@ -298,9 +224,8 @@ function handleChangeFilesList(nodeInputFile) {
 
         const name = document.createElement("div")
         name.classList.add("file-name")
-        name.title = humanFileSize(nodeInputFile.files[i].size)
+        name.title = gettext("File size") + " " + humanFileSize(nodeInputFile.files[i].size)
         name.appendChild(document.createTextNode(file_name))
-        // name.appendChild(document.createTextNode(" " + humanFileSize(nodeInputFile.files[i].size)))
         content.appendChild(name)
 
         if (asyncFetch) {
@@ -386,54 +311,22 @@ function removeAttachment(event) {
     }
     event.target.closest("li").remove()
 
-    // const listFileNames = event.target.closest("ul")
     const listFileNames = getAttachmentsList(nodeInputFile)
-    console.log("listFileNames:", listFileNames)
-
-    // TODO: recalculate all items for limit and size.
-    // if (!listFileNames.querySelectorAll("li.error").length) {
-    //     const frame = listFileNames.closest("." + uploadFilesFrame)
-    //     const nodeInputFile = frame.querySelector("input[type=file]")
-    //     nodeInputFile.setCustomValidity("")
-    //     // Trigger event Change to validate form.
-    //     nodeInputFile.value = null
-    //     nodeInputFile.dispatchEvent(new Event("change"))
-    // }
 
     // Recalculate all items for limit and size.
     let total_size = 0
     let attachments = 0
     for (const nodeLi of listFileNames.querySelectorAll("li")) {
-        // console.log("nodeLi:", nodeLi, "attachments:", attachments, "total_size:", total_size)
-        // console.log("? limit:", nodeLi.classList.contains("files-limit"))
-        // console.log("? nodeInputFile.dataset.max_files:", nodeInputFile.dataset.max_files, "attachments:", attachments)
         if (nodeLi.classList.contains("files-limit") && nodeInputFile.dataset.max_files !== null && attachments < nodeInputFile.dataset.max_files) {
-            // TODO: remove message, remove parent, if is empty.
-            console.log("!!! removeError", nodeLi)
             removeError(nodeLi, "files-limit")
-            // for (const node of nodeLi.querySelectorAll(".files-limit")) {
-            //     node.remove()
-            // }
-            // nodeLi.classList.remove("files-limit")
-            // if (!nodeLi.querySelectorAll(".error div").length) {
-            //     for (const node of nodeLi.querySelectorAll(".error")) {
-            //         node.remove()
-            //     }
-            //     nodeLi.classList.remove("error")
-            // }
         } else {
             attachments += 1
         }
-        console.log("??? file-size:", nodeLi.classList.contains("file-size"))
-        console.log("??? nodeInputFile.dataset.max_size:", nodeInputFile.dataset.max_size, "total_size:", total_size)
         total_size += nodeLi.file.size
         if (nodeLi.classList.contains("file-size") && nodeInputFile.dataset.max_size !== null && total_size < nodeInputFile.dataset.max_size) {
-            // TODO: remove message, remove parent, if is empty.
             total_size -= nodeLi.file.size
-            console.log("!!! REMOVE file-size !!!", nodeLi)
             removeError(nodeLi, "file-size")
         }
-        // TODO: remove class error from li, if it does not have errors.
     }
     if (!listFileNames.querySelectorAll("li.error").length) {
         // Trigger event Change to validate form.
@@ -445,27 +338,16 @@ function removeAttachment(event) {
 
 
 function removeError(nodeLi, name) {
-    document.xxx = nodeLi
-    console.log("----------------------------")
-    console.log("removeError", nodeLi, name)
     for (const node of nodeLi.querySelectorAll(".content > .error > div." + name)) {
-        console.log("1.node.remove():", node)
         node.remove()
     }
     nodeLi.classList.remove(name)
-    console.log("??? .content > .error > div:", nodeLi.querySelectorAll(".content > .error > div").length)
-    document.xxx.querySelectorAll(".content > .error")
     if (!nodeLi.querySelectorAll(".content > .error > div").length) {
-        // for (const node of nodeLi.querySelectorAll(".error")) {
-        //     console.log("2.node.remove():", node)
-        //     node.remove()
-        // }
         nodeLi.classList.remove("error")
         for (const node of nodeLi.querySelectorAll(".status img")) {
             node.src = "/static/aldryn_forms/img/attach-file.svg"
         }
     }
-// document.xxx.classList.remove("error")
 }
 
 

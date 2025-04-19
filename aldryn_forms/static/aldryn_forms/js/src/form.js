@@ -2,13 +2,34 @@
 
 // Prevent a situation when the translation is not implemented.
 if (typeof gettext !== "function") {
-    window.gettext = text => text
-}
-if (typeof ngettext !== "function") {
-    window.ngettext = singular, plural, count => singular
-}
-if (typeof interpolate !== "function") {
-    window.interpolate = formats, values, names => formats[0]
+
+    const django = {}
+
+    django.catalog = {}
+
+    window.gettext = function(msgid) {
+        const value = django.catalog[msgid]
+        if (typeof value === 'undefined') {
+          return msgid
+        } else {
+          return (typeof value === 'string') ? value : value[0]
+        }
+    }
+    window.ngettext = function(singular, plural, count) {
+        const value = django.catalog[singular]
+        if (typeof value === 'undefined') {
+          return (count == 1) ? singular : plural
+        } else {
+          return value.constructor === Array ? value[django.pluralidx(count)] : value
+        }
+      }
+    window.interpolate = function(fmt, obj, named) {
+        if (named) {
+          return fmt.replace(/%\(\w+\)s/g, function(match){return String(obj[match.slice(2,-2)])})
+        } else {
+          return fmt.replace(/%s/g, function(match){return String(obj.shift())})
+        }
+    }
 }
 
 

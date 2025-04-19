@@ -216,6 +216,36 @@ Add these commands to crontab: ::
     1/10 * * * * django-admin aldryn_forms_send_emails; django-admin aldryn_forms_remove_expired_post_idents
 
 
+Tlačítko Odeslat
+================
+
+Před odesláním formuláře prohlížeč standarně zkontroluje, že všechna povinná pole formuláře jsou vyplněna a jejich hodnoty jsou daného typu.
+K tomuto chování můžete přidat deaktivaci a aktivaci tlačítka Odeslat.
+Je-li formulář ve stavu, kdy nejsou všechny hodnoty správně, tak je tlačítko Odeslat deaktivováno.
+Je-li formulář v pořádku, tak se tlačítko aktivuje.
+Tuto funkcionalitu zapnete tak, že do pluginu Formulář přidáte třídu ``toggle-submit``.
+
+V pluginu ``Form`` v atributu ``data-toggle_submit`` si můžete definovat vlasní funkci pro zpracování stavu formuláře.
+Funkce musí mít jeden boolean parameter ``allValid``, který určuje, jestli je formulář patný nebo ne.
+
+Po odeslání formuláře se tlačítko Odeslat automaticky deaktivuje, aby bylo zabráněno opakovanému kliknutí na tlačítko a vícenásobnému odeslání formuálře.
+Toto chování je možné vypnout zadáním třídy ``skip-disable-submit`` do pluginu Formulář.
+
+Submit button
+=============
+
+Before submitting the form, the browser checks by default that all mandatory fields of the form are filled in and their values are of the given type.
+You can add deactivating and activating the Submit button to this behavior.
+If the form is in a state where not all values are correct, the Submit button is deactivated.
+If the form is in the correct state, the button is activated.
+To enable this functionality, add the ``toggle-submit`` class to the ``Form`` plugin.
+
+In the ``Form`` plugin, in the ``data-toggle_submit`` attribute, you can define your own function to handle the form state.
+The function must have one boolean parameter, which determines whether the form is valid or not.
+
+After submitting the form, the Submit button is automatically deactivated to prevent clicking the button repeatedly and submitting the form multiple times.
+This behavior can be disabled by specifying the ``skip-disable-submit`` class in the ``Form`` plugin.
+
 Webhooks
 ========
 

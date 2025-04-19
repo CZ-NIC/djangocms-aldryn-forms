@@ -33,13 +33,13 @@ if (typeof gettext !== "function") {
 }
 
 
-export function validateForm(form) {
+export function toggleSubmitButton(form) {
     const requiredInputs = form.querySelectorAll('input[required], select[required], textarea[required], input[type=file]')
 
     const validateFieldset = () => {
         const allValid = Array.from(requiredInputs).every(input => input.checkValidity())
-        if (form.dataset.validate_result) {
-            form.dataset.validate_result(allValid)
+        if (form.dataset.toggle_submit) {
+            form.dataset.toggle_submit(allValid)
         } else {
             for(const submit of form.querySelectorAll('[type="submit"]')) {
                 submit.disabled = !allValid
@@ -51,9 +51,14 @@ export function validateForm(form) {
         input.addEventListener('input', validateFieldset)   // for text inputs
         input.addEventListener('change', validateFieldset)  // for checkboxes, selects, etc.
     })
+
     // Disable submit buttons.
-    for(const submit of form.querySelectorAll('[type="submit"]')) {
-        submit.disabled = true
+    if (form.dataset.toggle_submit) {
+        form.dataset.toggle_submit(false)
+    } else {
+        for(const submit of form.querySelectorAll('[type="submit"]')) {
+            submit.disabled = true
+        }
     }
 }
 

@@ -58,16 +58,6 @@ export function validateForm(form) {
 }
 
 
-function populate(text, obj) {
-    // Map values to the text. E.g. "Text %(value)s."
-    for (const [key, value] of Object.entries(obj)) {
-        const pattern = new RegExp(`%\\(${key}\\)s`, 'g')
-        text = text.replace(pattern, value)
-    }
-    return text
-}
-
-
 export function handleFormRequiredCheckbox(event) {
     // The event.target is a checkbox - this is the result of selector: .form-required input[type=checkbox]
     const form = event.target.closest("form")
@@ -122,8 +112,14 @@ export function handleRequiredFields(event) {
             checkboxset.insertAdjacentHTML(
                 'afterend',
                 '<div class="text-danger aldryn-forms aldryn-forms-required-msg">'
-                + populate(gettext("You have to choose at least %(value)s options (chosen %(chosen)s)."), {
-                    value: checkboxset.dataset.required_min, chosen: chosen})
+                + interpolate(
+                    ngettext(
+                        "You have to choose at least %(value)s option (chosen %(chosen)s).",
+                        "You have to choose at least %(value)s options (chosen %(chosen)s)."
+                    ), {
+                        value: checkboxset.dataset.required_min,
+                        chosen: chosen
+                    }, true)
                 + '</div>')
         }
     }

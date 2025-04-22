@@ -226,9 +226,12 @@ This feature is activated in the ``File upload field`` or ``Multiple files uploa
 It is also possible to use the ``drag-and-drop`` class to add an area to drag and drop files onto this field.
 The drop icon, placeholder text, and text for the maximum size allowed, if specified, will be displayed on the area.
 In the case of a field of type ``multiple``, the maximum number of items allowed, if specified, will also be displayed.
-If the form is submitted asynchronously (enabled by the ``submit-by-fetch`` class), the icon for removing
+If the form is submitted asynchronously (enabled by the ``submit-by-fetch`` class), the trash icon for removing
 the file from the list will automatically appear next to the attached files.
 This makes it possible for the ``multiple`` field type to insert files multiple times.
+
+You can style the form fields with your own css styles. You can replace the default icons with your own. Define the data in the Form plugin:
+data-icon_upload, data-icon_attach, data-icon_error, data-icon_trash.
 
 
 Multiple post save commands

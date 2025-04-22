@@ -261,7 +261,7 @@ function handleChangeFilesList(nodeInputFile) {
             const remove = document.createElement("div")
             remove.classList.add("remove")
             const trash = document.createElement("img")
-            trash.src = "/static/aldryn_forms/img/trash.svg"
+            trash.src = form.dataset.icon_trash ? form.dataset.icon_trash : "/static/aldryn_forms/img/trash.svg"
             trash.classList.add("trash")
             trash.style.cursor = "pointer"
             trash.alt = trash.title = gettext("Remove file.")
@@ -314,9 +314,9 @@ function handleChangeFilesList(nodeInputFile) {
 
         const icon = document.createElement("img")
         if (valid) {
-            icon.src = "/static/aldryn_forms/img/attach-file.svg"
+            icon.src = form.dataset.icon_attach ? form.dataset.icon_attach : "/static/aldryn_forms/img/attach-file.svg"
         } else {
-            icon.src = "/static/aldryn_forms/img/exclamation-mark.svg"
+            icon.src = form.dataset.icon_error ? form.dataset.icon_error : "/static/aldryn_forms/img/exclamation-mark.svg"
         }
         status.appendChild(icon)
 
@@ -358,9 +358,9 @@ function removeAttachment(event) {
         }
     }
     if (!listFileNames.querySelectorAll("li.error").length) {
-        // Trigger event Change to validate form.
         nodeInputFile.setCustomValidity("")
         nodeInputFile.value = null
+        // Trigger event Change to validate form.
         nodeInputFile.dispatchEvent(new Event("change"))
     }
 }
@@ -394,12 +394,14 @@ function dragAndDropFields(input) {
     dragAndDrop.classList.add("drag-and-drop")
     uploadFileFrame.appendChild(dragAndDrop)
 
+    const form = input.closest("form")
+
     if (input.classList.contains("drag-and-drop")) {
         const label = document.createElement("div")
         label.classList.add("label")
 
         const icon = document.createElement("img")
-        icon.src = "/static/aldryn_forms/img/upload-one.svg"
+        icon.src = form.dataset.icon_upload ? form.dataset.icon_upload : "/static/aldryn_forms/img/upload-one.svg"
         label.appendChild(icon)
 
         if (input.placeholder) {
@@ -443,7 +445,6 @@ function dragAndDropFields(input) {
     listFileNames.classList.add("upload-file-names")
     uploadFileFrame.appendChild(listFileNames)
 
-    const form = input.closest("form")
     form.classList.add("adjust-uploads")
     input.addEventListener('change', (event) => handleChangeFilesList(event.target), false)
 }

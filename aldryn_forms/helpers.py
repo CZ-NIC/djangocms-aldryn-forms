@@ -1,6 +1,3 @@
-from cms.cms_plugins import AliasPlugin
-
-
 def get_user_name(user):
     try:
         name = user.get_full_name()
@@ -12,6 +9,7 @@ def get_user_name(user):
 
 def is_form_element(plugin):
     # import here due because of circular imports
+    from cms.cms_plugins import AliasPlugin
     from .cms_plugins import FormElement
 
     # cms_plugins.CMSPlugin subclass

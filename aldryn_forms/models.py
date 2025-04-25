@@ -510,11 +510,11 @@ class EmailFieldPlugin(FieldPluginBase):
     )
 
     def get_parent_form(self):
-        parent = self.get_parent()
+        parent = self.parent
         while parent is not None:
             if parent.plugin_type in ("FormPlugin", "EmailNotificationForm"):
                 break
-            parent = parent.get_parent()
+            parent = self.parent
         return parent
 
     def get_parent_form_action_backend(self):

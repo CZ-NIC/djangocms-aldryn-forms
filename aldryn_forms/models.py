@@ -13,7 +13,6 @@ from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
 from cms.cms_plugins import AliasPlugin
-from cms.models.fields import PageField
 from cms.models.pluginmodel import CMSPlugin
 from cms.utils.plugins import downcast_plugins
 
@@ -22,6 +21,7 @@ from filer.fields.folder import FilerFolderField
 
 from .compat import build_plugin_tree
 from .constants import WEBHOOK_METHODS
+from .fields import AldrynFormsPageField
 from .helpers import is_form_element
 from .sizefield.models import FileSizeField
 from .utils import ALDRYN_FORMS_ACTION_BACKEND_KEY_MAX_SIZE, action_backend_choices, get_action_backends
@@ -181,7 +181,7 @@ class BaseFormPlugin(CMSPlugin):
         blank=True,
     )
 
-    redirect_page = PageField(
+    redirect_page = AldrynFormsPageField(
         verbose_name=_('CMS Page'),
         blank=True,
         null=True,

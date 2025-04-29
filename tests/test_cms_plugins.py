@@ -32,8 +32,7 @@ class DataMixin:
         self.user = User.objects.create_superuser('username', 'email@example.com', 'password')
 
         plugin_data = {
-            'redirect_type': 'redirect_to_url',
-            'url': 'http://www.google.com',
+            'redirect_to': {"external_link": "http://www.google.com"},
             'name': 'Contact us',
         }
         self.form_plugin = add_plugin(self.placeholder, self.plugin_name, 'en', **plugin_data)

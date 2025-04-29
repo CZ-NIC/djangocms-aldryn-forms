@@ -24,6 +24,7 @@ HELPER_SETTINGS = {
     ),
     'LANGUAGE_CODE': 'en',
     'EMAIL_BACKEND': 'django.core.mail.backends.dummy.EmailBackend',
+    'CMS_CONFIRM_VERSION4': True,
 }
 
 

@@ -38,18 +38,14 @@ class SubmitFormViewTest(CMSTestCase):
             published=True,
             apphook="FormsApp",
         )
-        try:
-            self.placeholder = self.page.placeholders.get(slot="content")
-        except AttributeError:
-            self.placeholder = self.page.get_placeholders("en").get(slot="content")
+        self.placeholder = self.page.get_placeholders("en").get(slot="content")
 
         self.redirect_url = "http://www.google.com"
         self.redirect_url_with_params = "http://www.google.com?aldryn_form_post_ident=" \
             "aBH7hWEGAihsg9KxctpNRfvEXUoOFpJZigmZETqWWNVs4gENFsL3qva1d4Q93URg"
 
         plugin_data = {
-            "redirect_type": "redirect_to_url",
-            "url": self.redirect_url,
+            'redirect_to': {"external_link": self.redirect_url},
         }
         self.form_plugin = add_plugin(
             self.placeholder, "FormPlugin", "en", **plugin_data
@@ -101,10 +97,7 @@ class SubmitFormViewTest(CMSTestCase):
             public_page = self.page.publisher_public
         else:
             public_page = self.page
-        try:
-            public_placeholder = public_page.placeholders.first()
-        except AttributeError:
-            public_placeholder = public_page.get_placeholders("en").first()
+        public_placeholder = public_page.get_placeholders("en").first()
 
         public_page_form_plugin = public_placeholder.cmsplugin_set.filter(
             plugin_type="FormPlugin"
@@ -144,7 +137,7 @@ class SubmitFormViewTest(CMSTestCase):
             published=True,
             apphook="FormsApp",
         )
-        placeholder = page.placeholders.get(slot="content")
+        placeholder = page.get_placeholders("en").get(slot="content")
 
         form_plugin = add_plugin(
             placeholder,
@@ -174,8 +167,7 @@ class SubmitFormViewTest(CMSTestCase):
         form_plugin.save()
 
         plugin_data2 = {
-            "redirect_type": "redirect_to_url",
-            "url": redirect_url,
+            'redirect_to': {"external_link": self.redirect_url},
         }
 
         form_plugin2 = add_plugin(placeholder, form_plugin_name, "en", **plugin_data2)  # noqa: E501
@@ -257,7 +249,7 @@ class SubmitFormViewTest(CMSTestCase):
             published=True,
             apphook="FormsApp",
         )
-        placeholder = page.placeholders.get(slot="content")
+        placeholder = page.get_placeholders("en").get(slot="content")
 
         form_plugin = add_plugin(
             placeholder,
@@ -335,12 +327,11 @@ class SubmitFormViewTest(CMSTestCase):
             published=True,
             apphook="FormsApp",
         )
-        placeholder = page.placeholders.get(slot="content")
+        placeholder = page.get_placeholders("en").get(slot="content")
 
         kwargs = {}
         if redirect:
-            kwargs["redirect_type"] = "redirect_to_page"
-            kwargs["redirect_page"] =  page
+            kwargs["redirect_to"] = {"internal_link": f"cms.page:{page.pk}"},
         form_plugin = add_plugin(
             placeholder,
             form_plugin_name,

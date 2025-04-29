@@ -21,7 +21,7 @@ from filer.fields.folder import FilerFolderField
 
 from .compat import build_plugin_tree
 from .constants import WEBHOOK_METHODS
-from .fields import AldrynFormsLinkField, AldrynFormsPageField
+from .fields import AldrynFormsLinkField
 from .helpers import is_form_element
 from .sizefield.models import FileSizeField
 from .utils import ALDRYN_FORMS_ACTION_BACKEND_KEY_MAX_SIZE, action_backend_choices, get_action_backends
@@ -114,13 +114,6 @@ class BaseFormPlugin(CMSPlugin):
     if hasattr(settings, 'ALDRYN_FORMS_TEMPLATES'):
         FORM_TEMPLATES += settings.ALDRYN_FORMS_TEMPLATES
 
-    REDIRECT_TO_PAGE = 'redirect_to_page'
-    REDIRECT_TO_URL = 'redirect_to_url'
-    REDIRECT_CHOICES = [
-        (REDIRECT_TO_PAGE, _('CMS Page')),
-        (REDIRECT_TO_URL, _('Absolute URL')),
-    ]
-
     _form_elements = None
     _form_field_key_cache = None
 
@@ -143,14 +136,6 @@ class BaseFormPlugin(CMSPlugin):
         help_text=_('An success message that will be displayed.')
     )
     redirect_to = AldrynFormsLinkField(verbose_name=_('Redirect to'), null=True, blank=True)
-    redirect_type = models.CharField(
-        verbose_name=_('Redirect to'),
-        max_length=20,
-        choices=REDIRECT_CHOICES,
-        help_text=_('Where to redirect the user when the form has been successfully sent?'),
-        blank=True,
-    )
-    url = models.URLField(_('Absolute URL'), blank=True, null=True)
     custom_classes = models.CharField(
         verbose_name=_('custom css classes'), max_length=255, blank=True)
     form_template = models.CharField(
@@ -180,13 +165,6 @@ class BaseFormPlugin(CMSPlugin):
     form_attributes = AttributesField(
         verbose_name=_('Attributes'),
         blank=True,
-    )
-
-    redirect_page = AldrynFormsPageField(
-        verbose_name=_('CMS Page'),
-        blank=True,
-        null=True,
-        on_delete=models.SET_NULL,
     )
 
     is_enable_autofill_from_url_params = models.BooleanField(

@@ -18,7 +18,7 @@ from easy_thumbnails.VIL import Image as VILImage
 from PIL import Image
 
 from .constants import ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION, ALDRYN_FORMS_POST_IDENT_NAME, MAX_IDENT_SIZE
-from .models import FormPlugin, FormSubmission, FormSubmissionBase
+from .models import FormSubmission, FormSubmissionBase
 from .sizefield.utils import filesizeformat
 from .utils import add_form_error, get_action_backends, get_user_model
 

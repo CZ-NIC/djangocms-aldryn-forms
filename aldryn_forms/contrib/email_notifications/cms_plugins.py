@@ -141,8 +141,7 @@ class EmailNotificationForm(FormPlugin):
         (None, {
             'fields': (
                 'name',
-                'redirect_type',
-                ('redirect_page', 'url'),
+                'redirect_to',
             )
         }),
         (_('Advanced Settings'), {

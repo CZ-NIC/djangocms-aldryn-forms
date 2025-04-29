@@ -391,24 +391,6 @@ class FormPluginForm(ExtandableErrorForm):
         return recipients
 
     def clean(self):
-        redirect_type = self.cleaned_data.get('redirect_type')
-        redirect_page = self.cleaned_data.get('redirect_page')
-        url = self.cleaned_data.get('url')
-
-        if redirect_type:
-            if redirect_type == FormPlugin.REDIRECT_TO_PAGE:
-                if not redirect_page:
-                    self.append_to_errors('redirect_page', _('Please provide CMS page for redirect.'))
-                self.cleaned_data['url'] = None
-
-            if redirect_type == FormPlugin.REDIRECT_TO_URL:
-                if not url:
-                    self.append_to_errors('url', _('Please provide an absolute URL for redirect.'))
-                self.cleaned_data['redirect_page'] = None
-        else:
-            self.cleaned_data['url'] = None
-            self.cleaned_data['redirect_page'] = None
-
         action_backend = get_action_backends().get(self.cleaned_data.get('action_backend'))
         if action_backend is not None:
             error = getattr(action_backend, "clean_form", lambda form: None)(self)

@@ -21,7 +21,7 @@ from filer.fields.folder import FilerFolderField
 
 from .compat import build_plugin_tree
 from .constants import WEBHOOK_METHODS
-from .fields import AldrynFormsPageField
+from .fields import AldrynFormsLinkField, AldrynFormsPageField
 from .helpers import is_form_element
 from .sizefield.models import FileSizeField
 from .utils import ALDRYN_FORMS_ACTION_BACKEND_KEY_MAX_SIZE, action_backend_choices, get_action_backends
@@ -142,6 +142,7 @@ class BaseFormPlugin(CMSPlugin):
         null=True,
         help_text=_('An success message that will be displayed.')
     )
+    redirect_to = AldrynFormsLinkField(verbose_name=_('Redirect to'), null=True, blank=True)
     redirect_type = models.CharField(
         verbose_name=_('Redirect to'),
         max_length=20,
@@ -233,10 +234,7 @@ class BaseFormPlugin(CMSPlugin):
 
     @cached_property
     def success_url(self):
-        if self.redirect_type == FormPlugin.REDIRECT_TO_PAGE:
-            return self.redirect_page.get_absolute_url()
-        elif self.redirect_type == FormPlugin.REDIRECT_TO_URL and self.url:
-            return self.url
+        return self.redirect_to
 
     def copy_relations(self, oldinstance):
         self.recipients.set(oldinstance.recipients.all())

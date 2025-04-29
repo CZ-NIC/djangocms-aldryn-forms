@@ -21,6 +21,9 @@ msgstr ""
 msgid "\"%(file_name)s\" is not of accepted file type."
 msgstr "\"%(file_name)s\" není požadovaného typu souboru."
 
+msgid "#anchor"
+msgstr "#kotva"
+
 #, python-format
 msgid "%(value)s is not extension."
 msgstr "%(value)s není rozšíření."
@@ -190,6 +193,9 @@ msgstr ""
 msgid "Export form submissions"
 msgstr "Exportovat odeslané formuláře"
 
+msgid "External link/anchor"
+msgstr "Externí odkaz/kotva"
+
 msgid "Field"
 msgstr "Pole"
 
@@ -286,6 +292,9 @@ msgstr "Nesprávný typ id formuláře."
 msgid "Initial value"
 msgstr "Počáteční hodnota"
 
+msgid "Internal link"
+msgstr "Interní odkaz"
+
 msgid "Is spam"
 msgstr "Je spam"
 
@@ -367,6 +376,9 @@ msgstr "Ne"
 msgid "No action"
 msgstr "Žádná akce"
 
+msgid "No destination selected. Use the dropdown to select a destination."
+msgstr "Cíl nebyl vybrán. Pro výběr cíle použijte rozbalovací nabídku."
+
 msgid "No records found"
 msgstr "Záznamy nenalezeny"
 
@@ -420,6 +432,17 @@ msgstr "Prosím, k exportu zvolte alespoň jedno pole."
 msgid "Position"
 msgstr "Pozice"
 
+msgid ""
+"Provide a link to an external URL, including the schema such as 'https://'. "
+"Optionally, add an #anchor (including the #) to scroll to."
+msgstr ""
+"Uveďte odkaz na externí URL adresu, včetně schématu, například 'https://'. "
+"Volitelně můžete přidat #kotvu (včetně #), na kterou se bude stránka "
+"posouvat."
+
+msgid "Provide an anchor to scroll to."
+msgstr "Zadejte kotvu, na kterou se má přejít."
+
 msgid "Provides the base theme for the email."
 msgstr "Zajišťuje základní motiv pro e-mail."
 
@@ -459,6 +482,19 @@ msgid ""
 msgstr ""
 "Zvolte složku, kam budou nahrány všechny soubory přiložené pomocí tohoto "
 "pole."
+
+msgid ""
+"Select from available internal destinations. Optionally, add an anchor to "
+"scroll to."
+msgstr ""
+"Vyberte z dostupných interních cílů. Volitelně můžete přidat kotvu, na "
+"kterou se bude přecházet."
+
+msgid "Select internal destination"
+msgstr "Vyberte interní cíl"
+
+msgid "Select site"
+msgstr "Vyberte web"
 
 msgid "Send data via webhook"
 msgstr "Odeslat data přes webhook"
@@ -668,6 +704,9 @@ msgstr "z e-mailu"
 
 msgid "from name"
 msgstr "od jména"
+
+msgid "https://example.com or #anchor"
+msgstr "https://example.com nebo #kotva"
 
 msgid "language"
 msgstr "jazyk"

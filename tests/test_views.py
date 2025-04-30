@@ -1,6 +1,5 @@
 import json
 import sys
-from distutils.version import LooseVersion
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
@@ -9,16 +8,11 @@ from django.http import HttpResponseBadRequest
 from django.test import modify_settings, override_settings
 from django.urls import clear_url_caches
 
-import cms
 from cms.api import add_plugin, create_page
 from cms.appresolver import clear_app_resolvers
 from cms.test_utils.testcases import CMSTestCase
 
 from aldryn_forms.models import FormPlugin, FormSubmission, SubmittedToBeSent
-
-
-# These means "less than or equal"
-CMS_3_6 = LooseVersion(cms.__version__) < LooseVersion("4.0")
 
 
 class SubmitFormViewTest(CMSTestCase):
@@ -60,8 +54,6 @@ class SubmitFormViewTest(CMSTestCase):
         )
         self.form_plugin.action_backend = "default"
         self.form_plugin.save()
-        # if CMS_3_6:
-        #     self.page.publish("en")
 
         self.reload_urls()
         self.apphook_clear()
@@ -93,10 +85,6 @@ class SubmitFormViewTest(CMSTestCase):
                 del sys.modules[module]
 
     def _form_view_and_submission_with_apphook_django_gte_111(self, redirect_url):
-        # if CMS_3_6:
-        #     public_page = self.page.publisher_public
-        # else:
-        #     public_page = self.page
         public_page = self.page
         public_placeholder = public_page.get_placeholders("en").first()
 
@@ -145,7 +133,6 @@ class SubmitFormViewTest(CMSTestCase):
             "multiple forms",
             "test_page.html",
             "en",
-            # published=True,
             apphook="FormsApp",
         )
         placeholder = page.get_placeholders("en").get(slot="content")
@@ -203,10 +190,6 @@ class SubmitFormViewTest(CMSTestCase):
         form_plugin2.action_backend = "default"
         form_plugin2.save()
 
-        # page.publish("en")
-        # self.reload_urls()
-        # self.apphook_clear()
-
         post = {
             "form_plugin_id": form_plugin2.id,
             "email_1": "test@test",
@@ -257,7 +240,6 @@ class SubmitFormViewTest(CMSTestCase):
             "multiple forms",
             "test_page.html",
             "en",
-            # published=True,
             apphook="FormsApp",
         )
         placeholder = page.get_placeholders("en").get(slot="content")
@@ -314,7 +296,6 @@ class SubmitFormViewTest(CMSTestCase):
         form_plugin2.action_backend = "default"
         form_plugin2.save()
 
-        # page.publish("en")
         self.reload_urls()
         self.apphook_clear()
 
@@ -335,7 +316,6 @@ class SubmitFormViewTest(CMSTestCase):
             "form",
             "test_page.html",
             "en",
-            # published=True,
             apphook="FormsApp",
         )
         placeholder = page.get_placeholders("en").get(slot="content")
@@ -362,9 +342,6 @@ class SubmitFormViewTest(CMSTestCase):
             target=form_plugin,
             label="Submit",
         )
-        # page.publish("en")
-        # self.reload_urls()
-        # self.apphook_clear()
         return page, FormPlugin.objects.last(), {'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'}
 
     @modify_settings(MIDDLEWARE={"append": "aldryn_forms.middleware.handle_post.HandleHttpPost"})

@@ -16,7 +16,6 @@ from requests.exceptions import HTTPError
 from testfixtures import LogCapture
 
 from aldryn_forms.models import FormPlugin, FormSubmission, SubmittedToBeSent, Webhook
-from tests.test_views import CMS_3_6
 
 
 class DataMixin:
@@ -68,8 +67,6 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
     def test_form_submission_default_action(self):
         self.form_plugin.action_backend = 'default'
         self.form_plugin.save()
-        if CMS_3_6:
-            self.page.publish('en')
 
         form_plugin = FormPlugin.objects.last()
         data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester"}
@@ -87,8 +84,6 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
     def test_form_submission_email_action(self):
         self.form_plugin.action_backend = 'email_only'
         self.form_plugin.save()
-        if CMS_3_6:
-            self.page.publish('en')
 
         form_plugin = FormPlugin.objects.last()
         data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester"}
@@ -106,8 +101,6 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
         add_plugin(self.placeholder, 'HoneypotField', 'en', target=self.form_plugin, label="Trap", name="trap")
         self.form_plugin.action_backend = 'email_only'
         self.form_plugin.save()
-        if CMS_3_6:
-            self.page.publish('en')
 
         form_plugin = FormPlugin.objects.last()
         data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester", "trap": "Catched!"}
@@ -124,8 +117,6 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
     def test_form_submission_no_action(self):
         self.form_plugin.action_backend = 'none'
         self.form_plugin.save()
-        if CMS_3_6:
-            self.page.publish('en')
 
         form_plugin = FormPlugin.objects.last()
         data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester"}
@@ -143,8 +134,6 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
     def test_form_submission_default_action_with_webhook_failure(self):
         self.form_plugin.action_backend = 'default'
         self.form_plugin.save()
-        if CMS_3_6:
-            self.page.publish('en')
 
         form_plugin = FormPlugin.objects.last()
         form_plugin.webhooks.add(self.webhook)
@@ -171,8 +160,6 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
     def test_form_submission_default_action_with_webhook(self):
         self.form_plugin.action_backend = 'default'
         self.form_plugin.save()
-        if CMS_3_6:
-            self.page.publish('en')
 
         form_plugin = FormPlugin.objects.last()
         form_plugin.webhooks.add(self.webhook)
@@ -198,8 +185,6 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
     def test_form_submission_email_action_webhook(self):
         self.form_plugin.action_backend = 'email_only'
         self.form_plugin.save()
-        if CMS_3_6:
-            self.page.publish('en')
 
         form_plugin = FormPlugin.objects.last()
         form_plugin.webhooks.add(self.webhook)
@@ -221,8 +206,6 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
     def test_form_submission_no_action_webhook(self):
         self.form_plugin.action_backend = 'none'
         self.form_plugin.save()
-        if CMS_3_6:
-            self.page.publish('en')
 
         form_plugin = FormPlugin.objects.last()
         form_plugin.webhooks.add(self.webhook)
@@ -243,8 +226,6 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
     def test_form_postponed_submission_default_action_with_webhook(self):
         self.form_plugin.action_backend = 'default'
         self.form_plugin.save()
-        if CMS_3_6:
-            self.page.publish('en')
 
         form_plugin = FormPlugin.objects.last()
         form_plugin.webhooks.add(self.webhook)
@@ -269,8 +250,6 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
     def test_form_postponed_submission_email_action_webhook(self):
         self.form_plugin.action_backend = 'email_only'
         self.form_plugin.save()
-        if CMS_3_6:
-            self.page.publish('en')
 
         form_plugin = FormPlugin.objects.last()
         form_plugin.webhooks.add(self.webhook)
@@ -291,8 +270,6 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
     def test_form_postponed_submission_no_action_webhook(self):
         self.form_plugin.action_backend = 'none'
         self.form_plugin.save()
-        if CMS_3_6:
-            self.page.publish('en')
 
         form_plugin = FormPlugin.objects.last()
         form_plugin.webhooks.add(self.webhook)
@@ -313,8 +290,6 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
         self.form_plugin.action_backend = 'default'
         self.form_plugin.save()
         add_plugin(self.placeholder, 'HoneypotField', 'en', target=self.form_plugin, label="Trap", name="trap")
-        if CMS_3_6:
-            self.page.publish('en')
 
         form_plugin = FormPlugin.objects.last()
         form_plugin.webhooks.add(self.webhook)
@@ -349,8 +324,6 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
         self.form_plugin.action_backend = 'default'
         self.form_plugin.save()
         add_plugin(self.placeholder, 'HoneypotField', 'en', target=self.form_plugin, label="Trap", name="trap")
-        if CMS_3_6:
-            self.page.publish('en')
 
         form_plugin = FormPlugin.objects.last()
         form_plugin.webhooks.add(self.webhook)
@@ -370,8 +343,6 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
         self.form_plugin.success_message = "Thank you."
         self.form_plugin.action_backend = 'default'
         self.form_plugin.save()
-        if CMS_3_6:
-            self.page.publish('en')
 
         form_plugin = FormPlugin.objects.last()
         data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester"}
@@ -391,8 +362,6 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
         self.form_plugin.success_message = "Thank you."
         self.form_plugin.action_backend = 'default'
         self.form_plugin.save()
-        if CMS_3_6:
-            self.page.publish('en')
 
         form_plugin = FormPlugin.objects.last()
         data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester"}
@@ -423,8 +392,6 @@ class EmailNotificationFormPluginTestCase(DataMixin, CMSTestCase):
     def test_form_submission_default_action(self):
         self.form_plugin.action_backend = 'default'
         self.form_plugin.save()
-        if CMS_3_6:
-            self.page.publish('en')
 
         form_plugin = FormPlugin.objects.last()
         data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester"}
@@ -442,8 +409,6 @@ class EmailNotificationFormPluginTestCase(DataMixin, CMSTestCase):
     def test_form_submission_email_action(self):
         self.form_plugin.action_backend = 'email_only'
         self.form_plugin.save()
-        if CMS_3_6:
-            self.page.publish('en')
 
         form_plugin = FormPlugin.objects.last()
         data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester"}
@@ -460,8 +425,6 @@ class EmailNotificationFormPluginTestCase(DataMixin, CMSTestCase):
     def test_form_submission_no_action(self):
         self.form_plugin.action_backend = 'none'
         self.form_plugin.save()
-        if CMS_3_6:
-            self.page.publish('en')
 
         form_plugin = FormPlugin.objects.last()
         data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester"}
@@ -479,8 +442,6 @@ class EmailNotificationFormPluginTestCase(DataMixin, CMSTestCase):
     def test_form_submission_default_action_webhook_failure(self):
         self.form_plugin.action_backend = 'default'
         self.form_plugin.save()
-        if CMS_3_6:
-            self.page.publish('en')
 
         form_plugin = FormPlugin.objects.last()
         form_plugin.webhooks.add(self.webhook)
@@ -507,8 +468,6 @@ class EmailNotificationFormPluginTestCase(DataMixin, CMSTestCase):
     def test_form_submission_default_action_webhook(self):
         self.form_plugin.action_backend = 'default'
         self.form_plugin.save()
-        if CMS_3_6:
-            self.page.publish('en')
 
         form_plugin = FormPlugin.objects.last()
         form_plugin.webhooks.add(self.webhook)
@@ -534,8 +493,6 @@ class EmailNotificationFormPluginTestCase(DataMixin, CMSTestCase):
     def test_form_submission_no_action_webhook(self):
         self.form_plugin.action_backend = 'none'
         self.form_plugin.save()
-        if CMS_3_6:
-            self.page.publish('en')
 
         form_plugin = FormPlugin.objects.last()
         form_plugin.webhooks.add(self.webhook)

@@ -2,6 +2,16 @@
 Changelog
 =========
 
+Unreleased
+==========
+
+8.0.0 (2025-??-??)
+==================
+
+* Add support of CMS 4.0
+* Remove support of CMS 3.x
+* Replace fields redirect_type, url and redirect_page by redirect_to in model BaseFormPlugin.
+
 7.7.0 (2025-04-22)
 ==================
 

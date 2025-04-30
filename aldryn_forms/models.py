@@ -211,8 +211,8 @@ class BaseFormPlugin(CMSPlugin):
         self.redirect_page = value
 
     @cached_property
-    def success_url(self):
-        return self.redirect_to
+    def success_url(self) -> str:
+        return self.redirect_to.url
 
     def copy_relations(self, oldinstance):
         self.recipients.set(oldinstance.recipients.all())

@@ -120,6 +120,16 @@ class SubmitFormViewTest(CMSTestCase):
     def test_form_view_and_submission_with_apphook_django_gte_111(self):
         self._form_view_and_submission_with_apphook_django_gte_111(self.redirect_url)
 
+    def test_field_redirect_to_and_success_url(self):
+        page = create_page("tpage", "test_page.html", "en", apphook="FormsApp")
+        placeholder = page.get_placeholders("en").get(slot="content")
+        form_plugin = add_plugin(placeholder, "FormPlugin", "en")
+        response = self.client.post(page.get_absolute_url("en"), {"form_plugin_id": form_plugin.id})
+        self.assertContains(response, """
+            <div class="cms-form-success-message">
+                <p>Thank you for submitting your information.</p>
+            </div>""", html=True)
+
     @patch(
         "aldryn_forms.forms.get_random_string",
         lambda length: "aBH7hWEGAihsg9KxctpNRfvEXUoOFpJZigmZETqWWNVs4gENFsL3qva1d4Q93URg",

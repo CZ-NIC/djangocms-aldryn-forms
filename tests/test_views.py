@@ -35,7 +35,7 @@ class SubmitFormViewTest(CMSTestCase):
             "tpage",
             "test_page.html",
             "en",
-            published=True,
+            # published=True,
             apphook="FormsApp",
         )
         self.placeholder = self.page.get_placeholders("en").get(slot="content")
@@ -60,8 +60,8 @@ class SubmitFormViewTest(CMSTestCase):
         )
         self.form_plugin.action_backend = "default"
         self.form_plugin.save()
-        if CMS_3_6:
-            self.page.publish("en")
+        # if CMS_3_6:
+        #     self.page.publish("en")
 
         self.reload_urls()
         self.apphook_clear()
@@ -93,10 +93,11 @@ class SubmitFormViewTest(CMSTestCase):
                 del sys.modules[module]
 
     def _form_view_and_submission_with_apphook_django_gte_111(self, redirect_url):
-        if CMS_3_6:
-            public_page = self.page.publisher_public
-        else:
-            public_page = self.page
+        # if CMS_3_6:
+        #     public_page = self.page.publisher_public
+        # else:
+        #     public_page = self.page
+        public_page = self.page
         public_placeholder = public_page.get_placeholders("en").first()
 
         public_page_form_plugin = public_placeholder.cmsplugin_set.filter(
@@ -144,7 +145,7 @@ class SubmitFormViewTest(CMSTestCase):
             "multiple forms",
             "test_page.html",
             "en",
-            published=True,
+            # published=True,
             apphook="FormsApp",
         )
         placeholder = page.get_placeholders("en").get(slot="content")
@@ -177,7 +178,7 @@ class SubmitFormViewTest(CMSTestCase):
         form_plugin.save()
 
         plugin_data2 = {
-            'redirect_to': {"external_link": self.redirect_url},
+            'redirect_to': {"external_link": redirect_url},
         }
 
         form_plugin2 = add_plugin(placeholder, form_plugin_name, "en", **plugin_data2)  # noqa: E501
@@ -202,9 +203,9 @@ class SubmitFormViewTest(CMSTestCase):
         form_plugin2.action_backend = "default"
         form_plugin2.save()
 
-        page.publish("en")
-        self.reload_urls()
-        self.apphook_clear()
+        # page.publish("en")
+        # self.reload_urls()
+        # self.apphook_clear()
 
         post = {
             "form_plugin_id": form_plugin2.id,
@@ -215,7 +216,7 @@ class SubmitFormViewTest(CMSTestCase):
             post["aldryn_form_post_ident"] = post_ident
         response = self.client.post(page.get_absolute_url("en"), post)
         self.assertRedirects(
-            response, plugin_data2["url"], fetch_redirect_response=False
+            response, plugin_data2["redirect_to"]["external_link"], fetch_redirect_response=False
         )  # noqa: E501
 
     @patch(
@@ -256,7 +257,7 @@ class SubmitFormViewTest(CMSTestCase):
             "multiple forms",
             "test_page.html",
             "en",
-            published=True,
+            # published=True,
             apphook="FormsApp",
         )
         placeholder = page.get_placeholders("en").get(slot="content")
@@ -313,7 +314,7 @@ class SubmitFormViewTest(CMSTestCase):
         form_plugin2.action_backend = "default"
         form_plugin2.save()
 
-        page.publish("en")
+        # page.publish("en")
         self.reload_urls()
         self.apphook_clear()
 
@@ -334,14 +335,14 @@ class SubmitFormViewTest(CMSTestCase):
             "form",
             "test_page.html",
             "en",
-            published=True,
+            # published=True,
             apphook="FormsApp",
         )
         placeholder = page.get_placeholders("en").get(slot="content")
 
         kwargs = {}
         if redirect:
-            kwargs["redirect_to"] = {"internal_link": f"cms.page:{page.pk}"},
+            kwargs["redirect_to"] = {"internal_link": f"cms.page:{page.pk}"}
         form_plugin = add_plugin(
             placeholder,
             form_plugin_name,
@@ -361,9 +362,9 @@ class SubmitFormViewTest(CMSTestCase):
             target=form_plugin,
             label="Submit",
         )
-        page.publish("en")
-        self.reload_urls()
-        self.apphook_clear()
+        # page.publish("en")
+        # self.reload_urls()
+        # self.apphook_clear()
         return page, FormPlugin.objects.last(), {'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'}
 
     @modify_settings(MIDDLEWARE={"append": "aldryn_forms.middleware.handle_post.HandleHttpPost"})

@@ -1,3 +1,4 @@
+from typing import Optional
 from django.conf import settings
 from django.forms import MultiWidget, Select, URLInput
 from django.utils.translation import gettext_lazy as _
@@ -64,7 +65,7 @@ class LinkWidget(MultiWidget):
         js = ("djangocms_link/link-widget.js",)
         css = {"all": ("djangocms_link/link-widget.css",)}
 
-    def __init__(self, site_selector: bool | None = None):
+    def __init__(self, site_selector: Optional[bool] = None):
         if site_selector is None:
             site_selector = LinkWidget.default_site_selector
 
@@ -96,7 +97,7 @@ class LinkWidget(MultiWidget):
         }
         super().__init__(widgets)
 
-    def get_context(self, name: str, value: str | None, attrs: dict) -> dict:
+    def get_context(self, name: str, value: Optional[str], attrs: dict) -> dict:
         if not self.is_required:
             self.widgets[0].choices = [("empty", "---------")] + self.widgets[0].choices
         context = super().get_context(name, value, attrs)

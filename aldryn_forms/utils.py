@@ -8,7 +8,7 @@ from django.forms.forms import NON_FIELD_ERRORS
 from django.utils.module_loading import import_string
 from django.utils.translation import get_language
 
-from cms.cms_plugins import AliasPlugin
+from cms.plugin_pool import plugin_pool
 from cms.utils.moderator import get_cmsplugin_queryset
 from cms.utils.plugins import downcast_plugins
 
@@ -91,6 +91,7 @@ def get_nested_plugins(parent_plugin, include_self=False):
     """
     Returns a flat list of plugins from parent_plugin. Replace AliasPlugin by descendants.
     """
+    AliasPlugin = plugin_pool.get_plugin("AliasPlugin")
     found_plugins = []
 
     if include_self:

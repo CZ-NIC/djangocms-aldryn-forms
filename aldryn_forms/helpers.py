@@ -1,4 +1,4 @@
-from cms.cms_plugins import AliasPlugin
+from cms.plugin_pool import plugin_pool
 
 
 def get_user_name(user):
@@ -13,6 +13,8 @@ def get_user_name(user):
 def is_form_element(plugin):
     # import here due because of circular imports
     from .cms_plugins import FormElement
+
+    AliasPlugin = plugin_pool.get_plugin("AliasPlugin")
 
     # cms_plugins.CMSPlugin subclass
     cms_plugin = plugin.get_plugin_class_instance(None)

@@ -12,7 +12,7 @@ from django.db.models.functions import Coalesce
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
-from cms.cms_plugins import AliasPlugin
+from cms.plugin_pool import plugin_pool
 from cms.models.fields import PageField
 from cms.models.pluginmodel import CMSPlugin
 from cms.utils.plugins import downcast_plugins
@@ -257,6 +257,7 @@ class BaseFormPlugin(CMSPlugin):
     def get_form_fields(self) -> List[FormField]:
         from .cms_plugins import Field
 
+        AliasPlugin = plugin_pool.get_plugin("AliasPlugin")
         fields = []
 
         # A field occurrence is how many times does a field

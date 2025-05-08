@@ -710,7 +710,6 @@ class FormSubmissionBase(models.Model):
     language = models.CharField(
         verbose_name=_('form language'),
         max_length=10,
-        choices=settings.LANGUAGES,
         default=settings.LANGUAGE_CODE
     )
     form_url = models.CharField(

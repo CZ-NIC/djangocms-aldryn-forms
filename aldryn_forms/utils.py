@@ -11,9 +11,9 @@ from django.utils.module_loading import import_string
 from django.utils.translation import get_language
 
 from cms.models import CMSPlugin
+from cms.plugin_pool import plugin_pool
 from cms.utils.plugins import downcast_plugins
 
-from djangocms_alias.models import AliasPlugin
 from emailit.api import send_mail
 from emailit.utils import get_template_names
 
@@ -97,6 +97,7 @@ def get_nested_plugins(parent_plugin, include_self=False):
     """
     Returns a flat list of plugins from parent_plugin. Replace AliasPlugin by descendants.
     """
+    AliasPlugin = plugin_pool.get_plugin("AliasPlugin")
     found_plugins = []
 
     if include_self:

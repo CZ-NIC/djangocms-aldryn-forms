@@ -12,9 +12,9 @@ from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
 from cms.models.pluginmodel import CMSPlugin
+from cms.plugin_pool import plugin_pool
 from cms.utils.plugins import downcast_plugins
 
-from djangocms_alias.models import AliasPlugin
 from djangocms_attributes_field.fields import AttributesField
 from filer.fields.folder import FilerFolderField
 
@@ -217,6 +217,7 @@ class BaseFormPlugin(CMSPlugin):
     def get_form_fields(self) -> List[FormField]:
         from .cms_plugins import Field
 
+        AliasPlugin = plugin_pool.get_plugin("AliasPlugin")
         fields = []
 
         # A field occurrence is how many times does a field

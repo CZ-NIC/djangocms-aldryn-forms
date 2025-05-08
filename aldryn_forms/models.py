@@ -23,9 +23,7 @@ from .constants import WEBHOOK_METHODS
 from .fields import AldrynFormsLinkField
 from .helpers import is_form_element
 from .sizefield.models import FileSizeField
-from .utils import (
-    ALDRYN_FORMS_ACTION_BACKEND_KEY_MAX_SIZE, action_backend_choices, get_action_backends, get_serialized_fields,
-)
+from .utils import ALDRYN_FORMS_ACTION_BACKEND_KEY_MAX_SIZE, get_action_backends, get_serialized_fields
 
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
@@ -160,7 +158,6 @@ class BaseFormPlugin(CMSPlugin):
         verbose_name=_('Action backend'),
         max_length=ALDRYN_FORMS_ACTION_BACKEND_KEY_MAX_SIZE,
         default='default',
-        choices=action_backend_choices(),
     )
     webhooks = models.ManyToManyField(Webhook, blank=True)
 

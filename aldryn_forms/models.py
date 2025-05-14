@@ -12,10 +12,10 @@ from django.db.models.functions import Coalesce
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
-from cms.cms_plugins import AliasPlugin
 from cms.models.pluginmodel import CMSPlugin
 from cms.utils.plugins import downcast_plugins
 
+from djangocms_alias.models import AliasPlugin
 from djangocms_attributes_field.fields import AttributesField
 from filer.fields.folder import FilerFolderField
 

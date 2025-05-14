@@ -1,4 +1,5 @@
 from typing import Optional
+
 from django.conf import settings
 from django.forms import MultiWidget, Select, URLInput
 from django.utils.translation import gettext_lazy as _

@@ -8,10 +8,10 @@ from django.forms.forms import NON_FIELD_ERRORS
 from django.utils.module_loading import import_string
 from django.utils.translation import get_language
 
-from cms.cms_plugins import AliasPlugin
 from cms.models import CMSPlugin
 from cms.utils.plugins import downcast_plugins
 
+from djangocms_alias.models import AliasPlugin
 from emailit.api import send_mail
 from emailit.utils import get_template_names
 

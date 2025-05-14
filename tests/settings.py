@@ -6,6 +6,7 @@ HELPER_SETTINGS = {
     'INSTALLED_APPS': [
         'tests',
         'aldryn_forms.contrib.email_notifications',
+        'djangocms_alias',
         'djangocms_text',
         'captcha',
         'easy_thumbnails',

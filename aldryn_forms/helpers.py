@@ -1,4 +1,4 @@
-from cms.cms_plugins import AliasPlugin
+from djangocms_alias.models import AliasPlugin
 
 
 def get_user_name(user):

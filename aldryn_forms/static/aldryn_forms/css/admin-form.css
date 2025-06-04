@@ -1,30 +1,30 @@
-#formsubmission_form .readonly {
+.readonly {
     max-width: max-content;
     width: auto;
 }
 
-#formsubmission_form .readonly .submitted-data th {
+.readonly .submitted-data th {
     color: #fff;
     background-color: #00bbff;
 }
 
-#formsubmission_form .readonly .submitted-data td {
+.readonly .submitted-data td {
     line-height: normal;
     padding: 1em;
 }
 
-#formsubmission_form .readonly .submitted-data td:first-child {
+.readonly .submitted-data td:first-child {
     color: #00bbff;
 }
 
-#formsubmission_form .readonly .submitted-data tr:hover td {
+.readonly .submitted-data tr:hover td {
     background-color: #e8f8ff;
 }
 
-#formsubmission_form .readonly .submitted-data td a {
+.readonly .submitted-data td a {
     display: block;
 }
 
-#formsubmission_form .readonly .submitted-data td a:hover {
+.readonly .submitted-data td a:hover {
     text-decoration: underline;
 }

@@ -11,8 +11,9 @@ def populate_field_redirect_to(apps, schema_editor):
     FormPlugin = apps.get_model("aldryn_forms", "FormPlugin")
     for instance in FormPlugin.objects.all():
         if instance.redirect_type == "redirect_to_page":
-            instance.redirect_to = {"internal_link": f"cms.page:{instance.redirect_page.pk}"}
-            instance.save()
+            if instance.redirect_page is not None:
+                instance.redirect_to = {"internal_link": f"cms.page:{instance.redirect_page.pk}"}
+                instance.save()
         elif instance.redirect_type == "redirect_to_url":
             instance.redirect_to = {"external_link": instance.url}
             instance.save()

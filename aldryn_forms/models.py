@@ -192,24 +192,6 @@ class BaseFormPlugin(CMSPlugin):
     def __str__(self):
         return self.name
 
-    @property
-    def page(self):
-        warnings.warn(
-            'The "page" field has been renamed to redirect_page '
-            'and will be removed on Aldryn Forms 3.1.0',
-            PendingDeprecationWarning
-        )
-        return self.redirect_page
-
-    @page.setter
-    def page(self, value):
-        warnings.warn(
-            'The "page" field has been renamed to redirect_page '
-            'and will be removed on Aldryn Forms 3.1.0',
-            PendingDeprecationWarning
-        )
-        self.redirect_page = value
-
     @cached_property
     def success_url(self) -> str:
         return self.redirect_to.url

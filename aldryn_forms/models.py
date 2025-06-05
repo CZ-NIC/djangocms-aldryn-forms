@@ -1,6 +1,5 @@
 import json
 import re
-import warnings
 from collections import defaultdict, namedtuple
 from functools import partial
 from typing import Dict, List

@@ -5,12 +5,14 @@ Changelog
 Unreleased
 ==========
 
-8.0.0 (2025-??-??)
+8.0.0 (2025-06-05)
 ==================
 
 * Add support of CMS 4.0
 * Remove support of CMS 3.x
 * Replace fields redirect_type, url and redirect_page by redirect_to in model BaseFormPlugin.
+* Use djangocms_text instead of djangocms_text_ckeditor.
+* Restrict python version >= 3.10.
 
 7.7.0 (2025-04-22)
 ==================

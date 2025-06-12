@@ -17,7 +17,7 @@ from emailit.utils import get_template_names
 
 from .action_backends_base import BaseAction
 from .compat import build_plugin_tree
-from .constants import ALDRYN_FORMS_ACTION_BACKEND_KEY_MAX_SIZE, DEFAULT_ALDRYN_FORMS_ACTION_BACKENDS
+from .constants import ALDRYN_FORMS_ACTION_BACKEND_KEY_MAX_SIZE, DEFAULT_ALDRYN_FORMS_ACTION_BACKENDS, EMAIL_REPLY_TO
 from .validators import is_valid_recipient
 
 
@@ -162,6 +162,10 @@ def send_postponed_notifications(instance: "FormSubmissionBase") -> bool:
     else:
         subject_templates = None
 
+    reply_to = []
+    for nametype in form_data:
+        if nametype.name == EMAIL_REPLY_TO:
+            reply_to.append(nametype.value)
     try:
         send_mail(
             recipients=[user.email for user in recipients],
@@ -170,6 +174,7 @@ def send_postponed_notifications(instance: "FormSubmissionBase") -> bool:
                 settings, 'ALDRYN_FORMS_EMAIL_TEMPLATES_BASE', 'aldryn_forms/emails/notification'),
             subject_templates=subject_templates,
             language=instance.language,
+            reply_to=reply_to,
         )
     except smtplib.SMTPException as err:
         logger.error(err)

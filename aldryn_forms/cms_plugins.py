@@ -29,7 +29,9 @@ from filer.models import filemodels, imagemodels
 from PIL import Image
 
 from . import models
-from .constants import ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION, ALDRYN_FORMS_POST_IDENT_NAME, MAX_IDENT_SIZE
+from .constants import (
+    ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION, ALDRYN_FORMS_POST_IDENT_NAME, EMAIL_REPLY_TO, MAX_IDENT_SIZE,
+)
 from .forms import (
     BooleanFieldForm, CaptchaFieldForm, DateFieldForm, DateTimeFieldForm, EmailFieldForm, FileFieldForm, FormPluginForm,
     FormSubmissionBaseForm, HiddenFieldForm, ImageFieldForm, MultipleSelectFieldForm, RadioFieldForm,
@@ -289,13 +291,10 @@ class FormPlugin(FieldContainer):
             'form_plugin': instance,
         }
 
-        reply_to = None
-        for field_name, field_instance in form.fields.items():
-            if hasattr(field_instance, '_model_instance') and \
-                    field_instance._model_instance.plugin_type == 'EmailField':
-                if form.cleaned_data.get(field_name):
-                    reply_to = [form.cleaned_data[field_name]]
-                    break
+        reply_to = []
+        for name, value in form.cleaned_data.items():
+            if name == EMAIL_REPLY_TO:
+                reply_to.append(value)
 
         subject_template_base = getattr(settings, 'ALDRYN_FORMS_EMAIL_SUBJECT_TEMPLATES_BASE',
                                         getattr(settings, 'ALDRYN_FORMS_EMAIL_TEMPLATES_BASE', None))

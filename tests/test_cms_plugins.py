@@ -53,7 +53,22 @@ class DataMixin:
         part_text, part_html = msg.get_payload()
         self.assertEqual(part_text.get_payload().strip(), 'Form name: Contact us\nName: Tester')
         self.assertInHTML(
-            "<html><head></head><body><p>Form name: Contact us</p><p>Name: Tester</p></body></html>",
+            """<html>
+                <head></head>
+                <body>
+                    <p>Form name: Contact us</p>
+                    <table>
+                        <tr>
+                            <th bgcolor="#deddda" align="left">Label</th>
+                            <th bgcolor="#deddda" align="left">Value</th>
+                        </tr>
+                        <tr>
+                            <th bgcolor="#f6f5f4" align="left">Name</th>
+                            <td>Tester</td>
+                        </tr>
+                    </table>
+                </body>
+            </html>""",
             part_html.get_payload())
 
 

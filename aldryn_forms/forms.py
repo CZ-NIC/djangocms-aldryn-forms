@@ -18,7 +18,7 @@ from easy_thumbnails.VIL import Image as VILImage
 from PIL import Image
 
 from .constants import ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION, ALDRYN_FORMS_POST_IDENT_NAME, MAX_IDENT_SIZE
-from .models import FormPlugin, FormSubmission, FormSubmissionBase
+from .models import FormPlugin, FormSubmission, FormSubmissionBase, SerializedFormField
 from .sizefield.utils import filesizeformat
 from .utils import add_form_error, get_action_backends, get_user_model
 
@@ -302,11 +302,11 @@ class FormSubmissionBaseForm(forms.Form):
             if serialized_field:
                 yield serialized_field
 
-    def get_serialized_field_choices(self, is_confirmation=False):
-        """Renders the form data in a format suitable to be serialized.
-        """
+    def get_serialized_form_fields(self, is_confirmation=False):
+        """Get list of SerializedFormField."""
         fields = self.get_serialized_fields(is_confirmation)
-        fields = [(field.label, field.value) for field in fields]
+        fields = [SerializedFormField(name=field.name, label=field.label, value=field.value, field_occurrence=1)
+                  for field in fields]
         return fields
 
     def get_cleaned_data(self, is_confirmation=False):

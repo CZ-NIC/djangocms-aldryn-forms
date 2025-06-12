@@ -2,6 +2,12 @@
 Changelog
 =========
 
+7.8.0 (2025-06-12)
+==================
+
+* Better formatting of the html part of the sent email.
+* Add header reply-to into send (postponed) notifications.
+
 7.7.0 (2025-04-22)
 ==================
 

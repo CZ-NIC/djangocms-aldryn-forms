@@ -1,6 +1,6 @@
 import logging
 import smtplib
-from typing import TYPE_CHECKING, NamedTuple
+from typing import TYPE_CHECKING
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
@@ -23,11 +23,6 @@ from .validators import is_valid_recipient
 
 if TYPE_CHECKING:  # pragma: no cover
     from .models import FormSubmissionBase
-
-
-class NameTypeField(NamedTuple):
-    name: str
-    value: str
 
 
 logger = logging.getLogger(__name__)
@@ -148,7 +143,7 @@ def send_postponed_notifications(instance: "FormSubmissionBase") -> bool:
     recipients = [user for user in instance.get_recipients() if is_valid_recipient(user.email)]
     if not recipients:
         return True
-    form_data = [NameTypeField(item.name, item.value) for item in instance.get_form_data()]
+    form_data = instance.get_form_data()
     context = {
         'form_name': instance.name,
         'form_data': form_data,
@@ -163,9 +158,9 @@ def send_postponed_notifications(instance: "FormSubmissionBase") -> bool:
         subject_templates = None
 
     reply_to = []
-    for nametype in form_data:
-        if nametype.name == EMAIL_REPLY_TO:
-            reply_to.append(nametype.value)
+    for field in form_data:
+        if field.name == EMAIL_REPLY_TO:
+            reply_to.append(field.value)
     try:
         send_mail(
             recipients=[user.email for user in recipients],

@@ -595,3 +595,11 @@ class MultipleSelectFieldForm(MinMaxValueForm):
     class Meta:
         # 'required' and 'required_message' depend on min_value field validator
         fields = ['label', 'help_text', 'min_value', 'max_value', 'custom_classes']
+
+
+class URLFieldForm(TextFieldForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name in ("list", "pattern", "size"):
+            self.fields[name].required = False

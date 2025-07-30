@@ -29,6 +29,20 @@ msgstr "%(value)s není rozšíření."
 msgid "%(value)s is not mimetype."
 msgstr "%(value)s není mimetype."
 
+msgid ""
+"A list of predefined url values. Each url is on a separate line. The first "
+"word is the url. The next (optional) words are a description for the url."
+msgstr ""
+"Seznam předdefinovaných položek. Každé url je na samostatné řádce. První "
+"slovo je url. Další (nepovinná) slova jsou popisek k url."
+
+msgid ""
+"A regular expression to match for the value. It must be a valid JavaScript "
+"regular expression."
+msgstr ""
+"Regulární výraz pro porovnání hodnoty. Musí to být validní JavaScript "
+"regulární výraz."
+
 msgid "Absolute URL"
 msgstr "Absolutní adresa URL"
 
@@ -121,6 +135,9 @@ msgid ""
 "example.com/sub-page/?email=hello@example.com&name=Alex', then the fields "
 "'email' and 'name' are going to to be filled in automatically."
 msgstr ""
+"Např. když otevřete formulář s url, která obsahuje parametry jako třeba "
+"'https://example.com/sub-page/?email=hello@example.com&name=Alex', tak pole "
+"'email' a 'name' budou vyplněny automaticky."
 
 msgid "Email"
 msgstr "E-mail"
@@ -253,6 +270,10 @@ msgid "Honeypot Field"
 msgstr "Honeypot pole"
 
 msgid ""
+"How many characters wide the input field should be. The default value is 20."
+msgstr "Na kolik znaků by pole mělo být široké. Výchozí hodnota je 20."
+
+msgid ""
 "If checkbox \"Field is required\" is set, \"Min choices\" must be at least 1."
 msgstr ""
 "Je-li zatrženo \"Toto pole je povinné\", tak \"Minimální výběr\" musí být "
@@ -303,6 +324,9 @@ msgstr "Nejpozdější čas"
 
 msgid "Legend"
 msgstr "Nápověda"
+
+msgid "List of urls"
+msgstr "Seznam urls"
 
 msgid "Max choices"
 msgstr "Maximální výběr"
@@ -388,6 +412,9 @@ msgstr "Volby"
 msgid "POST does not contain a form id."
 msgstr "POST neobsahuje id formuláře."
 
+msgid "Pattern"
+msgstr "Pattern"
+
 msgid "People who got a notification when form was submitted."
 msgstr "Lidé, kteří dostali upozornění po odeslání formuláře."
 
@@ -469,15 +496,27 @@ msgstr "Nastavit je to spam"
 msgid "Set not to spam"
 msgstr "Nastavit není to spam"
 
+msgid "Size"
+msgstr "Velikost"
+
 #, python-format
 msgid "Size '%s' has incorrect format"
 msgstr "Velikost '%s' má nesprávný formát."
+
+msgid "Spellcheck"
+msgstr "Kontrola pravopisu"
 
 msgid "Step"
 msgstr "Krok"
 
 msgid "Submit Button"
 msgstr "Tlačítko Odeslat"
+
+msgid "Submitted form to be sent"
+msgstr "Odeslaný formulář k odeslání"
+
+msgid "Submitted forms to be sent"
+msgstr "Odeslané formuláře k odeslání"
 
 msgid "Success message"
 msgstr "Hlášení při úspešném odeslání"
@@ -564,6 +603,12 @@ msgstr "Tento e-mail je nedostupný."
 msgid "Time Field"
 msgstr "Pole Čas"
 
+msgid "To enable spell-checking for an element."
+msgstr "Aktivace kontroly pravopisu pro toto pole."
+
+msgid "URL Field"
+msgstr "Pole URL"
+
 msgid "Upload files to"
 msgstr "Nahrajte soubory do"
 
@@ -583,6 +628,9 @@ msgstr "Použito pro nastavení jména pole"
 
 msgid "Value"
 msgstr "Hodnota"
+
+msgid "Webhook URL"
+msgstr "Webhook URL"
 
 msgid ""
 "When checked, the value of this field will be used to send an email "
@@ -680,6 +728,9 @@ msgstr "nová e-mailová upozornění"
 
 msgid "people notified"
 msgstr "uživatelé, kteří budou upozorněni"
+
+msgid "reply to email"
+msgstr "odpovědět na mail"
 
 msgid "rows"
 msgstr "řádky"

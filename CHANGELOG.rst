@@ -2,6 +2,11 @@
 Changelog
 =========
 
+7.9.0 (2025-07-31)
+==================
+
+* Add plugin URLField.
+
 7.8.0 (2025-06-12)
 ==================
 
@@ -296,7 +301,7 @@ Changelog
 2.1.3 (2016-09-05)
 ==================
 
-* Added missing `control-label`` classes in bootstrap templates
+* Added missing ``control-label`` classes in bootstrap templates
 * Fixed related_name inconsistency with django CMS 3.3.1
 * Dropped support for djangoCMS < 3.2
 * Introduced support for djangoCMS 3.4.0

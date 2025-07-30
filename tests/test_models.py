@@ -10,7 +10,7 @@ from cms.models import Placeholder
 from filer.models import Folder
 
 from aldryn_forms.models import (
-    FileUploadFieldPlugin, FormSubmission, ImageUploadFieldPlugin, MultipleFilesUploadFieldPlugin, Option,
+    FileUploadFieldPlugin, FormSubmission, ImageUploadFieldPlugin, MultipleFilesUploadFieldPlugin, Option, URLFieldPlugin
 )
 
 
@@ -172,3 +172,44 @@ class FormSubmissionTest(TestCase):
     def test_form_data(self):
         data = [{'name': 'test', 'label': 'Test', 'field_occurrence': 1, 'value': 1}]
         self.assertEqual(self.submission.form_data(), data)
+
+
+class URLFieldPluginTest(TestCase):
+
+    def test_get_html_id_list(self):
+        field = URLFieldPlugin(name="address")
+        self.assertEqual(field.get_html_id_list(), "id_address_list")
+
+    def test_empty_list(self):
+        field = URLFieldPlugin(name="address")
+        self.assertFalse(field.is_list())
+
+    def test_list(self):
+        field = URLFieldPlugin(name="address", list="https://example.com")
+        self.assertTrue(field.is_list())
+
+    def test_get_list_empty(self):
+        field = URLFieldPlugin(name="address")
+        self.assertEqual(field.get_list_values_and_labels(), [])
+
+    def test_get_list_str(self):
+        field = URLFieldPlugin(name="address", list="")
+        self.assertEqual(field.get_list_values_and_labels(), [])
+
+    def test_get_list_spaces(self):
+        field = URLFieldPlugin(name="address", list=r"    ")
+        self.assertEqual(field.get_list_values_and_labels(), [])
+
+    def test_get_list(self):
+        field = URLFieldPlugin(name="address", list="https://example.com")
+        self.assertEqual(field.get_list_values_and_labels(), [["https://example.com", None]])
+
+    def test_get_list_more_items(self):
+        field = URLFieldPlugin(name="address", list="""
+            https://example.com/1/
+            https://example.com/2/ Second example
+        """)
+        self.assertEqual(field.get_list_values_and_labels(), [
+            ["https://example.com/1/", None],
+            ["https://example.com/2/", "Second example"],
+        ])

@@ -36,7 +36,7 @@ from .forms import (
     BooleanFieldForm, CaptchaFieldForm, DateFieldForm, DateTimeFieldForm, EmailFieldForm, FileFieldForm, FormPluginForm,
     FormSubmissionBaseForm, HiddenFieldForm, ImageFieldForm, MultipleSelectFieldForm, RadioFieldForm,
     RestrictedFileField, RestrictedImageField, RestrictedMultipleFilesField, SelectFieldForm, TextAreaFieldForm,
-    TextFieldForm, TimeFieldForm,
+    TextFieldForm, TimeFieldForm, URLFieldForm,
 )
 from .helpers import get_user_name
 from .models import FieldPluginBase, SerializedFormField, SubmittedToBeSent
@@ -1132,6 +1132,31 @@ class RadioSelectField(Field):
         return kwargs
 
 
+class URLField(BaseTextField):
+    name = _('URL Field')
+    form_field_widget_input_type = 'url'
+    model = models.URLFieldPlugin
+    form = URLFieldForm
+    fieldset_general_fields = [
+        'label',
+        'name',
+        'placeholder_text',
+        'required',
+        'help_text',
+    ]
+    fieldset_advanced_fields = [
+        'required_message',
+        ('min_value', 'max_value',),
+        'list',
+        'pattern',
+        'readonly',
+        'size',
+        'spellcheck',
+        'custom_classes',
+        'attributes',
+    ]
+
+
 try:
     if not apps.is_installed("captcha"):  # django-simple-captcha
         raise ImportError('Module "captcha" is not in INSTALLED_APPS.')
@@ -1203,3 +1228,4 @@ plugin_pool.register_plugin(SubmitButton)
 plugin_pool.register_plugin(TextAreaField)
 plugin_pool.register_plugin(TextField)
 plugin_pool.register_plugin(HoneypotField)
+plugin_pool.register_plugin(URLField)

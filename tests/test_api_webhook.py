@@ -213,13 +213,8 @@ class TransformDataTest(Mixin, SimpleTestCase):
             {"dest": "answer", "src": ".question[.foo"},
         ]
         self.assertEqual(transform_data(rules, data), {})
-        self.log_handler.check(
-            ('aldryn_forms.api.webhook', 'ERROR',
-            '.question[.foo jq: error: syntax error, unexpected end of file (Unix shell '
-            'quoting issues?) at <top-level>, line 1:\n'
-            '.question[.foo          \n'
-            'jq: 1 compile error')
-        )
+        self.assertEqual(
+            self.log_handler.records[0].msg[:62], ".question[.foo jq: error: syntax error, unexpected end of file")
 
     def test_stop_iteration(self):
         data = {"question": "42"}

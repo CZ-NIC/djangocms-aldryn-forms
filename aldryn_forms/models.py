@@ -645,6 +645,53 @@ class TimeFieldPlugin(FieldPluginBase):
         help_text=_('The field cannot be edited by the user.'))
 
 
+class URLFieldPlugin(FieldPluginBase):
+    """URL field plugin."""
+    list = models.TextField(
+        verbose_name=_('List of urls'),
+        blank=None, null=True,
+        help_text=_('A list of predefined url values. Each url is on a separate line. The first word is the url. '
+                    'The next (optional) words are a description for the url.'))
+    pattern = models.CharField(
+        verbose_name=_('Pattern'),
+        blank=None, null=True,
+        max_length=255,
+        help_text=_('A regular expression to match for the value. It must be a valid JavaScript regular expression.'))
+    readonly = models.BooleanField(
+        verbose_name=_('Read only'),
+        blank=None, null=True,
+        help_text=_('The field cannot be edited by the user.'))
+    size = models.SmallIntegerField(
+        verbose_name=_('Size'),
+        blank=None, null=True,
+        help_text=_('How many characters wide the input field should be. The default value is 20.'))
+    spellcheck = models.BooleanField(
+        verbose_name=_('Spellcheck'),
+        blank=None, null=True,
+        help_text=_('To enable spell-checking for an element.'))
+
+    def get_html_id_list(self) -> str:
+        return f"id_{self.name}_list"
+
+    def is_list(self) -> bool:
+        return bool(self.list)
+
+    def get_list_values_and_labels(self) -> List[List[str]]:
+        data: List[List[str]] = []
+        if self.list is None:
+            return data
+        for line in re.split("[\r\n]+", self.list):
+            content = line.strip()
+            if content:
+                item = content.split(" ", 1)
+                if len(item) > 1:
+                    item[1] = item[1].lstrip()
+                else:
+                    item.append(None)
+                data.append(item)
+        return data
+
+
 class Option(models.Model):
     field = models.ForeignKey(FieldPlugin, editable=False, on_delete=models.CASCADE)
     value = models.CharField(_('Value'), max_length=255)

@@ -14,6 +14,10 @@ help:
 	@echo "    Check javascript code. Run npm -i manually before the command."
 	@echo "make build-js-css"
 	@echo "    Build js and css. Run npm -i manually if node_modules isn't installed yet."
+	@echo ""
+	@echo "Run tests in docker:"
+	@echo "    docker run -t -w /app -v .:/app python:3.8 bash -c 'pip install tox; tox -e py38'"
+	@echo "    sudo chown -R \$$(id -u):\$$(id -g) .tox"
 
 # Translations
 msg-make:

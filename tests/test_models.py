@@ -207,7 +207,7 @@ class URLFieldPluginTest(TestCase):
     def test_get_list_more_items(self):
         field = URLFieldPlugin(name="address", list="""
             https://example.com/1/
-            https://example.com/2/ Second example
+            https://example.com/2/     Second example
         """)
         self.assertEqual(field.get_list_values_and_labels(), [
             ["https://example.com/1/", None],

@@ -684,7 +684,9 @@ class URLFieldPlugin(FieldPluginBase):
             content = line.strip()
             if content:
                 item = content.split(" ", 1)
-                if len(item) == 1:
+                if len(item) > 1:
+                    item[1] = item[1].lstrip()
+                else:
                     item.append(None)
                 data.append(item)
         return data

@@ -1,3 +1,5 @@
+from typing import Dict
+
 from django import template
 from django.forms.boundfield import BoundField
 from django.utils import encoding
@@ -23,8 +25,8 @@ def render_notification_text(context, email_notification, email_type):
     return mark_safe(message)
 
 
-def _build_kwargs(field: BoundField, instance: FieldPluginBase) -> dict[str, str]:
-    kwargs: dict[str, str] = {}
+def _build_kwargs(field: BoundField, instance: FieldPluginBase) -> Dict[str, str]:
+    kwargs: Dict[str, str] = {}
     if instance.custom_classes:
         kwargs["class"] = instance.custom_classes
     if "class" in kwargs and field.errors:

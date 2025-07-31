@@ -48,7 +48,7 @@ def get_response(
         return None
     form_plugin, form = form_plugin_and_form
 
-    data: dict[str, str] = {"status": "ERROR"}
+    data: Dict[str, str] = {"status": "ERROR"}
     if form.is_valid():
         data["status"] = "SUCCESS"
         data["post_ident"] = form.cleaned_data.get(ALDRYN_FORMS_POST_IDENT_NAME)

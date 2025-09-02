@@ -5,6 +5,11 @@ Changelog
 Unreleased
 ==========
 
+8.1.0 (2025-09-02)
+==================
+
+* Merge branch with tags 7.8.0 and 7.9.0.
+
 8.0.0 (2025-06-05)
 ==================
 
@@ -13,6 +18,18 @@ Unreleased
 * Replace fields redirect_type, url and redirect_page by redirect_to in model BaseFormPlugin.
 * Use djangocms_text instead of djangocms_text_ckeditor.
 * Restrict python version >= 3.10.
+
+7.9.0 (2025-07-31)
+==================
+
+* Add plugin URLField.
+* Remove redundant templates.
+
+7.8.0 (2025-06-12)
+==================
+
+* Better formatting of the html part of the sent email.
+* Add header reply-to into send (postponed) notifications.
 
 7.7.0 (2025-04-22)
 ==================

@@ -29,12 +29,14 @@ from filer.models import filemodels, imagemodels
 from PIL import Image
 
 from . import models
-from .constants import ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION, ALDRYN_FORMS_POST_IDENT_NAME, MAX_IDENT_SIZE
+from .constants import (
+    ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION, ALDRYN_FORMS_POST_IDENT_NAME, EMAIL_REPLY_TO, MAX_IDENT_SIZE,
+)
 from .forms import (
     BooleanFieldForm, CaptchaFieldForm, DateFieldForm, DateTimeFieldForm, EmailFieldForm, FileFieldForm, FormPluginForm,
     FormSubmissionBaseForm, HiddenFieldForm, ImageFieldForm, MultipleSelectFieldForm, RadioFieldForm,
     RestrictedFileField, RestrictedImageField, RestrictedMultipleFilesField, SelectFieldForm, TextAreaFieldForm,
-    TextFieldForm, TimeFieldForm,
+    TextFieldForm, TimeFieldForm, URLFieldForm,
 )
 from .helpers import get_user_name
 from .models import FieldPluginBase, SerializedFormField, SubmittedToBeSent
@@ -283,17 +285,14 @@ class FormPlugin(FieldContainer):
 
         context = {
             'form_name': instance.name,
-            'form_data': form.get_serialized_field_choices(),
+            'form_data': form.get_serialized_form_fields(),
             'form_plugin': instance,
         }
 
-        reply_to = None
-        for field_name, field_instance in form.fields.items():
-            if hasattr(field_instance, '_model_instance') and \
-                    field_instance._model_instance.plugin_type == 'EmailField':
-                if form.cleaned_data.get(field_name):
-                    reply_to = [form.cleaned_data[field_name]]
-                    break
+        reply_to = []
+        for name, value in form.cleaned_data.items():
+            if name == EMAIL_REPLY_TO:
+                reply_to.append(value)
 
         subject_template_base = getattr(settings, 'ALDRYN_FORMS_EMAIL_SUBJECT_TEMPLATES_BASE',
                                         getattr(settings, 'ALDRYN_FORMS_EMAIL_TEMPLATES_BASE', None))
@@ -794,7 +793,7 @@ class EmailField(BaseTextField):
     def send_notification_email(self, email, form, form_field_instance):
         context = {
             'form_name': form.instance.name,
-            'form_data': form.get_serialized_field_choices(is_confirmation=True),
+            'form_data': form.get_serialized_form_fields(is_confirmation=True),
             'body_text': form_field_instance.email_body,
         }
         try:
@@ -1131,6 +1130,31 @@ class RadioSelectField(Field):
         return kwargs
 
 
+class URLField(BaseTextField):
+    name = _('URL Field')
+    form_field_widget_input_type = 'url'
+    model = models.URLFieldPlugin
+    form = URLFieldForm
+    fieldset_general_fields = [
+        'label',
+        'name',
+        'placeholder_text',
+        'required',
+        'help_text',
+    ]
+    fieldset_advanced_fields = [
+        'required_message',
+        ('min_value', 'max_value',),
+        'list',
+        'pattern',
+        'readonly',
+        'size',
+        'spellcheck',
+        'custom_classes',
+        'attributes',
+    ]
+
+
 try:
     if not apps.is_installed("captcha"):  # django-simple-captcha
         raise ImportError('Module "captcha" is not in INSTALLED_APPS.')
@@ -1202,3 +1226,4 @@ plugin_pool.register_plugin(SubmitButton)
 plugin_pool.register_plugin(TextAreaField)
 plugin_pool.register_plugin(TextField)
 plugin_pool.register_plugin(HoneypotField)
+plugin_pool.register_plugin(URLField)

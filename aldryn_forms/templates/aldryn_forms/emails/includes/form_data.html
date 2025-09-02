@@ -1,3 +1,13 @@
-{% for name, value in form_data %}
-    <p>{{ name }}: {{ value|default_if_none:"—" }}</p>
-{% endfor %}
+{% load i18n aldryn_forms_admin_tags %}
+<table>
+    <tr>
+        <th bgcolor="#deddda" align="left">{% translate "Label" %}</th>
+        <th bgcolor="#deddda" align="left">{% translate "Value" %}</th>
+    </tr>
+    {% for field in form_data %}
+        <tr>
+            <th bgcolor="#f6f5f4" align="left">{{ field.label|default:field.name }}</th>
+            <td>{{ field.value|media_filer_public_link }}</td>
+        </tr>
+    {% endfor %}
+</table>

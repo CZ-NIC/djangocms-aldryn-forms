@@ -1,6 +1,6 @@
 import logging
 import smtplib
-from typing import TYPE_CHECKING, NamedTuple
+from typing import TYPE_CHECKING
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
@@ -17,17 +17,12 @@ from emailit.utils import get_template_names
 
 from .action_backends_base import BaseAction
 from .compat import build_plugin_tree
-from .constants import ALDRYN_FORMS_ACTION_BACKEND_KEY_MAX_SIZE, DEFAULT_ALDRYN_FORMS_ACTION_BACKENDS
+from .constants import ALDRYN_FORMS_ACTION_BACKEND_KEY_MAX_SIZE, DEFAULT_ALDRYN_FORMS_ACTION_BACKENDS, EMAIL_REPLY_TO
 from .validators import is_valid_recipient
 
 
 if TYPE_CHECKING:  # pragma: no cover
     from .models import FormSubmissionBase
-
-
-class NameTypeField(NamedTuple):
-    name: str
-    value: str
 
 
 logger = logging.getLogger(__name__)
@@ -148,7 +143,7 @@ def send_postponed_notifications(instance: "FormSubmissionBase") -> bool:
     recipients = [user for user in instance.get_recipients() if is_valid_recipient(user.email)]
     if not recipients:
         return True
-    form_data = [NameTypeField(item.name, item.value) for item in instance.get_form_data()]
+    form_data = instance.get_form_data()
     context = {
         'form_name': instance.name,
         'form_data': form_data,
@@ -162,6 +157,10 @@ def send_postponed_notifications(instance: "FormSubmissionBase") -> bool:
     else:
         subject_templates = None
 
+    reply_to = []
+    for field in form_data:
+        if field.name == EMAIL_REPLY_TO:
+            reply_to.append(field.value)
     try:
         send_mail(
             recipients=[user.email for user in recipients],
@@ -170,6 +169,7 @@ def send_postponed_notifications(instance: "FormSubmissionBase") -> bool:
                 settings, 'ALDRYN_FORMS_EMAIL_TEMPLATES_BASE', 'aldryn_forms/emails/notification'),
             subject_templates=subject_templates,
             language=instance.language,
+            reply_to=reply_to,
         )
     except smtplib.SMTPException as err:
         logger.error(err)

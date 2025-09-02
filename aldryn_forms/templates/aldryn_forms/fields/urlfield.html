@@ -1,0 +1,13 @@
+{% extends "aldryn_forms/field.html" %}
+{% load aldryn_forms_tags %}
+
+{% block widget %}
+    {% render_url_field field instance %}
+    {% if instance.is_list %}
+        <datalist id="{{ instance.get_html_id_list }}">
+            {% for value, label in instance.get_list_values_and_labels %}
+                <option value="{{ value }}"{% if label %} label="{{ label }}"{% endif %}></option>
+            {% endfor %}
+        </datalist>
+    {% endif %}
+{% endblock %}

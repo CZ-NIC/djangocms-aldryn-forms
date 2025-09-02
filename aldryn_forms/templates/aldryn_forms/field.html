@@ -14,7 +14,9 @@
         {% endif %}
     </label>
 
-    {% render_form_widget field class=instance.custom_classes %}
+    {% block widget %}
+        {% render_form_widget field instance %}
+    {% endblock %}
 
     {% if field.errors %}
         <ul class="errormessages">

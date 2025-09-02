@@ -51,7 +51,22 @@ class DataMixin:
         part_text, part_html = msg.get_payload()
         self.assertEqual(part_text.get_payload().strip(), 'Form name: Contact us\nName: Tester')
         self.assertInHTML(
-            "<html><head></head><body><p>Form name: Contact us</p><p>Name: Tester</p></body></html>",
+            """<html>
+                <head></head>
+                <body>
+                    <p>Form name: Contact us</p>
+                    <table>
+                        <tr>
+                            <th bgcolor="#deddda" align="left">Label</th>
+                            <th bgcolor="#deddda" align="left">Value</th>
+                        </tr>
+                        <tr>
+                            <th bgcolor="#f6f5f4" align="left">Name</th>
+                            <td>Tester</td>
+                        </tr>
+                    </table>
+                </body>
+            </html>""",
             part_html.get_payload())
 
 
@@ -507,3 +522,60 @@ class EmailNotificationFormPluginTestCase(DataMixin, CMSTestCase):
             ('aldryn_forms.action_backends', 'INFO',
              f'Not persisting data for "{form_plugin.pk}" since action_backend is set to "none"'),
         )
+
+
+class URLFieldTest(DataMixin, CMSTestCase):
+
+    plugin_name = "FormPlugin"
+
+    def test_min_attrs(self):
+        add_plugin(self.placeholder, 'URLField', 'en', target=self.form_plugin, name="address", label="URL address")
+        if CMS_3_6:
+            self.page.publish('en')
+        response = self.client.get(self.page.get_absolute_url('en'))
+        self.assertContains(response, """
+            <label for="id_address">URL address</label>
+            <input type="url" name="address" id="id_address">
+        """, html=True)
+
+    def test_all_attrs(self):
+        add_plugin(
+            self.placeholder,
+            'URLField',
+            'en',
+            target=self.form_plugin,
+            name="address",
+            label="URL address",
+            required=True,
+            required_message="Required to fill",
+            placeholder_text="https://placeholder.com/",
+            help_text="Enter URL",
+            attributes={"one": "1", "two": "2"},
+            min_value=8,
+            max_value=64,
+            custom_classes="first last",
+            pattern=r".+\.com",
+            readonly=True,
+            size=42,
+            spellcheck=True,
+            list="""
+                https://one.com/
+                https://two.com/ Second url
+            """
+        )
+        if CMS_3_6:
+            self.page.publish('en')
+        response = self.client.get(self.page.get_absolute_url('en'))
+        self.assertContains(response, """
+            <label for="id_address">
+                URL address
+                <abbr title="Required field">*</abbr>
+            </label>
+            <input type="url" name="address" placeholder="https://placeholder.com/" class="first last" one="1" two="2"
+                id="id_address" minlength="8" maxlength="64" pattern=".+\.com" size="42" list="id_address_list"
+                readonly spellcheck required>
+            <datalist id="id_address_list">
+                <option value="https://one.com/"></option>
+                <option value="https://two.com/" label="Second url"></option>
+            </datalist>
+        """, html=True)

@@ -2,6 +2,7 @@ import json
 from datetime import datetime, timezone
 from unittest.mock import patch
 
+from django import VERSION
 from django.contrib.auth.models import User
 from django.contrib.messages import get_messages
 from django.core import mail
@@ -530,8 +531,6 @@ class URLFieldTest(DataMixin, CMSTestCase):
 
     def test_min_attrs(self):
         add_plugin(self.placeholder, 'URLField', 'en', target=self.form_plugin, name="address", label="URL address")
-        if CMS_3_6:
-            self.page.publish('en')
         response = self.client.get(self.page.get_absolute_url('en'))
         self.assertContains(response, """
             <label for="id_address">URL address</label>
@@ -563,17 +562,16 @@ class URLFieldTest(DataMixin, CMSTestCase):
                 https://two.com/ Second url
             """
         )
-        if CMS_3_6:
-            self.page.publish('en')
         response = self.client.get(self.page.get_absolute_url('en'))
-        self.assertContains(response, """
+        aria_describedby = 'aria-describedby="id_address_helptext"' if VERSION[0] > 4 else ""
+        self.assertContains(response, f"""
             <label for="id_address">
                 URL address
                 <abbr title="Required field">*</abbr>
             </label>
             <input type="url" name="address" placeholder="https://placeholder.com/" class="first last" one="1" two="2"
                 id="id_address" minlength="8" maxlength="64" pattern=".+\.com" size="42" list="id_address_list"
-                readonly spellcheck required>
+                readonly spellcheck required {aria_describedby}>
             <datalist id="id_address_list">
                 <option value="https://one.com/"></option>
                 <option value="https://two.com/" label="Second url"></option>

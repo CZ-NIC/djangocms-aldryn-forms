@@ -396,7 +396,14 @@ class SubmitFormViewTest(CMSTestCase):
             }, **headers
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), {'status': 'ERROR', 'form': {'email_1': ['This field is required.']}})
+        self.assertEqual(response.json(), {
+            'status': 'ERROR',
+            'form': {
+                '__all__': ['The form could not be submitted. Please check that all form fields are filled in '
+                            'correctly.'],
+                'email_1': ['This field is required.'],
+            }
+        })
         self.assertQuerySetEqual(FormSubmission.objects.values_list('data'), [])
         self.assertEqual(len(mail.outbox), 0)
 
@@ -429,8 +436,7 @@ class SubmitFormViewTest(CMSTestCase):
                 "email_1": "test@test.foo",
             },
         )
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.get("Content-Type"), "text/html; charset=utf-8")
+        self.assertRedirects(response, "/en/form/")
         self.assertQuerySetEqual(FormSubmission.objects.values_list('data'), [
             ('[{"name": "email_1", "label": "Submit", "field_occurrence": 1, "value": "test@test.foo"}]',)
         ], transform=tuple)
@@ -482,8 +488,7 @@ class SubmitFormViewTest(CMSTestCase):
                 "form_plugin_id": form_plugin.pk,
             },
         )
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context["form"].errors, {'email_1': ['This field is required.']})
+        self.assertRedirects(response, "/en/form/")
         self.assertQuerySetEqual(FormSubmission.objects.values_list('data'), [])
         self.assertEqual(len(mail.outbox), 0)
 

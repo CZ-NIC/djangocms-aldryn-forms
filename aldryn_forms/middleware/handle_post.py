@@ -42,7 +42,7 @@ class HandleHttpPost(MiddlewareMixin):
 def get_response(
     request: HttpRequest,
     form_plugin_and_form: Tuple[FormPlugin, FormSubmissionBaseForm] = None,
-) -> Optional[Union[HttpResponseRedirect, JsonResponse]]:
+) -> Union[HttpResponseRedirect, JsonResponse]:
     """Get response type."""
     if form_plugin_and_form is None:
         return None
@@ -65,4 +65,4 @@ def get_response(
         if success_url:
             return HttpResponseRedirect(success_url)
 
-    return None
+    return HttpResponseRedirect("")

@@ -5,6 +5,12 @@ Changelog
 Unreleased
 ==========
 
+8.1.1 (2025-09-23)
+==================
+
+* Fix get_response in handle_post.
+* Add default message, if form is not valid.
+
 8.1.0 (2025-09-02)
 ==================
 

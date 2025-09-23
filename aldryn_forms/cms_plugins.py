@@ -114,6 +114,9 @@ class FormPlugin(FieldContainer):
     def form_invalid(self, instance: models.FormPlugin, request: HttpRequest, form: FormSubmissionBaseForm) -> None:
         if instance.error_message:
             form._add_error(message=instance.error_message)
+        else:
+            form._add_error(message=_(
+                "The form could not be submitted. Please check that all form fields are filled in correctly."))
 
     def process_form(self, instance: models.FormPlugin, request: HttpRequest) -> FormSubmissionBaseForm:
         PROCESSED_FORM = "aldryn_forms_processed_forms"

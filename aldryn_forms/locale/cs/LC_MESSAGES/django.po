@@ -581,14 +581,18 @@ msgstr "Nejdřívější akceptovatelný čas."
 msgid "The field cannot be edited by the user."
 msgstr "Pole nemůže být uživatelem změněno."
 
+msgid ""
+"The form could not be submitted. Please check that all form fields are "
+"filled in correctly."
+msgstr ""
+"Formulář se nepodařilo odeslat. Zkontrolujte prosím všechna pole formuláře, "
+"že jsou vyplněna správně."
+
 msgid "The form has been sent."
 msgstr "Formulář byl odeslán."
 
 msgid "The form is not active."
 msgstr "Formulář není aktivní."
-
-msgid "The form submission failed. Please try again later."
-msgstr "Odeslání formuláře se nezdařilo. Prosím, zkuste to později."
 
 msgid "The granularity numnber."
 msgstr "Hodnota rozlišení."

@@ -14,7 +14,7 @@ from django.db.models import query
 from django.http import HttpRequest
 from django.template.loader import select_template
 from django.utils.safestring import mark_safe
-from django.utils.translation import get_language, gettext
+from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 
 from cms.models.pluginmodel import CMSPlugin
@@ -24,14 +24,11 @@ from cms.plugin_rendering import PluginContext
 
 import markdown
 from emailit.api import send_mail
-from emailit.utils import get_template_names
 from filer.models import filemodels, imagemodels
 from PIL import Image
 
 from . import models
-from .constants import (
-    ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION, ALDRYN_FORMS_POST_IDENT_NAME, EMAIL_REPLY_TO, MAX_IDENT_SIZE,
-)
+from .constants import ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION, ALDRYN_FORMS_POST_IDENT_NAME, MAX_IDENT_SIZE
 from .forms import (
     BooleanFieldForm, CaptchaFieldForm, DateFieldForm, DateTimeFieldForm, EmailFieldForm, FileFieldForm, FormPluginForm,
     FormSubmissionBaseForm, HiddenFieldForm, ImageFieldForm, MultipleSelectFieldForm, RadioFieldForm,
@@ -42,7 +39,7 @@ from .helpers import get_user_name
 from .models import FieldPluginBase, FormField, SerializedFormField, SubmittedToBeSent
 from .signals import form_post_save, form_pre_save
 from .sizefield.utils import filesizeformat
-from .utils import get_action_backends
+from .utils import get_action_backends, send_email
 from .validators import MaxChoicesValidator, MinChoicesValidator, is_valid_recipient
 
 
@@ -282,44 +279,12 @@ class FormPlugin(FieldContainer):
 
     def send_notifications(self, instance, form):
         users = instance.recipients.exclude(email='')
-
-        recipients = [user for user in users.iterator()
-                      if is_valid_recipient(user.email)]
-
-        context = {
-            'form_name': instance.name,
-            'form_data': form.get_serialized_form_fields(),
-            'form_plugin': instance,
-        }
-
-        reply_to = []
-        for name, value in form.cleaned_data.items():
-            if name == EMAIL_REPLY_TO:
-                reply_to.append(value)
-
-        subject_template_base = getattr(settings, 'ALDRYN_FORMS_EMAIL_SUBJECT_TEMPLATES_BASE',
-                                        getattr(settings, 'ALDRYN_FORMS_EMAIL_TEMPLATES_BASE', None))
-        if subject_template_base:
-            language = instance.language or get_language()
-            subject_templates = get_template_names(language, subject_template_base, 'subject', 'txt')
+        recipients = [user for user in users.iterator() if is_valid_recipient(user.email)]
+        if recipients and send_email(recipients, instance, form.get_serialized_form_fields(),
+                                     form.cleaned_data.items()):
+            users_notified = [(get_user_name(user), user.email) for user in recipients]
         else:
-            subject_templates = None
-
-        try:
-            send_mail(
-                recipients=[user.email for user in recipients],
-                context=context,
-                template_base=getattr(
-                    settings, 'ALDRYN_FORMS_EMAIL_TEMPLATES_BASE', 'aldryn_forms/emails/notification'),
-                subject_templates=subject_templates,
-                language=instance.language,
-                reply_to=reply_to,
-            )
-        except smtplib.SMTPException as err:
-            logger.error(err)
-
-        users_notified = [
-            (get_user_name(user), user.email) for user in recipients]
+            users_notified = []
         return users_notified
 
 

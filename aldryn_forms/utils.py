@@ -1,6 +1,6 @@
 import logging
 import smtplib
-from typing import TYPE_CHECKING, Dict, List
+from typing import TYPE_CHECKING, Dict, ItemsView, List
 
 from django import forms
 from django.conf import settings
@@ -26,8 +26,7 @@ from .validators import is_valid_recipient
 
 
 if TYPE_CHECKING:  # pragma: no cover
-    from .models import FormSubmissionBase
-
+    from .models import FormSubmissionBase, Recipient, SerializedFormField
 
 logger = logging.getLogger(__name__)
 
@@ -148,10 +147,22 @@ def send_postponed_notifications(instance: "FormSubmissionBase") -> bool:
     if not recipients:
         return True
     form_data = instance.get_form_data()
+    cleaned_data = [(field.name, field.value) for field in form_data]
+    return send_email(recipients, instance, form_data, cleaned_data)
+
+
+def send_email(
+    recipients: List["Recipient"],
+    instance: "FormSubmissionBase",
+    form_data: List["SerializedFormField"],
+    cleaned_data: ItemsView
+) -> bool:
+    """Send email."""
     context = {
         'form_name': instance.name,
         'form_data': form_data,
         'form_plugin': instance,
+        'form_values': {sf.name: sf.value for sf in form_data},
     }
     subject_template_base = getattr(settings, 'ALDRYN_FORMS_EMAIL_SUBJECT_TEMPLATES_BASE',
                                     getattr(settings, 'ALDRYN_FORMS_EMAIL_TEMPLATES_BASE', None))
@@ -162,9 +173,9 @@ def send_postponed_notifications(instance: "FormSubmissionBase") -> bool:
         subject_templates = None
 
     reply_to = []
-    for field in form_data:
-        if field.name == EMAIL_REPLY_TO:
-            reply_to.append(field.value)
+    for name, value in cleaned_data:
+        if name == EMAIL_REPLY_TO:
+            reply_to.append(value)
     try:
         send_mail(
             recipients=[user.email for user in recipients],

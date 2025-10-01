@@ -5,7 +5,6 @@
 {% if text_message %}
 {{ text_message|safe }}
 {% else %}
-{% blocktranslate %}Form name: {{ form_name }}{% endblocktranslate %}
 {% include "aldryn_forms/emails/includes/form_data.txt" %}
 {% endif %}
 {% endblock email_content %}

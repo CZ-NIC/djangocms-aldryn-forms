@@ -39,7 +39,7 @@ from .forms import (
     TextFieldForm, TimeFieldForm, URLFieldForm,
 )
 from .helpers import get_user_name
-from .models import FieldPluginBase, SerializedFormField, SubmittedToBeSent
+from .models import FieldPluginBase, FormField, SerializedFormField, SubmittedToBeSent
 from .signals import form_post_save, form_pre_save
 from .sizefield.utils import filesizeformat
 from .utils import get_action_backends
@@ -407,7 +407,7 @@ class Field(FormElement):
             value = '-'
         return str(value)
 
-    def serialize_field(self, form, field, is_confirmation=False):
+    def serialize_field(self, form:  models.FormPlugin, field: FormField, is_confirmation=False):
         """Returns a (key, label, value) named tuple for the given field."""
         value = self.serialize_value(
             instance=field.plugin_instance,
@@ -419,6 +419,7 @@ class Field(FormElement):
             label=field.label,
             field_occurrence=field.field_occurrence,
             value=value,
+            plugin_type=field.plugin_instance.plugin_type
         )
         return serialized_field
 

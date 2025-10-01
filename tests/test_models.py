@@ -170,7 +170,7 @@ class FormSubmissionTest(TestCase):
         self.assertEqual(self.submission.form_recipients(), self.recipients)
 
     def test_form_data(self):
-        data = [{'name': 'test', 'label': 'Test', 'field_occurrence': 1, 'value': 1}]
+        data = [{'name': 'test', 'label': 'Test', 'field_occurrence': 1, 'value': 1, 'plugin_type': ''}]
         self.assertEqual(self.submission.form_data(), data)
 
 

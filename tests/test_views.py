@@ -210,7 +210,8 @@ class SubmitFormViewTest(CMSTestCase):
     def test_view_submit_one_form_instead_multiple_multiple_steps(self):
         self._submit_one_form_instead_multiple(self.redirect_url_with_params)
         self.assertQuerySetEqual(SubmittedToBeSent.objects.values_list("name", "data"), [
-            ('', '[{"name": "email", "label": "Email", "field_occurrence": 1, "value": "test2@test.foo"}]'),
+            ('', '[{"name": "email", "label": "Email", "field_occurrence": 1, "value": "test2@test.foo",'
+             ' "plugin_type": "EmailField"}]'),
         ])
 
     @patch(
@@ -221,13 +222,14 @@ class SubmitFormViewTest(CMSTestCase):
     def test_view_append_into_previous_submission(self):
         post_ident = "aBH7hWEGAihsg9KxctpNRfvEXUoOFpJZigmZETqWWNVs4gENFsL3qva1d4Q93URg"
         data = [
-            {"label": "Test", "name": "test", "value": 1},
+            {"label": "Test", "name": "test", "value": 1, "plugin_type": "EmailField"},
         ]
         SubmittedToBeSent.objects.create(name="Test", data=json.dumps(data), post_ident=post_ident)
         self._submit_one_form_instead_multiple(self.redirect_url_with_params, "FormWithIdentPlugin", post_ident)
         self.assertQuerySetEqual(SubmittedToBeSent.objects.values_list("name", "data"), [
-            ('Test', '[{"label": "Test", "name": "test", "value": 1}, '
-             '{"name": "email", "label": "Email", "field_occurrence": 1, "value": "test2@test.foo"}]'),
+            ('Test', '[{"label": "Test", "name": "test", "value": 1, "plugin_type": "EmailField"}, '
+             '{"name": "email", "label": "Email", "field_occurrence": 1, "value": "test2@test.foo", '
+             '"plugin_type": "EmailField"}]'),
         ])
 
     def test_view_submit_one_form_instead_multiple(self):
@@ -420,7 +422,8 @@ class SubmitFormViewTest(CMSTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {'status': 'SUCCESS', 'post_ident': None, 'message': 'OK'})
         self.assertQuerySetEqual(FormSubmission.objects.values_list('data'), [
-            ('[{"name": "email_1", "label": "Submit", "field_occurrence": 1, "value": "test@test.foo"}]',)
+            ('[{"name": "email_1", "label": "Submit", "field_occurrence": 1, "value": "test@test.foo", '
+             '"plugin_type": "EmailField"}]',)
         ], transform=tuple)
         self.assertEqual(len(mail.outbox), 1)
         msg = mail.outbox[0].message()
@@ -438,7 +441,8 @@ class SubmitFormViewTest(CMSTestCase):
         )
         self.assertRedirects(response, "/en/form/")
         self.assertQuerySetEqual(FormSubmission.objects.values_list('data'), [
-            ('[{"name": "email_1", "label": "Submit", "field_occurrence": 1, "value": "test@test.foo"}]',)
+            ('[{"name": "email_1", "label": "Submit", "field_occurrence": 1, "value": "test@test.foo", '
+             '"plugin_type": "EmailField"}]',)
         ], transform=tuple)
         self.assertEqual(len(mail.outbox), 1)
         msg = mail.outbox[0].message()
@@ -457,13 +461,15 @@ class SubmitFormViewTest(CMSTestCase):
         self.assertRedirects(response, page.get_absolute_url("en"))
         self.assertEqual(response.get("Content-Type"), "text/html; charset=utf-8")
         self.assertQuerySetEqual(FormSubmission.objects.values_list('data'), [
-            ('[{"name": "email_1", "label": "Submit", "field_occurrence": 1, "value": "test@test.foo"}]',)
+            ('[{"name": "email_1", "label": "Submit", "field_occurrence": 1, "value": "test@test.foo", '
+             '"plugin_type": "EmailField"}]',)
         ], transform=tuple)
         self.assertEqual(len(mail.outbox), 1)
         msg = mail.outbox[0].message()
         self.assertEqual(msg.get("to"), "dave@foo.foo")
         self.assertQuerySetEqual(FormSubmission.objects.values_list('data'), [
-            ('[{"name": "email_1", "label": "Submit", "field_occurrence": 1, "value": "test@test.foo"}]',)
+            ('[{"name": "email_1", "label": "Submit", "field_occurrence": 1, "value": "test@test.foo", '
+             '"plugin_type": "EmailField"}]',)
         ], transform=tuple)
 
     @modify_settings(MIDDLEWARE={"append": "aldryn_forms.middleware.handle_post.HandleHttpPost"})
@@ -497,7 +503,7 @@ class SubmitFormViewTest(CMSTestCase):
     def test_join_post_into_submission(self):
         page, form_plugin, headers = self._prepare_form(form_plugin_name="FormWithIdentPlugin")
         data = [
-            {"label": "Test", "name": "test", "value": 1},
+            {"label": "Test", "name": "test", "value": 1, "plugin_type": "EmailField"},
         ]
         FormSubmission.objects.create(name="Test submit", data=json.dumps(data), post_ident="1234567890")
         response = self.client.post(
@@ -511,7 +517,8 @@ class SubmitFormViewTest(CMSTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {'status': 'SUCCESS', 'post_ident': "1234567890", 'message': 'OK'})
         self.assertQuerySetEqual(FormSubmission.objects.values_list('data'), [
-            ('[{"label": "Test", "name": "test", "value": 1}, '
-             '{"name": "email_1", "label": "Submit", "field_occurrence": 1, "value": "test2@test.foo"}]',)
+            ('[{"label": "Test", "name": "test", "value": 1, "plugin_type": "EmailField"}, '
+             '{"name": "email_1", "label": "Submit", "field_occurrence": 1, "value": "test2@test.foo", '
+             '"plugin_type": "EmailField"}]',)
         ], transform=tuple)
         self.assertEqual(len(mail.outbox), 0)

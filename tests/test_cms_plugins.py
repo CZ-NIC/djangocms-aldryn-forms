@@ -48,14 +48,13 @@ class DataMixin:
         self.assertEqual(len(mail.outbox), 1)
         msg = mail.outbox[0].message()
         self.assertEqual(msg.get("to"), "email@example.com")
-        self.assertEqual(msg.get("subject"), "[Form submission] Contact us")
+        self.assertEqual(msg.get("subject"), "Contact us")
         part_text, part_html = msg.get_payload()
-        self.assertEqual(part_text.get_payload().strip(), 'Form name: Contact us\nName: Tester')
+        self.assertEqual(part_text.get_payload().strip(), 'Name: Tester')
         self.assertInHTML(
             """<html>
                 <head></head>
                 <body>
-                    <p>Form name: Contact us</p>
                     <table>
                         <tr>
                             <th bgcolor="#deddda" align="left">Label</th>
@@ -92,7 +91,8 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertQuerySetEqual(FormSubmission.objects.values_list(
             "name", "data", "post_ident").all().order_by('pk'), [
-            ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester"}]', None),
+            ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester", '
+             '"plugin_type": "TextField"}]', None),
         ], transform=None)
         self._check_mailbox()
         self.log_handler.check()
@@ -161,7 +161,8 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertQuerySetEqual(FormSubmission.objects.values_list(
             "name", "data", "post_ident").all().order_by('pk'), [
-            ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester"}]', None),
+            ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester", '
+             '"plugin_type": "TextField"}]', None),
         ], transform=None)
         self._check_mailbox()
         self.log_handler.check(
@@ -169,7 +170,7 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
             "{'hostname': 'example.com', 'name': 'Contact us', 'language': 'en', "
             "'sent_at': '2025-03-13T03:10:00-05:00', 'form_recipients': [{'name': '', "
             "'email': 'email@example.com'}], 'form_data': [{'name': 'name', 'label': "
-            "'Name', 'field_occurrence': 1, 'value': 'Tester'}]}"),
+            "'Name', 'field_occurrence': 1, 'value': 'Tester', 'plugin_type': 'TextField'}]}"),
             ('aldryn_forms.api.webhook', 'ERROR', 'https://host.foo/webhook/ Connection failed.')
         )
 
@@ -187,7 +188,8 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertQuerySetEqual(FormSubmission.objects.values_list(
             "name", "data", "post_ident").all().order_by('pk'), [
-            ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester"}]', None),
+            ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester", '
+             '"plugin_type": "TextField"}]', None),
         ], transform=None)
         self._check_mailbox()
         self.log_handler.check(
@@ -195,7 +197,7 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
             "{'hostname': 'example.com', 'name': 'Contact us', 'language': 'en', "
             "'sent_at': '2025-03-13T03:10:00-05:00', 'form_recipients': [{'name': '', "
             "'email': 'email@example.com'}], 'form_data': [{'name': 'name', 'label': "
-            "'Name', 'field_occurrence': 1, 'value': 'Tester'}]}")
+            "'Name', 'field_occurrence': 1, 'value': 'Tester', 'plugin_type': 'TextField'}]}")
         )
 
     def test_form_submission_email_action_webhook(self):
@@ -252,11 +254,13 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertQuerySetEqual(FormSubmission.objects.values_list(
             "name", "data", "post_ident").all().order_by('pk'), [
-            ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester"}]', "BJKHAmxW"),
+            ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester", '
+             '"plugin_type": "TextField"}]', "BJKHAmxW"),
         ], transform=None)
         self.assertQuerySetEqual(SubmittedToBeSent.objects.values_list(
             "name", "data", "post_ident").all().order_by('pk'), [
-            ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester"}]', "BJKHAmxW"),
+            ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester", '
+             '"plugin_type": "TextField"}]', "BJKHAmxW"),
         ], transform=None)
         self.assertEqual(len(mail.outbox), 0)
         self.log_handler.check()
@@ -277,7 +281,8 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
         self.assertEqual(FormSubmission.objects.count(), 0)
         self.assertQuerySetEqual(SubmittedToBeSent.objects.values_list(
             "name", "data", "post_ident").all().order_by('pk'), [
-            ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester"}]', "BJKHAmxW"),
+            ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester", '
+             '"plugin_type": "TextField"}]', "BJKHAmxW"),
         ], transform=None)
         self.assertEqual(len(mail.outbox), 0)
         self.log_handler.check()
@@ -319,21 +324,20 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
         self.assertQuerySetEqual(FormSubmission.objects.values_list(
             "name", "data", "post_ident").all().order_by('pk'), [
             ('Contact us',
-             '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester"}, '
-             '{"name": "trap", "label": "Trap", "field_occurrence": 1, "value": ""}]',
+             '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester", '
+             '"plugin_type": "TextField"}]',
              None),
         ], transform=None)
         self.assertEqual(len(mail.outbox), 1)
         msg = mail.outbox[0].message()
         self.assertEqual(msg.get("to"), "email@example.com")
-        self.assertEqual(msg.get("subject"), "[Form submission] Contact us")
+        self.assertEqual(msg.get("subject"), "Contact us")
         self.log_handler.check(
             ('aldryn_forms.api.webhook', 'DEBUG',
             "{'hostname': 'example.com', 'name': 'Contact us', 'language': 'en', "
             "'sent_at': '2025-03-13T03:10:00-05:00', 'form_recipients': [{'name': '', "
             "'email': 'email@example.com'}], 'form_data': [{'name': 'name', 'label': "
-            "'Name', 'field_occurrence': 1, 'value': 'Tester'}, {'name': 'trap', "
-            "'label': 'Trap', 'field_occurrence': 1, 'value': ''}]}")
+            "'Name', 'field_occurrence': 1, 'value': 'Tester', 'plugin_type': 'TextField'}]}")
         )
 
     def test_honeypot_field_filled(self):
@@ -369,7 +373,8 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
         self.assertEqual([str(msg) for msg in get_messages(response.wsgi_request)], ["<p>Thank you.</p>"])
         self.assertQuerySetEqual(FormSubmission.objects.values_list(
             "name", "data", "post_ident").all().order_by('pk'), [
-            ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester"}]', None),
+            ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester", '
+             '"plugin_type": "TextField"}]', None),
         ], transform=None)
         self._check_mailbox()
         self.log_handler.check()
@@ -390,7 +395,8 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
         self.assertEqual(response.wsgi_request.aldryn_forms_success_message, "<p>Thank you.</p>")
         self.assertQuerySetEqual(FormSubmission.objects.values_list(
             "name", "data", "post_ident").all().order_by('pk'), [
-            ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester"}]', None),
+            ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester", '
+             '"plugin_type": "TextField"}]', None),
         ], transform=None)
         self._check_mailbox()
         self.log_handler.check()
@@ -417,7 +423,8 @@ class EmailNotificationFormPluginTestCase(DataMixin, CMSTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertQuerySetEqual(FormSubmission.objects.values_list(
             "name", "data", "post_ident").all().order_by('pk'), [
-            ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester"}]', None),
+            ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester", '
+             '"plugin_type": "TextField"}]', None),
         ], transform=None)
         self._check_mailbox()
         self.log_handler.check()
@@ -469,7 +476,8 @@ class EmailNotificationFormPluginTestCase(DataMixin, CMSTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertQuerySetEqual(FormSubmission.objects.values_list(
             "name", "data", "post_ident").all().order_by('pk'), [
-            ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester"}]', None),
+            ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester", '
+             '"plugin_type": "TextField"}]', None),
         ], transform=None)
         self._check_mailbox()
         self.log_handler.check(
@@ -477,7 +485,7 @@ class EmailNotificationFormPluginTestCase(DataMixin, CMSTestCase):
             "{'hostname': 'example.com', 'name': 'Contact us', 'language': 'en', "
             "'sent_at': '2025-03-13T03:10:00-05:00', 'form_recipients': [{'name': '', "
             "'email': 'email@example.com'}], 'form_data': [{'name': 'name', 'label': "
-            "'Name', 'field_occurrence': 1, 'value': 'Tester'}]}"),
+            "'Name', 'field_occurrence': 1, 'value': 'Tester', 'plugin_type': 'TextField'}]}"),
             ('aldryn_forms.api.webhook', 'ERROR', 'https://host.foo/webhook/ Connection failed.')
         )
 
@@ -495,7 +503,8 @@ class EmailNotificationFormPluginTestCase(DataMixin, CMSTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertQuerySetEqual(FormSubmission.objects.values_list(
             "name", "data", "post_ident").all().order_by('pk'), [
-            ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester"}]', None),
+            ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester", '
+             '"plugin_type": "TextField"}]', None),
         ], transform=None)
         self._check_mailbox()
         self.log_handler.check((
@@ -503,7 +512,7 @@ class EmailNotificationFormPluginTestCase(DataMixin, CMSTestCase):
             "{'hostname': 'example.com', 'name': 'Contact us', 'language': 'en', "
             "'sent_at': '2025-03-13T03:10:00-05:00', 'form_recipients': [{'name': '', "
             "'email': 'email@example.com'}], 'form_data': [{'name': 'name', 'label': "
-            "'Name', 'field_occurrence': 1, 'value': 'Tester'}]}"
+            "'Name', 'field_occurrence': 1, 'value': 'Tester', 'plugin_type': 'TextField'}]}"
         ))
 
     def test_form_submission_no_action_webhook(self):

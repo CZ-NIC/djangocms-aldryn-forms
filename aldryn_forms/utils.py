@@ -1,7 +1,8 @@
 import logging
 import smtplib
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, List
 
+from django import forms
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.forms.forms import NON_FIELD_ERRORS
@@ -17,7 +18,10 @@ from emailit.utils import get_template_names
 
 from .action_backends_base import BaseAction
 from .compat import build_plugin_tree
-from .constants import ALDRYN_FORMS_ACTION_BACKEND_KEY_MAX_SIZE, DEFAULT_ALDRYN_FORMS_ACTION_BACKENDS, EMAIL_REPLY_TO
+from .constants import (
+    ALDRYN_FORMS_ACTION_BACKEND_KEY_MAX_SIZE, ALDRYN_FORMS_POST_IDENT_NAME, DEFAULT_ALDRYN_FORMS_ACTION_BACKENDS,
+    EMAIL_REPLY_TO,
+)
 from .validators import is_valid_recipient
 
 
@@ -175,3 +179,16 @@ def send_postponed_notifications(instance: "FormSubmissionBase") -> bool:
         logger.error(err)
         return False
     return True
+
+
+def get_serialized_fields(form: forms.Form) -> Dict[str, str]:
+    """Get serialized fields. Skip honeypost and ident field."""
+    fields_as_dicts: List[Dict[str, str]] = []
+    for field in form.get_serialized_fields(is_confirmation=False):
+        item = field._asdict()
+        if item["plugin_type"] == "HoneypotField" and not item["value"]:
+            continue
+        if field.name == ALDRYN_FORMS_POST_IDENT_NAME:
+            continue
+        fields_as_dicts.append(item)
+    return fields_as_dicts

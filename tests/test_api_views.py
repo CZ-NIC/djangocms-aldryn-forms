@@ -57,7 +57,9 @@ class SubmissionsViewSetTest(DataMixin, TestCase):
             "name": "test",
             "label": "Test",
             "field_occurrence": 1,
-            "value": 1}]
+            "value": 1,
+            "plugin_type": "TextField",
+            }]
         }
     submitted_posts_list = {
         "count": 1,
@@ -79,7 +81,7 @@ class SubmissionsViewSetTest(DataMixin, TestCase):
 
     def test_response(self):
         data = [
-            {"label": "Test", "name": "test", "value": 1},
+            {"label": "Test", "name": "test", "value": 1, "plugin_type": "TextField"},
         ]
         FormSubmission.objects.create(name="Test submit", data=json.dumps(data))
         response = self.view(self.request)
@@ -88,7 +90,7 @@ class SubmissionsViewSetTest(DataMixin, TestCase):
 
     def test_get_object(self):
         data = [
-            {"label": "Test", "name": "test", "value": 1},
+            {"label": "Test", "name": "test", "value": 1, "plugin_type": "TextField"},
         ]
         submission = FormSubmission.objects.create(name="Test submit", data=json.dumps(data))
         view = SubmissionsViewSet.as_view({"get": "retrieve"})

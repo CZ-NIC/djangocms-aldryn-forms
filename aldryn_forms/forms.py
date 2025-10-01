@@ -20,7 +20,7 @@ from PIL import Image
 from .constants import ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION, ALDRYN_FORMS_POST_IDENT_NAME, MAX_IDENT_SIZE
 from .models import FormSubmission, FormSubmissionBase, SerializedFormField
 from .sizefield.utils import filesizeformat
-from .utils import add_form_error, get_action_backends, get_user_model
+from .utils import add_form_error, get_action_backends, get_serialized_fields, get_user_model
 
 
 class FileSizeCheckMixin:
@@ -305,7 +305,8 @@ class FormSubmissionBaseForm(forms.Form):
     def get_serialized_form_fields(self, is_confirmation=False):
         """Get list of SerializedFormField."""
         fields = self.get_serialized_fields(is_confirmation)
-        fields = [SerializedFormField(name=field.name, label=field.label, value=field.value, field_occurrence=1)
+        fields = [SerializedFormField(name=field.name, label=field.label, value=field.value, field_occurrence=1,
+                                      plugin_type=field.plugin_type)
                   for field in fields]
         return fields
 
@@ -342,9 +343,7 @@ class FormSubmissionBaseForm(forms.Form):
     def append_into_previous_submission(self, previous_submit: FormSubmissionBase) -> None:
         """Append post into previous submission."""
         data: List[Dict[str, str]] = json.loads(previous_submit.data)
-        fields = self.get_serialized_fields(is_confirmation=False)
-        fields_as_dicts = [field._asdict() for field in fields if field.name != ALDRYN_FORMS_POST_IDENT_NAME]
-        data.extend(fields_as_dicts)
+        data.extend(get_serialized_fields(self))
         previous_submit.data = json.dumps(data)
         if self.instance.honeypot_filled:
             previous_submit.honeypot_filled = True

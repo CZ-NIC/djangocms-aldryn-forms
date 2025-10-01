@@ -41,7 +41,7 @@ class SendToWebhookTest(Mixin, TestCase):
             'language': 'en',
             'sent_at': '2025-03-13T03:10:00-05:00',
             'form_recipients': [],
-            'form_data': [{'name': 'test', 'label': 'Test', 'field_occurrence': 1, 'value': 1}]
+            'form_data': [{'name': 'test', 'label': 'Test', 'field_occurrence': 1, 'value': 1, 'plugin_type': ''}]
         }
         post = json.dumps([
             {"label": "Test", "name": "test", "value": 1},
@@ -78,7 +78,7 @@ class TriggerWebhookTest(Mixin, TestCase):
             ('aldryn_forms.api.webhook', 'DEBUG',
             "{'hostname': 'testserver', 'name': 'Test', 'language': 'en', 'sent_at': "
             "'2025-03-13T03:10:00-05:00', 'form_recipients': [], 'form_data': "
-            "[{'name': 'test', 'label': 'Test', 'field_occurrence': 1, 'value': 1}]}"),
+            "[{'name': 'test', 'label': 'Test', 'field_occurrence': 1, 'value': 1, 'plugin_type': ''}]}"),
             ('aldryn_forms.api.webhook', 'ERROR', 'https://host.foo/webhook/ Connection failed.')
         )
 
@@ -95,7 +95,7 @@ class TriggerWebhookTest(Mixin, TestCase):
             'aldryn_forms.api.webhook', 'DEBUG',
             "{'hostname': 'testserver', 'name': 'Test', 'language': 'en', 'sent_at': "
             "'2025-03-13T03:10:00-05:00', 'form_recipients': [], 'form_data': "
-            "[{'name': 'test', 'label': 'Test', 'field_occurrence': 1, 'value': 1}]}"
+            "[{'name': 'test', 'label': 'Test', 'field_occurrence': 1, 'value': 1, 'plugin_type': ''}]}"
         ))
 
 
@@ -301,7 +301,7 @@ class CollectSubmissionsDataTest(Mixin, TestCase):
             'language': 'en',
             'sent_at': '2025-03-25T04:35:00-05:00',
             'form_recipients': [],
-            'form_data': [{'name': 'test', 'label': 'Test', 'field_occurrence': 1, 'value': 1}]
+            'form_data': [{'name': 'test', 'label': 'Test', 'field_occurrence': 1, 'value': 1, 'plugin_type': ''}]
         }])
         self.log_handler.check()
 
@@ -322,7 +322,7 @@ class SendSubmissionDataTest(Mixin, TestCase):
             ('aldryn_forms.api.webhook', 'DEBUG',
             "{'hostname': 'localhost', 'name': 'Test', 'language': 'en', 'sent_at': "
             "'2025-03-25T04:35:00-05:00', 'form_recipients': [], 'form_data': [{'name': "
-            "'test', 'label': 'Test', 'field_occurrence': 1, 'value': 1}]}"),
+            "'test', 'label': 'Test', 'field_occurrence': 1, 'value': 1, 'plugin_type': ''}]}"),
             ('aldryn_forms.api.webhook', 'ERROR', 'https://host.foo/webhook/ Connection failed.'),
         )
 
@@ -339,5 +339,5 @@ class SendSubmissionDataTest(Mixin, TestCase):
             ('aldryn_forms.api.webhook', 'DEBUG',
             "{'hostname': 'localhost', 'name': 'Test', 'language': 'en', 'sent_at': "
             "'2025-03-25T04:35:00-05:00', 'form_recipients': [], 'form_data': [{'name': "
-            "'test', 'label': 'Test', 'field_occurrence': 1, 'value': 1}]}"),
+            "'test', 'label': 'Test', 'field_occurrence': 1, 'value': 1, 'plugin_type': ''}]}"),
         )

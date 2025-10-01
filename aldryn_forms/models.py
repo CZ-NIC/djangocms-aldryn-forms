@@ -23,7 +23,9 @@ from .constants import WEBHOOK_METHODS
 from .fields import AldrynFormsLinkField
 from .helpers import is_form_element
 from .sizefield.models import FileSizeField
-from .utils import ALDRYN_FORMS_ACTION_BACKEND_KEY_MAX_SIZE, action_backend_choices, get_action_backends
+from .utils import (
+    ALDRYN_FORMS_ACTION_BACKEND_KEY_MAX_SIZE, action_backend_choices, get_action_backends, get_serialized_fields,
+)
 
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
@@ -63,6 +65,7 @@ BaseSerializedFormField = namedtuple(
         'label',
         'field_occurrence',
         'value',
+        'plugin_type',
     ]
 )
 
@@ -740,6 +743,8 @@ class FormSubmissionBase(models.Model):
         if field_id in occurrences:
             occurrences[field_id] += 1
 
+        if "plugin_type" not in data:
+            data["plugin_type"] = ""
         data['field_occurrence'] = occurrences[field_id]
         for name in ("label", "name", "value"):
             if name not in data:
@@ -753,7 +758,6 @@ class FormSubmissionBase(models.Model):
         occurrences = defaultdict(lambda: 1)
 
         data_hook = partial(self._form_data_hook, occurrences=occurrences)
-
         try:
             form_data = json.loads(
                 self.data,
@@ -776,10 +780,7 @@ class FormSubmissionBase(models.Model):
         return recipients
 
     def set_form_data(self, form):
-        fields = form.get_serialized_fields(is_confirmation=False)
-        fields_as_dicts = [field._asdict() for field in fields]
-
-        self.data = json.dumps(fields_as_dicts)
+        self.data = json.dumps(get_serialized_fields(form))
 
     def set_recipients(self, recipients):
         raw_recipients = [

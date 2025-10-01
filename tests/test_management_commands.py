@@ -94,13 +94,13 @@ class SendEmailsTest(TestCase):
         self.assertEqual(len(mail.outbox), 1)
         msg = mail.outbox[0].message()
         self.assertEqual(msg.get("to"), "dave@foo.foo")
-        self.assertEqual(msg.get("subject"), "[Form submission] Test")
+        self.assertEqual(msg.get("subject"), "Test")
         self.log_handler.check((
             'aldryn_forms.api.webhook', 'DEBUG',
             "{'hostname': 'example.com', 'name': 'Test', 'language': 'en', 'sent_at': "
             "'2025-03-14T03:59:59-05:00', 'form_recipients': [{'name': 'Dave', 'email': "
             "'dave@foo.foo'}], 'form_data': [{'name': 'test', 'label': 'Test', "
-            "'field_occurrence': 1, 'value': 1}]}"
+            "'field_occurrence': 1, 'value': 1, 'plugin_type': ''}]}"
         ))
 
     @override_settings(ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION=0)
@@ -122,13 +122,13 @@ class SendEmailsTest(TestCase):
         self.assertEqual(len(mail.outbox), 1)
         msg = mail.outbox[0].message()
         self.assertEqual(msg.get("to"), "dave@foo.foo")
-        self.assertEqual(msg.get("subject"), "[Form submission] Test")
+        self.assertEqual(msg.get("subject"), "Test")
         self.log_handler.check((
             'aldryn_forms.api.webhook', 'DEBUG',
             "{'hostname': 'example.com', 'name': 'Test', 'language': 'en', 'sent_at': "
             "'2025-03-14T04:00:00-05:00', 'form_recipients': [{'name': 'Dave', 'email': "
             "'dave@foo.foo'}], 'form_data': [{'name': 'test', 'label': 'Test', "
-            "'field_occurrence': 1, 'value': 1}]}"
+            "'field_occurrence': 1, 'value': 1, 'plugin_type': ''}]}"
         ))
 
     def test_honeypot_filled(self):
@@ -186,5 +186,5 @@ class SendEmailsTest(TestCase):
             'aldryn_forms.api.webhook', 'DEBUG',
             "{'hostname': 'example.com', 'name': 'Test', 'language': 'en', 'sent_at': "
             "'2025-03-14T03:59:59-05:00', 'form_recipients': [], 'form_data': "
-            "[{'name': 'test', 'label': 'Test', 'field_occurrence': 1, 'value': 1}]}"
+            "[{'name': 'test', 'label': 'Test', 'field_occurrence': 1, 'value': 1, 'plugin_type': ''}]}"
         ))

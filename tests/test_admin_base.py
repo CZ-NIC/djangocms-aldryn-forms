@@ -74,11 +74,13 @@ class AdminActionsTest(TestCase):
             'data': [
                 {'hostname': 'example.com', 'name': 'Test 1', 'language': 'en',
                  'sent_at': '2025-03-25T07:45:00-05:00', 'form_recipients': [],
-                 'form_data': [{'name': 'test', 'label': 'Test 1', 'field_occurrence': 1, 'value': 1}]
+                 'form_data': [{'name': 'test', 'label': 'Test 1', 'field_occurrence': 1, 'value': 1,
+                                'plugin_type': ''}]
                  },
                 {'hostname': 'example.com', 'name': 'Test 2', 'language': 'en',
                  'sent_at': '2025-03-25T07:45:00-05:00', 'form_recipients': [],
-                 'form_data': [{'name': 'test', 'label': 'Test 2', 'field_occurrence': 1, 'value': 2}]
+                 'form_data': [{'name': 'test', 'label': 'Test 2', 'field_occurrence': 1, 'value': 2,
+                                'plugin_type': ''}]
                  }
             ]})
         self.log_handler.check()
@@ -122,11 +124,11 @@ class AdminActionsTest(TestCase):
             ('aldryn_forms.api.webhook', 'DEBUG',
              "{'hostname': 'example.com', 'name': 'Test 1', 'language': 'en', 'sent_at': "
              "'2025-03-25T07:45:00-05:00', 'form_recipients': [], 'form_data': [{'name': "
-             "'test', 'label': 'Test 1', 'field_occurrence': 1, 'value': 1}]}"),
+             "'test', 'label': 'Test 1', 'field_occurrence': 1, 'value': 1, 'plugin_type': ''}]}"),
             ('aldryn_forms.api.webhook', 'DEBUG',
              "{'hostname': 'example.com', 'name': 'Test 2', 'language': 'en', 'sent_at': "
              "'2025-03-25T07:45:00-05:00', 'form_recipients': [], 'form_data': [{'name': "
-             "'test', 'label': 'Test 2', 'field_occurrence': 1, 'value': 2}]}"),
+             "'test', 'label': 'Test 2', 'field_occurrence': 1, 'value': 2, 'plugin_type': ''}]}"),
         )
 
     def test_action_export_webhook(self):

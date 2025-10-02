@@ -6,6 +6,7 @@ from django import forms
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.forms.forms import NON_FIELD_ERRORS
+from django.template import Context, Template
 from django.utils.module_loading import import_string
 from django.utils.translation import get_language
 
@@ -15,6 +16,13 @@ from cms.utils.plugins import downcast_plugins
 from djangocms_alias.models import AliasPlugin
 from emailit.api import send_mail
 from emailit.utils import get_template_names
+
+
+try:
+    from constance import config as constance_config
+except ModuleNotFoundError:
+    constance_config = None
+
 
 from .action_backends_base import BaseAction
 from .compat import build_plugin_tree
@@ -172,6 +180,12 @@ def send_email(
     else:
         subject_templates = None
 
+    subject = None
+    if constance_config is not None:
+        template_string = getattr(constance_config, f"ALDRYN_FORMS_EMAIL_SUBJECT_{instance.language.upper()}", None)
+        if template_string is not None:
+            subject = Template(template_string).render(Context(context))
+
     reply_to = []
     for name, value in cleaned_data:
         if name == EMAIL_REPLY_TO:
@@ -182,6 +196,7 @@ def send_email(
             context=context,
             template_base=getattr(
                 settings, 'ALDRYN_FORMS_EMAIL_TEMPLATES_BASE', 'aldryn_forms/emails/notification'),
+            subject=subject,
             subject_templates=subject_templates,
             language=instance.language,
             reply_to=reply_to,

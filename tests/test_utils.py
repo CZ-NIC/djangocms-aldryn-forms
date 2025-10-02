@@ -1,3 +1,7 @@
+import json
+from unittest.mock import patch
+
+from django.core import mail
 from django.core.exceptions import ImproperlyConfigured
 from django.test import override_settings
 
@@ -5,7 +9,8 @@ from cms.test_utils.testcases import CMSTestCase
 
 from aldryn_forms.action_backends import DefaultAction, EmailAction, NoAction
 from aldryn_forms.action_backends_base import BaseAction
-from aldryn_forms.utils import action_backend_choices, get_action_backends
+from aldryn_forms.models import FormSubmission
+from aldryn_forms.utils import action_backend_choices, get_action_backends, send_postponed_notifications
 
 
 class FakeValidBackend(BaseAction):
@@ -127,3 +132,34 @@ class ActionChoicesTestCase(CMSTestCase):
         choices = action_backend_choices()
 
         self.assertEqual(choices, expected)
+
+
+class SendPostponedNotificationsTest(CMSTestCase):
+
+    data = [
+        {"label": "Name", "name": "name", "value": "Tom Tester", "plugin_type": "TextField"},
+        {"label": "E-mail", "name": "email", "value": "tester@example.com", "plugin_type": "EmailField"},
+    ]
+    recipients = [
+        {"name": "Tom Tester", "email": "teser@example.com"},
+    ]
+
+    def test_subject(self):
+        instance = FormSubmission.objects.create(
+            name="Contact us", data=json.dumps(self.data), recipients=json.dumps(self.recipients))
+        send_postponed_notifications(instance)
+        self.assertEqual(len(mail.outbox), 1)
+        msg = mail.outbox[0].message()
+        self.assertEqual(msg.get("to"), "teser@example.com")
+        self.assertEqual(msg.get("subject"), "Contact us")
+
+    @patch("aldryn_forms.utils.constance_config")
+    def test_subject_from_constance(self, constance_config):
+        constance_config.ALDRYN_FORMS_EMAIL_SUBJECT_EN = "Reply to ad {{ form_values.name }} ({{ form_values.email }})"
+        instance = FormSubmission.objects.create(
+            name="Contact us", data=json.dumps(self.data), recipients=json.dumps(self.recipients))
+        send_postponed_notifications(instance)
+        self.assertEqual(len(mail.outbox), 1)
+        msg = mail.outbox[0].message()
+        self.assertEqual(msg.get("to"), "teser@example.com")
+        self.assertEqual(msg.get("subject"), "Reply to ad Tom Tester (tester@example.com)")

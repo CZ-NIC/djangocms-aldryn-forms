@@ -5,6 +5,13 @@ Changelog
 Unreleased
 ==========
 
+8.2.0 (2025-10-02)
+==================
+
+* Render e-mail subject from constace ALDRYN_FORMS_EMAIL_SUBJECT_LANG.
+* Remove HoneypotField from serialized fields.
+* Remove text "Form name" from mail body and subject.
+
 8.1.1 (2025-09-23)
 ==================
 

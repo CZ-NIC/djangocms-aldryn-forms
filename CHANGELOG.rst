@@ -5,6 +5,18 @@ Changelog
 Unreleased
 ==========
 
+8.3.0 (2025-10-21)
+==================
+
+- Upgrade install_requires in setup for django-cms>=4.1,<6.
+- Update tests for attribute language.
+- Fix plugin_pool.get_plugin Alias.
+- Remove default from field language in model FormSubmissionBase.
+- FormSubmissionBase.language: avoid migrations from settings-changes.
+- Changing settings.ALDRYN_FORMS_ACTION_BACKENDS would result in new migrations.
+- fixate "auto_field" on app-level.
+- Use plugin_pool.get_plugin() over importing from .cms_plugins directly.
+
 8.2.0 (2025-10-02)
 ==================
 

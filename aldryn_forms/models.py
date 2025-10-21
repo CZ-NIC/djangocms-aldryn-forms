@@ -214,7 +214,8 @@ class BaseFormPlugin(CMSPlugin):
     def get_form_fields(self) -> List[FormField]:
         from .cms_plugins import Field
 
-        AliasPlugin = plugin_pool.get_plugin("AliasPlugin")
+        AliasPlugin = plugin_pool.get_plugin("Alias")
+
         fields = []
 
         # A field occurrence is how many times does a field

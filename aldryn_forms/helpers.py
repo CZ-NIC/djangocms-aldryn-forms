@@ -14,7 +14,7 @@ def is_form_element(plugin):
     # import here due because of circular imports
     from .cms_plugins import FormElement
 
-    AliasPlugin = plugin_pool.get_plugin("AliasPlugin")
+    AliasPlugin = plugin_pool.get_plugin("Alias")
 
     # cms_plugins.CMSPlugin subclass
     cms_plugin = plugin.get_plugin_class_instance(None)

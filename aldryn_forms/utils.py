@@ -97,7 +97,8 @@ def get_nested_plugins(parent_plugin, include_self=False):
     """
     Returns a flat list of plugins from parent_plugin. Replace AliasPlugin by descendants.
     """
-    AliasPlugin = plugin_pool.get_plugin("AliasPlugin")
+    AliasPlugin = plugin_pool.get_plugin("Alias")
+
     found_plugins = []
 
     if include_self:
@@ -108,9 +109,9 @@ def get_nested_plugins(parent_plugin, include_self=False):
     for plugin in child_plugins:
         if issubclass(plugin.get_plugin_class(), AliasPlugin):
             if hasattr(plugin, "plugin"):
-                found_plugins.extend(list(plugin.plugin.get_descendants().order_by('path')))
+                found_plugins.extend(plugin.plugin.get_descendants())
             else:
-                found_plugins.extend(list(plugin.get_descendants().order_by('path')))
+                found_plugins.extend(plugin.get_descendants())
         else:
             found_plugins.extend(get_nested_plugins(plugin, include_self=True))
 

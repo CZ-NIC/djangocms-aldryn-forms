@@ -83,7 +83,7 @@ class SubmissionsViewSetTest(DataMixin, TestCase):
         data = [
             {"label": "Test", "name": "test", "value": 1, "plugin_type": "TextField"},
         ]
-        FormSubmission.objects.create(name="Test submit", data=json.dumps(data))
+        FormSubmission.objects.create(name="Test submit", language="en", data=json.dumps(data))
         response = self.view(self.request)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, self.submitted_posts_list)
@@ -92,7 +92,7 @@ class SubmissionsViewSetTest(DataMixin, TestCase):
         data = [
             {"label": "Test", "name": "test", "value": 1, "plugin_type": "TextField"},
         ]
-        submission = FormSubmission.objects.create(name="Test submit", data=json.dumps(data))
+        submission = FormSubmission.objects.create(name="Test submit", language="en", data=json.dumps(data))
         view = SubmissionsViewSet.as_view({"get": "retrieve"})
         response = view(self.request, pk=submission.pk)
         self.assertEqual(response.status_code, 200)

@@ -146,7 +146,7 @@ class SendPostponedNotificationsTest(CMSTestCase):
 
     def test_subject(self):
         instance = FormSubmission.objects.create(
-            name="Contact us", data=json.dumps(self.data), recipients=json.dumps(self.recipients))
+            name="Contact us", language="en", data=json.dumps(self.data), recipients=json.dumps(self.recipients))
         send_postponed_notifications(instance)
         self.assertEqual(len(mail.outbox), 1)
         msg = mail.outbox[0].message()
@@ -157,7 +157,7 @@ class SendPostponedNotificationsTest(CMSTestCase):
     def test_subject_from_constance(self, constance_config):
         constance_config.ALDRYN_FORMS_EMAIL_SUBJECT_EN = "Reply to ad {{ form_values.name }} ({{ form_values.email }})"
         instance = FormSubmission.objects.create(
-            name="Contact us", data=json.dumps(self.data), recipients=json.dumps(self.recipients))
+            name="Contact us", language="en", data=json.dumps(self.data), recipients=json.dumps(self.recipients))
         send_postponed_notifications(instance)
         self.assertEqual(len(mail.outbox), 1)
         msg = mail.outbox[0].message()

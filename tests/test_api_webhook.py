@@ -46,7 +46,7 @@ class SendToWebhookTest(Mixin, TestCase):
         post = json.dumps([
             {"label": "Test", "name": "test", "value": 1},
         ])
-        submission = FormSubmission.objects.create(name="Test", data=post)
+        submission = FormSubmission.objects.create(name="Test", language="en", data=post)
         serializer = FormSubmissionSerializer(submission)
         payload = json.dumps(serializer.data)
         response_data = {"status": "OK"}
@@ -70,7 +70,7 @@ class TriggerWebhookTest(Mixin, TestCase):
         data = json.dumps([
             {"label": "Test", "name": "test", "value": 1},
         ])
-        submission = FormSubmission.objects.create(name="Test", data=data)
+        submission = FormSubmission.objects.create(name="Test", language="en", data=data)
         with responses.RequestsMock() as rsps:
             rsps.add(responses.POST, self.url, body=HTTPError("Connection failed."))
             trigger_webhooks(webhooks, submission, "testserver")
@@ -87,7 +87,7 @@ class TriggerWebhookTest(Mixin, TestCase):
         data = json.dumps([
             {"label": "Test", "name": "test", "value": 1},
         ])
-        submission = FormSubmission.objects.create(name="Test", data=data)
+        submission = FormSubmission.objects.create(name="Test", language="en", data=data)
         with responses.RequestsMock() as rsps:
             rsps.add(responses.POST, self.url, body=json.dumps([{"status": "OK"}]))
             trigger_webhooks(webhooks, submission, "testserver")
@@ -292,7 +292,7 @@ class CollectSubmissionsDataTest(Mixin, TestCase):
         post = json.dumps([
             {"label": "Test", "name": "test", "value": 1},
         ])
-        FormSubmission.objects.create(name="Test", data=post)
+        FormSubmission.objects.create(name="Test", language="en", data=post)
         hook = Webhook.objects.create(name="Test", url=self.url)
         data = collect_submissions_data(hook, FormSubmission.objects.all(), "localhost")
         self.assertEqual(data, [{
@@ -313,7 +313,7 @@ class SendSubmissionDataTest(Mixin, TestCase):
         post = json.dumps([
             {"label": "Test", "name": "test", "value": 1},
         ])
-        FormSubmission.objects.create(name="Test", data=post)
+        FormSubmission.objects.create(name="Test", language="en", data=post)
         hook = Webhook.objects.create(name="Test", url=self.url)
         with responses.RequestsMock() as rsps:
             rsps.add(responses.POST, self.url, body=HTTPError("Connection failed."))
@@ -330,7 +330,7 @@ class SendSubmissionDataTest(Mixin, TestCase):
         post = json.dumps([
             {"label": "Test", "name": "test", "value": 1},
         ])
-        FormSubmission.objects.create(name="Test", data=post)
+        FormSubmission.objects.create(name="Test", language="en", data=post)
         hook = Webhook.objects.create(name="Test", url=self.url)
         with responses.RequestsMock() as rsps:
             rsps.add(responses.POST, self.url, body=json.dumps({"status": "SUCCESS"}))

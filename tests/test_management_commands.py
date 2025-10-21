@@ -23,14 +23,14 @@ class RemoveExpiredPostIdentsTest(TestCase):
 
     def test_not_yet_removed(self):
         with freeze_time(datetime(2025, 3, 14, 9, 0, tzinfo=timezone.utc)):
-            FormSubmission.objects.create(name="Test", data=json.dumps(self.data), post_ident="1234567890")
+            FormSubmission.objects.create(name="Test", language="en", data=json.dumps(self.data), post_ident="1234567890")
         with freeze_time(datetime(2025, 3, 14, 9, 30, tzinfo=timezone.utc)):
             call_command("aldryn_forms_remove_expired_post_idents")
         self.assertQuerySetEqual(FormSubmission.objects.values_list('post_ident'), [("1234567890",)], transform=None)
 
     def test_post_ident_removed(self):
         with freeze_time(datetime(2025, 3, 14, 8, 59, 59, tzinfo=timezone.utc)):
-            FormSubmission.objects.create(name="Test", data=json.dumps(self.data), post_ident="1234567890")
+            FormSubmission.objects.create(name="Test", language="en", data=json.dumps(self.data), post_ident="1234567890")
         with freeze_time(datetime(2025, 3, 14, 9, 30, tzinfo=timezone.utc)):
             call_command("aldryn_forms_remove_expired_post_idents")
         self.assertQuerySetEqual(FormSubmission.objects.values_list('post_ident'), [(None,)], transform=None)
@@ -38,7 +38,7 @@ class RemoveExpiredPostIdentsTest(TestCase):
     @override_settings(ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION=0)
     def test_disabled(self):
         with freeze_time(datetime(2025, 3, 14, 8, 59, 59, tzinfo=timezone.utc)):
-            FormSubmission.objects.create(name="Test", data=json.dumps(self.data), post_ident="1234567890")
+            FormSubmission.objects.create(name="Test", language="en", data=json.dumps(self.data), post_ident="1234567890")
         with freeze_time(datetime(2025, 3, 14, 9, 30, tzinfo=timezone.utc)):
             call_command("aldryn_forms_remove_expired_post_idents")
         self.assertQuerySetEqual(FormSubmission.objects.values_list('post_ident'), [("1234567890",)], transform=None)
@@ -63,6 +63,7 @@ class SendEmailsTest(TestCase):
         with freeze_time(datetime(2025, 3, 14, 9, 0, tzinfo=timezone.utc)):
             tosent = SubmittedToBeSent.objects.create(
                 name="Test",
+                language="en",
                 data=json.dumps(self.data),
                 recipients=json.dumps(self.recipients),
                 post_ident="1234567890"
@@ -80,6 +81,7 @@ class SendEmailsTest(TestCase):
         with freeze_time(datetime(2025, 3, 14, 8, 59, 59, tzinfo=timezone.utc)):
             tosent = SubmittedToBeSent.objects.create(
                 name="Test",
+                language="en",
                 data=json.dumps(self.data),
                 recipients=json.dumps(self.recipients),
                 post_ident="1234567890"
@@ -108,6 +110,7 @@ class SendEmailsTest(TestCase):
         with freeze_time(datetime(2025, 3, 14, 9, 0, tzinfo=timezone.utc)):
             tosent = SubmittedToBeSent.objects.create(
                 name="Test",
+                language="en",
                 data=json.dumps(self.data),
                 recipients=json.dumps(self.recipients),
                 post_ident="1234567890"
@@ -135,6 +138,7 @@ class SendEmailsTest(TestCase):
         with freeze_time(datetime(2025, 3, 14, 8, 59, 59, tzinfo=timezone.utc)):
             tosent = SubmittedToBeSent.objects.create(
                 name="Test",
+                language="en",
                 data=json.dumps(self.data),
                 recipients=json.dumps(self.recipients),
                 post_ident="1234567890",
@@ -154,6 +158,7 @@ class SendEmailsTest(TestCase):
         with freeze_time(datetime(2025, 3, 14, 8, 59, 59, tzinfo=timezone.utc)):
             tosent = SubmittedToBeSent.objects.create(
                 name="Test",
+                language="en",
                 data=json.dumps(self.data),
                 recipients=json.dumps(self.recipients),
                 post_ident="1234567890"
@@ -171,6 +176,7 @@ class SendEmailsTest(TestCase):
         with freeze_time(datetime(2025, 3, 14, 8, 59, 59, tzinfo=timezone.utc)):
             tosent = SubmittedToBeSent.objects.create(
                 name="Test",
+                language="en",
                 data=json.dumps(self.data),
                 post_ident="1234567890"
             )

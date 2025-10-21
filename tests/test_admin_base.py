@@ -19,9 +19,9 @@ class AdminActionsTest(TestCase):
     def setUp(self):
         self.url = "http://example.com/"
         self.hook = Webhook.objects.create(name="Test", url=self.url, method="post")
-        self.sub1 = FormSubmission.objects.create(name="Test 1", data=json.dumps([
+        self.sub1 = FormSubmission.objects.create(name="Test 1", language="en", data=json.dumps([
             {"label": "Test 1", "name": "test", "value": 1}]))
-        self.sub2 = FormSubmission.objects.create(name="Test 2", data=json.dumps([
+        self.sub2 = FormSubmission.objects.create(name="Test 2", language="en", data=json.dumps([
             {"label": "Test 2", "name": "test", "value": 2}]))
 
         self.log_handler = LogCapture()
@@ -159,7 +159,7 @@ class AdminActionsTest(TestCase):
         self.log_handler.check()
 
     def test_action_honeypot_filled_off(self):
-        sub3 = FormSubmission.objects.create(name="Test 3", data=json.dumps([
+        sub3 = FormSubmission.objects.create(name="Test 3", language="en", data=json.dumps([
             {"label": "Test 3", "name": "test", "value": 3}]), honeypot_filled=True)
         data = {"action": "honeypot_filled_off", "_selected_action": [str(sub3.pk)]}
         response = self.client.post(reverse("admin:aldryn_forms_formsubmission_changelist"), data)

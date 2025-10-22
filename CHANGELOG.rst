@@ -5,6 +5,11 @@ Changelog
 Unreleased
 ==========
 
+8.3.1 (2025-10-22)
+==================
+
+- Expand alias version to djangocms-alias>=2.0,<4.
+
 8.3.0 (2025-10-21)
 ==================
 

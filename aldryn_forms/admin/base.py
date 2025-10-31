@@ -111,6 +111,9 @@ class BaseFormSubmissionAdmin(admin.ModelAdmin):
 
     def get_data_for_display(self, obj):
         data = obj.get_form_data()
+        if hasattr(settings, "ALDRYN_FORMS_SUBMISSION_EXTRA_FIELDS"):
+            submission_field = import_string(settings.ALDRYN_FORMS_SUBMISSION_EXTRA_FIELDS)
+            data.extend(submission_field(obj))
         html = render_to_string(
             'admin/aldryn_forms/display/submission_data.html',
             {'data': data}

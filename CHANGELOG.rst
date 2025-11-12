@@ -5,6 +5,11 @@ Changelog
 Unreleased
 ==========
 
+8.4.1 (2025-11-12)
+==================
+
+- Setting dependencies on lower versions.
+
 8.4.0 (2025-11-12)
 ==================
 

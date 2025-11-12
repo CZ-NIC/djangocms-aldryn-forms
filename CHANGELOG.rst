@@ -5,6 +5,12 @@ Changelog
 Unreleased
 ==========
 
+8.4.0 (2025-11-12)
+==================
+
+- Add attribute is_private into plugins FileField, MultipleFilesField and ImageField.
+- Add settings ALDRYN_FORMS_SUBMISSION_EXTRA_FIELDS for BaseFormSubmissionAdmin.get_data_for_display in admin/base.py.
+
 8.3.1 (2025-10-22)
 ==================
 

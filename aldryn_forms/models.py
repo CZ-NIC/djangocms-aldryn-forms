@@ -528,6 +528,9 @@ class FileUploadFieldPlugin(FileFieldPluginBase):
         help_text=_('The list of accepted types. E.g. ".pdf .jpg .png text/plain application/msword image/*".'),
         validators=[validate_accepted_types]
     )
+    is_private = models.BooleanField(  # Used for attribute File.is_public in django-filer
+        default=False, verbose_name=_('Private'),
+        help_text=_('The file is private.'))
 
 
 class MultipleFilesUploadFieldPlugin(FileFieldPluginBase):
@@ -542,6 +545,9 @@ class MultipleFilesUploadFieldPlugin(FileFieldPluginBase):
         null=True, blank=True,
         help_text=_('Maximum number of uploaded files.'),
     )
+    is_private = models.BooleanField(  # Used for attribute File.is_public in django-filer
+        default=False, verbose_name=_('Private'),
+        help_text=_('The files are private.'))
 
 
 class ImageUploadFieldPlugin(FileFieldPluginBase):
@@ -555,6 +561,9 @@ class ImageUploadFieldPlugin(FileFieldPluginBase):
         null=True, blank=True,
         help_text=_('The maximum height of the uploaded image, in pixels.')
     )
+    is_private = models.BooleanField(  # Used for attribute Image.is_public in django-filer
+        default=False, verbose_name=_('Private'),
+        help_text=_('The file is private.'))
 
 
 class DateFieldPlugin(FieldPluginBase):

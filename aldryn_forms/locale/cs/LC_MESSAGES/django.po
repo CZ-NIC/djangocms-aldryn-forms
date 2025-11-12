@@ -459,6 +459,9 @@ msgstr "Prosím, k exportu zvolte alespoň jedno pole."
 msgid "Position"
 msgstr "Pozice"
 
+msgid "Private"
+msgstr "Soukromé"
+
 msgid ""
 "Provide a link to an external URL, including the schema such as 'https://'. "
 "Optionally, add an #anchor (including the #) to scroll to."
@@ -580,6 +583,12 @@ msgstr "Nejdřívější akceptovatelný čas."
 
 msgid "The field cannot be edited by the user."
 msgstr "Pole nemůže být uživatelem změněno."
+
+msgid "The file is private."
+msgstr "Soubor je soukromý."
+
+msgid "The files are private."
+msgstr "Soubory jsou soukromé."
 
 msgid ""
 "The form could not be submitted. Please check that all form fields are "

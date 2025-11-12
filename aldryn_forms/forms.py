@@ -538,7 +538,7 @@ class FileFieldForm(forms.ModelForm):
             'configured below.')
 
     class Meta:
-        fields = ['label', 'help_text', 'required', 'required_message',
+        fields = ['is_private', 'label', 'help_text', 'required', 'required_message',
                   'custom_classes', 'upload_to', 'max_size']
 
 

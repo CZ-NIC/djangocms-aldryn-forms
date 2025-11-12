@@ -804,6 +804,7 @@ class FileField(Field):
     ]
     fieldset_general_fields = [
         'upload_to',
+        'is_private',
     ] + Field.fieldset_general_fields
     fieldset_advanced_fields = [
         'help_text',
@@ -870,7 +871,7 @@ class FileField(Field):
                 file=uploaded_file,
                 name=uploaded_file.name,
                 original_filename=uploaded_file.name,
-                is_public=True,
+                is_public=not instance.is_private,
             )
             filer_file.save()
 
@@ -922,6 +923,7 @@ class ImageField(FileField):
     form_field_widget = RestrictedImageField.widget
     fieldset_general_fields = [
         'upload_to',
+        'is_private',
     ] + Field.fieldset_general_fields
     fieldset_advanced_fields = [
         'help_text',

@@ -20,7 +20,7 @@ def media_filer_public_link(value):
 
     if link_pattern is None:
         hostnames = "|".join(Site.objects.values_list('domain', flat=True))
-        link_pattern = f"^https?://({hostnames})/media/filer_public/"
+        link_pattern = f"^https?://({hostnames})/s?media/filer_(public|private)/"
 
     content = []
     for word in re.split(r"(\s+)", value):

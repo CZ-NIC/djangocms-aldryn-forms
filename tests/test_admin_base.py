@@ -179,7 +179,7 @@ class AdminActionsTest(TestCase):
             <td class="field-display_data">
                 <span class="aldryn-forms-data">
                     <span class="item">
-                        <span class="label">Test 1</span>
+                        <span class="label" title="?">Test 1</span>
                         <span class="value">1</span>
                     </span>
                 </span>
@@ -188,7 +188,7 @@ class AdminActionsTest(TestCase):
             <td class="field-display_data">
                 <span class="aldryn-forms-data">
                     <span class="item">
-                        <span class="label">Test 2</span>
+                        <span class="label" title="?">Test 2</span>
                         <span class="value">2</span>
                     </span>
                 </span>

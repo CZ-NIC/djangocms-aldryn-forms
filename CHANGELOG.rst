@@ -5,6 +5,12 @@ Changelog
 Unreleased
 ==========
 
+8.5.0 (2025-11-14)
+==================
+
+- Add templatetag display_field_value.
+- Add command aldryn_forms_set_plugin_type.
+
 8.4.1 (2025-11-12)
 ==================
 

@@ -1,3 +1,4 @@
+from io import StringIO
 import json
 import smtplib
 from datetime import datetime, timezone
@@ -194,3 +195,20 @@ class SendEmailsTest(TestCase):
             "'2025-03-14T03:59:59-05:00', 'form_recipients': [], 'form_data': "
             "[{'name': 'test', 'label': 'Test', 'field_occurrence': 1, 'value': 1, 'plugin_type': ''}]}"
         ))
+
+
+class SetPluginTypeTest(TestCase):
+
+    def test(self):
+        FormSubmission.objects.create(name="Test", language="en", data=json.dumps([
+            {"label": "Test", "name": "test", "value": 1},
+            {"label": "Attach.", "name": "attachment", "value": 1},
+        ]))
+        output = StringIO()
+        call_command("aldryn_forms_set_plugin_type", "attachment:FileField", stdout=output)
+        self.assertEqual(FormSubmission.objects.count(), 1)
+        self.assertJSONEqual(FormSubmission.objects.first().data, [
+                {"label": "Test", "name": "test", "value": 1},
+                {"label": "Attach.", "name": "attachment", "value": 1, "plugin_type": "FileField"},
+        ])
+        self.assertEqual(output.getvalue(), "\x1b[32;1mUpdated submissions: 1\x1b[0m\n")

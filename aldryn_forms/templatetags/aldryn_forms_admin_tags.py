@@ -1,9 +1,13 @@
+import os
 import re
+from urllib.parse import unquote, urlparse
 
 from django import template
 from django.contrib.sites.models import Site
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
+
+from ..models import SerializedFormField
 
 
 register = template.Library()
@@ -12,11 +16,11 @@ link_pattern = None
 
 
 @register.filter
-def media_filer_public_link(value):
+def media_filer_public_link(value: str) -> str:
     global link_pattern
 
     if not isinstance(value, str):
-        return value
+        return str(value)
 
     if link_pattern is None:
         hostnames = "|".join(Site.objects.values_list('domain', flat=True))
@@ -32,3 +36,12 @@ def media_filer_public_link(value):
         content.append(word)
 
     return mark_safe("".join(content))
+
+
+@register.filter
+def display_field_value(field: SerializedFormField) -> str:
+    if field.plugin_type in ("FileField", "ImageField", "MultipleFilesField"):
+        result = urlparse(field.value)
+        filename = os.path.basename(unquote(result.path))
+        return mark_safe(f"""<a href="{field.value}" target="_blank">{escape(filename)}</a>""")
+    return media_filer_public_link(field.value)

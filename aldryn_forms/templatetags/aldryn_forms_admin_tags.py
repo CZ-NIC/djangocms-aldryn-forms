@@ -16,11 +16,11 @@ link_pattern = None
 
 
 @register.filter
-def media_filer_public_link(value):
+def media_filer_public_link(value: str) -> str:
     global link_pattern
 
     if not isinstance(value, str):
-        return value
+        return str(value)
 
     if link_pattern is None:
         hostnames = "|".join(Site.objects.values_list('domain', flat=True))
@@ -44,4 +44,4 @@ def display_field_value(field: SerializedFormField) -> str:
         result = urlparse(field.value)
         filename = os.path.basename(unquote(result.path))
         return mark_safe(f"""<a href="{field.value}" target="_blank">{escape(filename)}</a>""")
-    return field.value
+    return media_filer_public_link(field.value)

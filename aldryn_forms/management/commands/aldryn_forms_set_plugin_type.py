@@ -1,4 +1,5 @@
 import json
+
 from django.core.management.base import BaseCommand, CommandError
 from django.utils.dateparse import parse_datetime
 
@@ -36,18 +37,16 @@ class Command(BaseCommand):
                 queryset = queryset.filter(sent_at=datetime_from)
         updated = 0
         for submission in queryset:
-            data = submission.get_form_data()
+            data = json.loads(submission.data)
             modified_data = []
             modified = False
-            for item in data:
-                sfield = item._asdict()
-                if item.name in translations:
-                    sfield["plugin_type"] = translations[item.name]
+            for sfield in data:
+                if sfield["name"] in translations:
+                    sfield["plugin_type"] = translations[sfield["name"]]
                     modified = True
                 modified_data.append(sfield)
             if modified:
                 submission.data = json.dumps(modified_data)
                 submission.save()
                 updated += 1
-
         self.stdout.write(self.style.SUCCESS('Updated submissions: %s' % updated))

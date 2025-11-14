@@ -11,8 +11,8 @@
     {% for field in data %}
         <tr>
             <td>{{ field.label }}</td>
-            <td>{{ field.name }}</td>
-            <td>{{ field.value|media_filer_public_link }}</td>
+            <td title="{{ field.plugin_type|default:"?" }}">{{ field.name }}</td>
+            <td>{{ field|display_field_value }}</td>
         </tr>
     {% endfor %}
 </tbody>

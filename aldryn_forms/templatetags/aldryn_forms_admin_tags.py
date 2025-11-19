@@ -28,10 +28,10 @@ def media_filer_public_link(value: str) -> str:
         link_pattern = f"^https?://({hostnames})/s?media/filer_(public|private)/"
 
     content = []
+    site = Site.objects.values_list('domain', flat=True).first()
     for word in re.split(r"(\s+)", value):
         if re.match(link_pattern, word):
-            filename = escape(word.split("/")[-1])
-            word = f"""<a href="{word}" target="_blank">{filename}</a>"""
+            word = make_link(word, site)
         else:
             word = escape(word)
         content.append(word)

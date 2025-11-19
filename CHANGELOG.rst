@@ -5,6 +5,11 @@ Changelog
 Unreleased
 ==========
 
+8.5.1 (2025-11-19)
+==================
+
+- Fix links to MultipleFilesField.
+
 8.5.0 (2025-11-14)
 ==================
 

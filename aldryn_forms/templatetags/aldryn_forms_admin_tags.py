@@ -43,7 +43,7 @@ def media_filer_public_link(value: str) -> str:
 def display_field_value(field: SerializedFormField) -> str:
     if field.plugin_type in ("FileField", "ImageField", "MultipleFilesField"):
         site = Site.objects.values_list('domain', flat=True).first()
-        links = [make_link(link, site) for link in re.split(r"(\s+)", field.value)]
+        links = [make_link(link, site) for link in re.split(r"\s+", field.value)]
         return mark_safe("\n".join(links))
     return media_filer_public_link(field.value)
 

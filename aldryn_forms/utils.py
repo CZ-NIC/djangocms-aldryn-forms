@@ -1,6 +1,10 @@
 import logging
+import os
+import re
 import smtplib
+from collections.abc import Sequence
 from typing import TYPE_CHECKING, Dict, ItemsView, List
+from urllib.parse import urlparse
 
 from django import forms
 from django.conf import settings
@@ -192,6 +196,17 @@ def send_email(
     for name, value in cleaned_data:
         if name == EMAIL_REPLY_TO:
             reply_to.append(value)
+
+    append_attachments = getattr(settings, "ALDRYN_FORMS_APPEND_ATTACHMENTS", False)
+    if constance_config is not None:
+        append_attachments = getattr(constance_config, "ALDRYN_FORMS_APPEND_ATTACHMENTS", append_attachments)
+    if append_attachments:
+        attachments = prepare_attachments(get_upload_urls(form_data))
+        if not attachments:
+            attachments = None
+    else:
+        attachments = None
+
     try:
         send_mail(
             recipients=[user.email for user in recipients],
@@ -202,6 +217,7 @@ def send_email(
             subject_templates=subject_templates,
             language=instance.language,
             reply_to=reply_to,
+            attachments=attachments,
         )
     except smtplib.SMTPException as err:
         logger.error(err)
@@ -220,3 +236,31 @@ def get_serialized_fields(form: forms.Form) -> Dict[str, str]:
             continue
         fields_as_dicts.append(item)
     return fields_as_dicts
+
+
+def get_upload_urls(form_data: List["SerializedFormField"]) -> set:
+    """Get upload URLs."""
+    urls = set()
+    for field in form_data:
+        if field.plugin_type in ("FileField", "ImageField", "MultipleFilesField"):
+            urls.update(re.split(r"\s+", field.value))
+    return urls
+
+
+def prepare_attachments(urls: Sequence) -> list[tuple[str, bytes]]:
+    """Prepare filename and content for emial attachments."""
+    attachments = []
+    for url in urls:
+        result = urlparse(url)
+        path = result.path.lstrip(settings.MEDIA_URL)
+        if hasattr(settings, "PRIVATE_MEDIA_URL_PREFIX"):
+            path = path.lstrip(settings.PRIVATE_MEDIA_URL_PREFIX)
+        filepath = os.path.join(settings.MEDIA_ROOT, path)
+        try:
+            with open(filepath, "rb") as handle:
+                content = handle.read()
+            filename = os.path.basename(filepath)
+            attachments.append((filename, content))
+        except FileNotFoundError as err:
+            logger.error(err)
+    return attachments

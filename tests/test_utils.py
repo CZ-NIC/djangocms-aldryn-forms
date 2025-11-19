@@ -1,16 +1,42 @@
 import json
+import os
+import shutil
+import tempfile
+from typing import Any
 from unittest.mock import patch
 
+from django.conf import settings
 from django.core import mail
 from django.core.exceptions import ImproperlyConfigured
 from django.test import override_settings
 
 from cms.test_utils.testcases import CMSTestCase
 
+from testfixtures import LogCapture
+
 from aldryn_forms.action_backends import DefaultAction, EmailAction, NoAction
 from aldryn_forms.action_backends_base import BaseAction
-from aldryn_forms.models import FormSubmission
-from aldryn_forms.utils import action_backend_choices, get_action_backends, send_postponed_notifications
+from aldryn_forms.models import FormSubmission, SerializedFormField
+from aldryn_forms.utils import (
+    action_backend_choices, get_action_backends, get_upload_urls, prepare_attachments, send_postponed_notifications,
+)
+
+
+_SETTINGS: dict[str, Any] = {}
+
+
+def setUpModule():
+    _SETTINGS["folder"] = tempfile.mkdtemp()
+    os.makedirs(os.path.join(_SETTINGS["folder"], "filer_public"))
+    os.makedirs(os.path.join(_SETTINGS["folder"], "filer_private"))
+    with open(os.path.join(_SETTINGS["folder"], "filer_public/hello.txt"), "w") as handle:
+        handle.write("Hello world!")
+    with open(os.path.join(_SETTINGS["folder"], "filer_private/hello.txt"), "w") as handle:
+        handle.write("Hello private world!")
+
+
+def tearDownModule():
+    shutil.rmtree(_SETTINGS["folder"])
 
 
 class FakeValidBackend(BaseAction):
@@ -163,3 +189,55 @@ class SendPostponedNotificationsTest(CMSTestCase):
         msg = mail.outbox[0].message()
         self.assertEqual(msg.get("to"), "teser@example.com")
         self.assertEqual(msg.get("subject"), "Reply to ad Tom Tester (tester@example.com)")
+
+
+class GetUploadUrlsTest(CMSTestCase):
+
+    def test(self):
+        form_data = [
+            SerializedFormField("name", "Name", 1, "Tom", "TextField"),
+            SerializedFormField("att1", "Att 1", 1, "file", "FileField"),
+            SerializedFormField("att2", "Att 2", 1, "image", "ImageField"),
+            SerializedFormField("att3", "Att 3", 1, "one/two", "MultipleFilesField"),
+            SerializedFormField("att4", "Att 4", 1, "file", "FileField"),
+        ]
+        self.assertEqual(get_upload_urls(form_data), {'one/two', 'file', 'image'})
+
+
+class PrepareAttachmentsTest(CMSTestCase):
+
+    log_name = "aldryn_forms.utils"
+
+    def test_file_missing(self):
+        url = os.path.join(settings.MEDIA_URL, "filer_public/test.txt")
+        with override_settings(MEDIA_ROOT=_SETTINGS["folder"]):
+            with LogCapture(self.log_name) as log_handler:
+                response = prepare_attachments([url])
+        self.assertEqual(response, [])
+        log_handler.check((
+            'aldryn_forms.utils',
+            'ERROR',
+            '[Errno 2] No such file or directory: '
+            f"'{_SETTINGS['folder']}/filer_public/test.txt'"
+        ))
+
+    def test_public(self):
+        url = os.path.join(settings.MEDIA_URL, "filer_public/hello.txt")
+        with override_settings(MEDIA_ROOT=_SETTINGS["folder"]):
+            with LogCapture(self.log_name) as log_handler:
+                response = prepare_attachments([url])
+        self.assertEqual(response, [
+            ("hello.txt", b"Hello world!"),
+        ])
+        log_handler.check()
+
+    @override_settings(PRIVATE_MEDIA_URL_PREFIX="/smedia/")
+    def test_private(self):
+        url = os.path.join(settings.PRIVATE_MEDIA_URL_PREFIX, "filer_private/hello.txt")
+        with override_settings(MEDIA_ROOT=_SETTINGS["folder"]):
+            with LogCapture(self.log_name) as log_handler:
+                response = prepare_attachments([url])
+        self.assertEqual(response, [
+            ("hello.txt", b"Hello private world!"),
+        ])
+        log_handler.check()

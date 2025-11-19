@@ -5,9 +5,10 @@ Changelog
 Unreleased
 ==========
 
-8.5.1 (2025-11-19)
+8.6.0 (2025-11-19)
 ==================
 
+- Append attachments into email.
 - Fix links to MultipleFilesField.
 
 8.5.0 (2025-11-14)

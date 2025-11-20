@@ -180,6 +180,7 @@ class GetUploadUrlsTest(CMSTestCase):
             SerializedFormField("att2", "Att 2", 1, "image", "ImageField"),
             SerializedFormField("att3", "Att 3", 1, "one/two", "MultipleFilesField"),
             SerializedFormField("att4", "Att 4", 1, "file", "FileField"),
+            SerializedFormField("att5", "Att 5", 1, "", "FileField"),
         ]
         self.assertEqual(get_upload_urls(form_data), {'one/two', 'file', 'image'})
 

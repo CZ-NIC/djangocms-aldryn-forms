@@ -232,13 +232,13 @@ def get_upload_urls(form_data: List["SerializedFormField"]) -> set:
     """Get upload URLs."""
     urls = set()
     for field in form_data:
-        if field.plugin_type in ("FileField", "ImageField", "MultipleFilesField"):
+        if field.value and field.plugin_type in ("FileField", "ImageField", "MultipleFilesField"):
             urls.update(re.split(r"\s+", field.value))
     return urls
 
 
 def prepare_attachments(urls: Sequence) -> list[tuple[str, bytes, str]]:
-    """Prepare filename and content for emial attachments."""
+    """Prepare filename and content for email attachments."""
     attachments = []
     request = RequestFactory().request()
     request.user = get_user_model()(is_superuser=True)  # Necessary due to permissions.

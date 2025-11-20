@@ -5,6 +5,11 @@ Changelog
 Unreleased
 ==========
 
+8.6.2 (2025-11-20)
+==================
+
+- Fix utils.get_upload_urls for empty field.value.
+
 8.6.1 (2025-11-20)
 ==================
 

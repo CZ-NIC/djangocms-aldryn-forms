@@ -1,8 +1,5 @@
 import json
 import os
-import shutil
-import tempfile
-from typing import Any
 from unittest.mock import patch
 
 from django.conf import settings
@@ -20,23 +17,6 @@ from aldryn_forms.models import FormSubmission, SerializedFormField
 from aldryn_forms.utils import (
     action_backend_choices, get_action_backends, get_upload_urls, prepare_attachments, send_postponed_notifications,
 )
-
-
-_SETTINGS: dict[str, Any] = {}
-
-
-def setUpModule():
-    _SETTINGS["folder"] = tempfile.mkdtemp()
-    os.makedirs(os.path.join(_SETTINGS["folder"], "filer_public"))
-    os.makedirs(os.path.join(_SETTINGS["folder"], "filer_private"))
-    with open(os.path.join(_SETTINGS["folder"], "filer_public/hello.txt"), "w") as handle:
-        handle.write("Hello world!")
-    with open(os.path.join(_SETTINGS["folder"], "filer_private/hello.txt"), "w") as handle:
-        handle.write("Hello private world!")
-
-
-def tearDownModule():
-    shutil.rmtree(_SETTINGS["folder"])
 
 
 class FakeValidBackend(BaseAction):
@@ -207,37 +187,45 @@ class GetUploadUrlsTest(CMSTestCase):
 class PrepareAttachmentsTest(CMSTestCase):
 
     log_name = "aldryn_forms.utils"
+    hostname = "https://example.com"
+
+    def setUp(self):
+        with open(os.path.join(settings.MEDIA_ROOT, "hello.txt"), "w") as handle:
+            handle.write("Hello world!")
+
+    def tearDown(self):
+        os.remove(os.path.join(settings.MEDIA_ROOT, "hello.txt"))
+        return super().tearDown()
 
     def test_file_missing(self):
-        url = os.path.join(settings.MEDIA_URL, "filer_public/test.txt")
-        with override_settings(MEDIA_ROOT=_SETTINGS["folder"]):
-            with LogCapture(self.log_name) as log_handler:
-                response = prepare_attachments([url])
+        url = self.hostname + os.path.join(settings.MEDIA_URL, "test.txt")
+        with LogCapture(self.log_name) as log_handler:
+            response = prepare_attachments([url])
         self.assertEqual(response, [])
         log_handler.check((
-            'aldryn_forms.utils',
+            self.log_name,
             'ERROR',
-            '[Errno 2] No such file or directory: '
-            f"'{_SETTINGS['folder']}/filer_public/test.txt'"
+            f'“{settings.MEDIA_ROOT}/test.txt” does not exist'
         ))
 
-    def test_public(self):
-        url = os.path.join(settings.MEDIA_URL, "filer_public/hello.txt")
-        with override_settings(MEDIA_ROOT=_SETTINGS["folder"]):
-            with LogCapture(self.log_name) as log_handler:
-                response = prepare_attachments([url])
-        self.assertEqual(response, [
-            ("hello.txt", b"Hello world!"),
-        ])
-        log_handler.check()
+    def test_invalid_path(self):
+        url = self.hostname + "/foo/test.txt"
+        with LogCapture(self.log_name) as log_handler:
+            response = prepare_attachments([url])
+        self.assertEqual(response, [])
+        log_handler.check((
+            self.log_name,
+            'ERROR',
+            "{'tried': [[<URLPattern '^media/(?P<path>.*)$'>], [<URLPattern "
+            "'^jsi18n/(?P<packages>\\S+?)/$'>], [<URLResolver <URLResolver list> "
+            "(None:None) 'en/'>]], 'path': 'foo/test.txt'}"
+        ))
 
-    @override_settings(PRIVATE_MEDIA_URL_PREFIX="/smedia/")
-    def test_private(self):
-        url = os.path.join(settings.PRIVATE_MEDIA_URL_PREFIX, "filer_private/hello.txt")
-        with override_settings(MEDIA_ROOT=_SETTINGS["folder"]):
-            with LogCapture(self.log_name) as log_handler:
-                response = prepare_attachments([url])
+    def test_attachments(self):
+        url = self.hostname + os.path.join(settings.MEDIA_URL, "hello.txt")
+        with LogCapture(self.log_name) as log_handler:
+            response = prepare_attachments([url])
         self.assertEqual(response, [
-            ("hello.txt", b"Hello private world!"),
+            ("hello.txt", b"Hello world!", "text/plain"),
         ])
         log_handler.check()

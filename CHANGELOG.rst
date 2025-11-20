@@ -5,6 +5,11 @@ Changelog
 Unreleased
 ==========
 
+8.6.1 (2025-11-20)
+==================
+
+- Rewrite function utils.prepare_attachments using django.urls.resolve.
+
 8.6.0 (2025-11-19)
 ==================
 

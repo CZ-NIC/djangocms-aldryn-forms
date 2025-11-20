@@ -8,9 +8,13 @@ from urllib.parse import urlparse
 
 from django import forms
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ImproperlyConfigured
 from django.forms.forms import NON_FIELD_ERRORS
+from django.http import Http404
 from django.template import Context, Template
+from django.test import RequestFactory
+from django.urls import Resolver404, resolve
 from django.utils.module_loading import import_string
 from django.utils.translation import get_language
 
@@ -81,20 +85,6 @@ def get_action_backends():
 def action_backend_choices(*args, **kwargs):
     choices = tuple((key, klass.verbose_name) for key, klass in get_action_backends().items())
     return sorted(choices, key=lambda x: x[1])
-
-
-def get_user_model():
-    """
-    Wrapper for get_user_model with compatibility for 1.5
-    """
-    # Notice these imports happen here to be compatible with django 1.7
-    try:
-        from django.contrib.auth import get_user_model as _get_user_model
-    except ImportError:  # django < 1.5
-        from django.contrib.auth.models import User
-    else:
-        User = _get_user_model()
-    return User
 
 
 def get_nested_plugins(parent_plugin, include_self=False):
@@ -247,20 +237,28 @@ def get_upload_urls(form_data: List["SerializedFormField"]) -> set:
     return urls
 
 
-def prepare_attachments(urls: Sequence) -> list[tuple[str, bytes]]:
+def prepare_attachments(urls: Sequence) -> list[tuple[str, bytes, str]]:
     """Prepare filename and content for emial attachments."""
     attachments = []
+    request = RequestFactory().request()
+    request.user = get_user_model()(is_superuser=True)  # Necessary due to permissions.
     for url in urls:
         result = urlparse(url)
-        path = result.path.lstrip(settings.MEDIA_URL)
-        if hasattr(settings, "PRIVATE_MEDIA_URL_PREFIX"):
-            path = path.lstrip(settings.PRIVATE_MEDIA_URL_PREFIX)
-        filepath = os.path.join(settings.MEDIA_ROOT, path)
         try:
-            with open(filepath, "rb") as handle:
-                content = handle.read()
-            filename = os.path.basename(filepath)
-            attachments.append((filename, content))
-        except FileNotFoundError as err:
+            match = resolve(result.path)
+        except Resolver404 as err:
             logger.error(err)
+            continue
+        try:
+            response = match.func(request=request, *match.args, **match.kwargs)
+        except Http404 as err:
+            logger.error(err)
+            continue
+        # https://github.com/divio/django-emailit/blob/0.2.4/emailit/api.py#L75
+        # https://github.com/django/django/blob/5.2.8/django/core/mail/message.py#L309
+        attachments.append((
+            os.path.basename(result.path),  # filename
+            response.getvalue(),  # content
+            response.headers["Content-Type"]  # mimetype
+        ))
     return attachments

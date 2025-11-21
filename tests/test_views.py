@@ -439,7 +439,7 @@ class SubmitFormViewTest(CMSTestCase):
                 "email_1": "test@test.foo",
             },
         )
-        self.assertRedirects(response, "/en/form/")
+        self.assertContains(response, "<p>Thank you for submitting your information.</p>")
         self.assertQuerySetEqual(FormSubmission.objects.values_list('data'), [
             ('[{"name": "email_1", "label": "Submit", "field_occurrence": 1, "value": "test@test.foo", '
              '"plugin_type": "EmailField"}]',)
@@ -494,7 +494,10 @@ class SubmitFormViewTest(CMSTestCase):
                 "form_plugin_id": form_plugin.pk,
             },
         )
-        self.assertRedirects(response, "/en/form/")
+        self.assertEqual(response.context["form"].errors, {
+            'email_1': ['This field is required.'],
+            '__all__': ['The form could not be submitted. Please check that all form fields are filled in correctly.']
+        })
         self.assertQuerySetEqual(FormSubmission.objects.values_list('data'), [])
         self.assertEqual(len(mail.outbox), 0)
 

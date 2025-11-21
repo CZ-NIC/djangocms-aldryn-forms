@@ -5,6 +5,11 @@ Changelog
 Unreleased
 ==========
 
+8.6.3 (2025-11-21)
+==================
+
+- Fix response in HandleHttpPost middleware.
+
 8.6.2 (2025-11-20)
 ==================
 

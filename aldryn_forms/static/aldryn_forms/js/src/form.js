@@ -234,6 +234,7 @@ function handleChangeFilesList(nodeInputFile) {
     console.log("mimetypes:", mimetypes)
 
     let number_items_exceeded = false
+    nodeInputFile.setCustomValidity("")
 
     for (let i = 0; i < nodeInputFile.files.length; i++) {
         attachments += 1

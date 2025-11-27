@@ -5,6 +5,11 @@ Changelog
 Unreleased
 ==========
 
+8.6.4 (2025-11-27)
+==================
+
+- Fix error message for input[type=file]. Reset input.setCustomValidity in form.js.
+
 8.6.3 (2025-11-21)
 ==================
 

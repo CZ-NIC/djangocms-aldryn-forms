@@ -1144,6 +1144,7 @@ else:
         form_field_enabled_options = ['label', 'error_messages']
         fieldset_general_fields = [
             'label',
+            'required',
         ]
         fieldset_advanced_fields = [
             'required_message',

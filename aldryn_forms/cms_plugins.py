@@ -122,7 +122,7 @@ class FormPlugin(FieldContainer):
         if processed_form is not None:
             return processed_form  # Form was already processed by middleware HandleHttpPost.
 
-        form_class = self.get_form_class(instance)
+        form_class = self.get_form_class(instance, request)
         form_kwargs = self.get_form_kwargs(instance, request)
         form = form_class(**form_kwargs)  # django.forms.widgets.AldrynDynamicForm
         form.ident_field_name = self.ident_field_name
@@ -181,26 +181,28 @@ class FormPlugin(FieldContainer):
 
         return form
 
-    def get_form_class(self, instance):
+    def get_form_class(self, instance: models.FormPlugin, request: HttpRequest):
         """
         Constructs form class basing on children plugin instances.
         """
-        fields = self.get_form_fields(instance)
+        fields = self.get_form_fields(instance, request)
         formClass = (
             type(FormSubmissionBaseForm)
             ('AldrynDynamicForm', (FormSubmissionBaseForm,), fields)
         )
         return formClass
 
-    def get_form_fields(self, instance: models.FormPlugin) -> Dict:
+    def get_form_fields(self, instance: models.FormPlugin, request: HttpRequest) -> Dict:
         form_fields = {}
         fields = instance.get_form_fields()
-
+        params = request.GET.dict()
         for field in fields:
             plugin_instance = field.plugin_instance                     # aldryn_forms.models.FieldPlugin
             field_plugin = plugin_instance.get_plugin_class_instance()  # aldryn_forms.cms_plugins.TextField
             form_fields[field.name] = field_plugin.get_form_field(plugin_instance)
             form_fields[field.name]._cms_form_plugin = self
+            if field.name in params:
+                form_fields[field.name].initial = params[field.name]
         return form_fields
 
     def get_form_kwargs(self, instance, request):

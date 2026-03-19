@@ -5,6 +5,13 @@ Changelog
 Unreleased
 ==========
 
+8.6.5 (2026-03-19)
+==================
+
+- Fix resource.get_export_headers in class BaseFormSubmissionAdmin.
+- Enable CaptchaField.required.
+- Set field.initial from url parameter.
+
 8.6.4 (2025-11-27)
 ==================
 

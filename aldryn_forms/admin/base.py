@@ -250,7 +250,7 @@ class BaseFormSubmissionAdmin(admin.ModelAdmin):
                 headers.append(force_str(label))
 
         resource = Resource()
-        resource.get_export_headers = lambda: headers
+        resource.get_export_headers = lambda selected_fields = None: headers
         for field in fields:
             resource.fields[force_str(field.attribute)] = field
 

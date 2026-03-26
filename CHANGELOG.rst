@@ -5,6 +5,11 @@ Changelog
 Unreleased
 ==========
 
+8.7.0 (2026-03-27)
+==================
+
+- Add widget value into class Option.
+
 8.6.5 (2026-03-19)
 ==================
 

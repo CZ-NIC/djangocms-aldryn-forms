@@ -666,7 +666,8 @@ class URLFieldPlugin(FieldPluginBase):
 
 class Option(models.Model):
     field = models.ForeignKey(FieldPlugin, editable=False, on_delete=models.CASCADE)
-    value = models.CharField(_('Value'), max_length=255)
+    value = models.CharField(_('Label'), max_length=255)
+    widget_value = models.CharField(_('Value'), max_length=255, blank=True, null=True)
     default_value = models.BooleanField(_('Default'), default=False)
     position = models.PositiveIntegerField(_('Position'), blank=True)
 

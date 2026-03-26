@@ -983,6 +983,22 @@ class BooleanField(Field):
         return gettext('Yes') if value else gettext('No')
 
 
+class AldrynModelChoiceIterator(forms.models.ModelChoiceIterator):
+    """Aldryn ModelChoiceIterator."""
+
+    def choice(self, obj):
+        value = obj if obj.widget_value is None else obj.widget_value
+        return (
+            forms.models.ModelChoiceIteratorValue(self.field.prepare_value(value), obj),
+            self.field.label_from_instance(obj),
+        )
+
+
+class AldrynModelChoiceField(forms.ModelChoiceField):
+    """Aldryn ModelChoiceField."""
+    iterator = AldrynModelChoiceIterator
+
+
 class SelectOptionInline(TabularInline):
     model = models.Option
 
@@ -991,7 +1007,7 @@ class SelectField(Field):
     name = _('Select Field')
 
     form = SelectFieldForm
-    form_field = forms.ModelChoiceField
+    form_field = AldrynModelChoiceField
     form_field_widget = form_field.widget
     form_field_enabled_options = [
         'label',
@@ -1018,16 +1034,21 @@ class SelectField(Field):
         kwargs['queryset'] = instance.option_set.all()
         for opt in kwargs['queryset']:
             if opt.default_value:
-                kwargs['initial'] = opt.pk
+                kwargs['initial'] = opt.pk if opt.widget_value is None else opt.widget_value
                 break
         return kwargs
+
+
+class AldrynModelMultipleChoiceField(forms.ModelMultipleChoiceField):
+    """Aldryn ModelMultipleChoiceField."""
+    iterator = AldrynModelChoiceIterator
 
 
 class MultipleSelectField(SelectField):
     name = _('Multiple Select Field')
 
     form = MultipleSelectFieldForm
-    form_field = forms.ModelMultipleChoiceField
+    form_field = AldrynModelMultipleChoiceField
     form_field_widget = forms.CheckboxSelectMultiple
     form_field_enabled_options = [
         'label',
@@ -1070,7 +1091,7 @@ class RadioSelectField(Field):
     name = _('Radio Select Field')
 
     form = RadioFieldForm
-    form_field = forms.ModelChoiceField
+    form_field = AldrynModelChoiceField
     form_field_widget = forms.RadioSelect
     form_field_enabled_options = [
         'label',
@@ -1098,7 +1119,7 @@ class RadioSelectField(Field):
         kwargs['empty_label'] = None
         for opt in kwargs['queryset']:
             if opt.default_value:
-                kwargs['initial'] = opt.pk
+                kwargs['initial'] = opt.pk if opt.widget_value is None else opt.widget_value
                 break
         return kwargs
 

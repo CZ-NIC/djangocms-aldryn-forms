@@ -1,7 +1,7 @@
 import logging
 import re
 import smtplib
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 from urllib.parse import parse_qs, urlencode, urlparse
 
 from django import forms
@@ -9,6 +9,7 @@ from django.apps import apps
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin import TabularInline
+from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator
 from django.db.models import query
 from django.http import HttpRequest
@@ -998,12 +999,48 @@ class AldrynModelChoiceField(forms.ModelChoiceField):
     """Aldryn ModelChoiceField."""
     iterator = AldrynModelChoiceIterator
 
+    def to_python(self, value):
+        if value in self.empty_values:
+            return None
+        self.validate_no_null_characters(value)
+        key = "pk" if value.isdigit() else "widget_value"
+        try:
+            if isinstance(value, self.queryset.model):
+                value = getattr(value, key)
+            value = self.queryset.get(**{key: value})
+        except (ValueError, TypeError, self.queryset.model.DoesNotExist):
+            raise ValidationError(
+                self.error_messages["invalid_choice"],
+                code="invalid_choice",
+                params={"value": value},
+            )
+        return value
+
+
+class WidgetValueMixin:
+
+    def get_form_field_kwargs(self, instance):
+        kwargs = super().get_form_field_kwargs(instance)
+        kwargs['queryset'] = instance.option_set.all()
+        for opt in kwargs['queryset']:
+            if opt.default_value:
+                kwargs['initial'] = opt.pk if opt.widget_value is None else opt.widget_value
+                break
+        return kwargs
+
+    def serialize_value(self, instance: models.FieldPlugin, value: Union[models.Option, None], is_confirmation=False):
+        if value is None:
+            return "-"
+        if value.widget_value is None:
+            return str(value)
+        return f"[{value.widget_value}]: {str(value)}"
+
 
 class SelectOptionInline(TabularInline):
     model = models.Option
 
 
-class SelectField(Field):
+class SelectField(WidgetValueMixin, Field):
     name = _('Select Field')
 
     form = SelectFieldForm
@@ -1028,15 +1065,6 @@ class SelectField(Field):
     ]
 
     inlines = [SelectOptionInline]
-
-    def get_form_field_kwargs(self, instance):
-        kwargs = super().get_form_field_kwargs(instance)
-        kwargs['queryset'] = instance.option_set.all()
-        for opt in kwargs['queryset']:
-            if opt.default_value:
-                kwargs['initial'] = opt.pk if opt.widget_value is None else opt.widget_value
-                break
-        return kwargs
 
 
 class AldrynModelMultipleChoiceField(forms.ModelMultipleChoiceField):
@@ -1087,7 +1115,7 @@ class MultipleCheckboxSelectField(MultipleSelectField):
     name = _('Multiple Checkbox Field')
 
 
-class RadioSelectField(Field):
+class RadioSelectField(WidgetValueMixin, Field):
     name = _('Radio Select Field')
 
     form = RadioFieldForm
@@ -1112,16 +1140,6 @@ class RadioSelectField(Field):
     ]
 
     inlines = [SelectOptionInline]
-
-    def get_form_field_kwargs(self, instance):
-        kwargs = super().get_form_field_kwargs(instance)
-        kwargs['queryset'] = instance.option_set.all()
-        kwargs['empty_label'] = None
-        for opt in kwargs['queryset']:
-            if opt.default_value:
-                kwargs['initial'] = opt.pk if opt.widget_value is None else opt.widget_value
-                break
-        return kwargs
 
 
 class URLField(BaseTextField):

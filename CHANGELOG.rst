@@ -5,6 +5,11 @@ Changelog
 Unreleased
 ==========
 
+8.7.1 (2026-03-31)
+==================
+
+ - Fix attribute for into element label and add attributes class and data-for-label into element p.
+
 8.7.0 (2026-03-27)
 ==================
 

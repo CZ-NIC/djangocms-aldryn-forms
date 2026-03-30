@@ -3,7 +3,7 @@
 {% if field %}
     <div class="checkbox{% if field.field.required %} form-required{% endif %}{% if field.errors %} has-error{% endif %}" data-required_min="{{ instance.min_value }}" data-required_max="{{ instance.max_value }}">
         {% block form_field_label %}
-            <p>
+            <p class="multiple-checkbox-select" data-for-label="{{ field.name }}">
                 {{ field.label }}
                 {% if field.field.required %}
                     <abbr title="{% translate "Required field" %}">*</abbr>

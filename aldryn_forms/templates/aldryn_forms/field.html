@@ -7,7 +7,7 @@
     {% if field.errors %} error{% endif %}
     {% endcomment %}
 
-    <label for="{{ field.id_for_label }}">
+    <label for="{{ field.id_for_label|default:field.name }}">
         {{ field.label }}
         {% if field.field.required %}
             <abbr title="{% translate "Required field" %}">*</abbr>

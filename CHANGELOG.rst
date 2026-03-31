@@ -5,6 +5,11 @@ Changelog
 Unreleased
 ==========
 
+8.7.2 (2026-03-31)
+==================
+
+- Add compiled admin_list.js  admin_list.js.map  main.js  main.js.map.
+
 8.7.1 (2026-03-31)
 ==================
 

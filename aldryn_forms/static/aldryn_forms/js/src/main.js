@@ -7,11 +7,14 @@ import {
     sendData,
     toggleSubmitButton
 } from './form'
+import {addEventsToFormFields, initFormFields} from './field-events'
 
 
 document.addEventListener('DOMContentLoaded', () => {
     enableFieldUploadDragAndDrop()
     enableSubmitFromByFetch()
+    addEventsToFormFields()
+    initFormFields()
 
     // Disable button submit to prevent user click more than once.
     // Do not submit the form if any required fields are missing.

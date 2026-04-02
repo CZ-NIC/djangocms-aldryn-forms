@@ -1,0 +1,118 @@
+{% extends "admin/cms/page/plugin/change_form.html" %}
+{% load i18n %}
+
+{% block after_field_sets %}
+<fieldset class="module aligned collapse" aria-labelledby="fieldset-help-js">
+    <details>
+        <summary>
+            <h2 id="fieldset-help-js" class="fieldset-heading">{% translate "Help for activating Javascript" %}</h2>
+        </summary>
+<p>
+<h3>{% translate "Description of how to set up javascript for form control." %}</h3>
+</p>
+<h4>
+{% translate "The settings for form fields when the page loads are defined in the attribute" %} <code>data-init-field-state</code>.
+</h4>
+<p>
+{% translate "Field value format:" %}
+<pre>
+{
+    "field_name": [action, ...]
+}
+</pre>
+</p>
+<p>
+{% translate "List of values" %} <code>action</code>:
+<ul>
+    <li>"enable" <span class="help">{% translate "activates the field" %}</span></li>
+    <li>"disable" <span class="help">{% translate "deactivates the field" %}</span></li>
+    <li>"required" <span class="help">{% translate "sets the field as required" %}</span></li>
+    <li>"optional" <span class="help">{% translate "sets the field as optional" %}</span></li>
+    <li>{"set": "value"} <span class="help">{% translate "sets the field value / for checkboxes and radio buttons sets the selection" %}</span></li>
+</ul>
+<p>
+{% translate "The field name can also include the field value. This is necessary for radio buttons or a group of checkboxes. The field value is given in square brackets." %}
+{% blocktranslate %}For example, <code>agreement[yes]</code> sets the field &lt;input type="radio" name="agreement" value="yes"&gt;.{% endblocktranslate %}
+</p>
+
+<p>
+<div>{% translate "Example" %}:</div>
+<pre>
+const initState = {
+    send_to: ["disable", "optional"],
+    confirmation_method: ["disable"],
+    handle: [{set: "MY HANDLE"}],
+    "agreement[yes]": [{set: true}],
+}
+const config = JSON.stringify(initState)
+</pre>
+</p>
+<p>
+{% blocktranslate trimmed %}
+Put the value <code>config</code> in the <code>data-init-field-state</code> attribute.
+This will disable the <code>send_to</code> and <code>confirmation_method</code> fields in the form when the page loads.
+The <code>send_to</code> field is set to optional.
+The <code>handle</code> field is set to "MY HANDLE".
+The <code>agreement</code> checkbox is checked with the value <code>yes</code>.
+{% endblocktranslate %}
+</p>
+
+<hr>
+<h4>
+{% blocktranslate %}Event settings for form fields are defined in the <code>data-add-field-events</code> attribute.{% endblocktranslate %}
+</h4>
+<p>
+<div>{% translate "Field value format" %}:</div>
+<pre>
+{
+    "trigger_field_name": {
+        "event_name": {
+            "destination_field_value": [
+                {"destination_filed_name": [action, ...]}
+            ]
+        }
+    }
+}
+</pre>
+</p>
+<p>
+<div>{% translate "Example" %}:</div>
+<pre>
+const data = {
+    send_to: {
+        change:
+        {
+            custom_email: [
+                {confirmation_method: ["enable", "required", {set: "notarized_letter"}]},
+                {"agreement[yes]": [{set: true}]},
+            ],
+            email_in_registry: [
+                {confirmation_method: ["disable", "optional"]},
+                {"agreement[yes]": [{set: false}]},
+            ]
+        }
+    }
+}
+const config = JSON.stringify(data)
+</pre>
+</p>
+<p>
+{% blocktranslate trimmed %}
+Put the <code>config</code> value in the <code>data-add-field-events</code> attribute.
+This will cause the <code>confirmation_method</code> field to be activated when the <code>send_to</code> field is set to <code>custom_email</code>, making it mandatory and setting its value to "notarized_letter".
+The <code>agreement</code> checkbox is also checked with a value of <code>yes</code>.
+The <code>confirmation_method</code> field is deactivated and made optional when the <code>send_to</code> field is set to <code>email_in_registry</code>.
+The <code>agreement</code> checkbox is cleared with a value of <code>yes</code>.
+{% endblocktranslate %}
+</p>
+
+<p>
+{% translate "The current configuration can be saved in readable form with the command" %}:
+<pre>
+JSON.stringify(JSON.parse(document.querySelector("[data-init-field-state]").dataset.initFieldState), null, 2)
+JSON.stringify(JSON.parse(document.querySelector("[data-add-field-events]").dataset.addFieldEvents), null, 2)
+</pre>
+</p>
+    </details>
+</fieldset>
+{% endblock %}

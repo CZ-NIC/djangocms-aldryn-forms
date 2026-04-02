@@ -66,6 +66,7 @@ class FormPlugin(FieldContainer):
     filter_horizontal = ['recipients']
     ident_field_name = None
     honeypot_filled = False
+    change_form_template = "admin/aldryn_forms/formplugin/change_form.html"
 
     fieldsets = (
         (None, {

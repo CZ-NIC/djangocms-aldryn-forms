@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-07-25 17:17+0200\n"
+"POT-Creation-Date: 2026-04-02 16:41+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Petr Peterka <petr.peterka@nic.cz>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -121,6 +121,9 @@ msgstr ""
 msgid "Default value of field."
 msgstr "Základní hodnota pole."
 
+msgid "Description of how to set up javascript for form control."
+msgstr "Popis jak nastavit javascript pro ovládání formuláře."
+
 msgid "E-mail"
 msgstr "E-mail"
 
@@ -173,6 +176,16 @@ msgstr ""
 "Pokud požadované pole zůstane nevyplněno, zobrazí se chybové hlášení. "
 "Výchozí: \"Toto pole je povinné\"."
 
+msgid ""
+"Event settings for form fields are defined in the <code>data-add-field-"
+"events</code> attribute."
+msgstr ""
+"Nastavení událostí pro pole formuláře se definuje v atributu <code>data-add-"
+"field-events</code>."
+
+msgid "Example"
+msgstr "Příklad"
+
 msgid "Explanatory text displayed next to input field. Just like this one."
 msgstr "Vysvětlivka zobrazená vedle pole formuláře. Tak jako tato."
 
@@ -219,6 +232,12 @@ msgstr "Pole"
 msgid "Field is required"
 msgstr "Toto pole je povinné"
 
+msgid "Field value format"
+msgstr "Formát hodnoty pole"
+
+msgid "Field value format:"
+msgstr "Formát hodnoty pole:"
+
 msgid "Fields"
 msgstr "Pole"
 
@@ -231,6 +250,13 @@ msgstr "Velikost souboru přesáhla stanovený limit %(size)s."
 
 msgid "File upload field"
 msgstr "Pole pro nahrání souboru"
+
+msgid ""
+"For example, <code>agreement[yes]</code> sets the field &lt;input "
+"type=\"radio\" name=\"agreement\" value=\"yes\"&gt;."
+msgstr ""
+"Například <code>agreement[yes]</code> nastavuje pole &lt;input "
+"type=\"radio\" name=\"agreement\" value=\"yes\"&gt;."
 
 msgid "Form"
 msgstr "Formulář"
@@ -262,6 +288,9 @@ msgstr "Formulář s Ident polem"
 
 msgid "Forms"
 msgstr "Formuláře"
+
+msgid "Help for activating Javascript"
+msgstr "Nápověda pro aktivaci Javascriptu"
 
 msgid "Help text"
 msgstr "Nápověda"
@@ -336,6 +365,9 @@ msgstr "Nápověda"
 
 msgid "List of urls"
 msgstr "Seznam urls"
+
+msgid "List of values"
+msgstr "Seznam hodnot"
 
 msgid "Max choices"
 msgstr "Maximální výběr"
@@ -476,6 +508,42 @@ msgstr "Zadejte kotvu, na kterou se má přejít."
 msgid "Provides the base theme for the email."
 msgstr "Zajišťuje základní motiv pro e-mail."
 
+msgid ""
+"Put the <code>config</code> value in the <code>data-add-field-events</code> "
+"attribute. This will cause the <code>confirmation_method</code> field to be "
+"activated when the <code>send_to</code> field is set to <code>custom_email</"
+"code>, making it mandatory and setting its value to \"notarized_letter\". "
+"The <code>agreement</code> checkbox is also checked with a value of "
+"<code>yes</code>. The <code>confirmation_method</code> field is deactivated "
+"and made optional when the <code>send_to</code> field is set to "
+"<code>email_in_registry</code>. The <code>agreement</code> checkbox is "
+"cleared with a value of <code>yes</code>."
+msgstr ""
+"Hodnotu <code>config</code> vložte do atributu <code>data-add-field-events</"
+"code>. To způsobí, že při přepnutí pole <code>send_to</code> na hodnotu "
+"<code>custom_email</code> se aktivuje pole <code>confirmation_method</code>, "
+"stane se povinné a nastaví se jeho hodnota na \"notarized_letter\". Dále se "
+"zaškrtne zaškrtávací pole <code>agreement</code> s hodnotou <code>yes</"
+"code>. Při přenutí pole <code>send_to</code> na hodnotu "
+"<code>email_in_registry</code> se pole <code>confirmation_method</code> "
+"deaktivuje a stane se nepovinné. Zaškrtávací pole <code>agreement</code> s "
+"hodnotou <code>yes</code> se odškrtne."
+
+msgid ""
+"Put the value <code>config</code> in the <code>data-init-field-state</code> "
+"attribute. This will disable the <code>send_to</code> and "
+"<code>confirmation_method</code> fields in the form when the page loads. The "
+"<code>send_to</code> field is set to optional. The <code>handle</code> field "
+"is set to \"MY HANDLE\". The <code>agreement</code> checkbox is checked with "
+"the value <code>yes</code>."
+msgstr ""
+"Hodnotu <code>config</code> vložte do atributu <code>data-init-field-state</"
+"code>. To způsobí, že při načtení stránky se ve formuláři deaktivuje pole "
+"<code>send_to</code> a <code>confirmation_method</code>. Pole <code>send_to</"
+"code> se nastaví jako nepovinné. Do pole <code>handle</code> se vloží text "
+"\"MY HANDLE\". Zaškrtne se zaškrtávací pole <code>agreement</code> s "
+"hodnotou <code>yes</code>."
+
 msgid "Radio Select Field"
 msgstr "Pole přepínačů"
 
@@ -572,6 +640,10 @@ msgstr "Děkujeme Vám za vyplnění formuláře."
 msgid "The \"name\" field cannot contain spaces."
 msgstr "Pole \"name\" nemůže obsahovat mezery."
 
+msgid ""
+"The current configuration can be saved in readable form with the command"
+msgstr "Aktuální konfigurace je možné zabrazit v čitelné podobě příkazy"
+
 msgid "The earliest date to accept."
 msgstr "Nejdřívější akceptovatelné datum."
 
@@ -583,6 +655,15 @@ msgstr "Nejdřívější akceptovatelný čas."
 
 msgid "The field cannot be edited by the user."
 msgstr "Pole nemůže být uživatelem změněno."
+
+msgid ""
+"The field name can also include the field value. This is necessary for radio "
+"buttons or a group of checkboxes. The field value is given in square "
+"brackets."
+msgstr ""
+"Název pole může obsahovat i hodnotu pole. U přepínačů nebo skupiny "
+"zaškrtávacích políček je to nezbytné. Hodnota pole se udává v hranatých "
+"závorkách."
 
 msgid "The file is private."
 msgstr "Soubor je soukromý."
@@ -641,6 +722,10 @@ msgstr "Metoda není typu POST."
 #, python-format
 msgid "The number of uploaded files exceeded the set limit of %(limit)s."
 msgstr "Počet nahraných souborů překročil stanovený limit %(limit)s."
+
+msgid ""
+"The settings for form fields when the page loads are defined in the attribute"
+msgstr "Nastavení polí formuláře při načtení stránky se definuje v atributu"
 
 #, python-format
 msgid "The total file size has exceeded the specified limit %(size)s."
@@ -718,6 +803,9 @@ msgstr ""
 msgid "[Form submission] %(form_name)s"
 msgstr "[Odeslání formuláře] %(form_name)s"
 
+msgid "activates the field"
+msgstr "aktivuje pole"
+
 msgid "available text variables"
 msgstr "dostupné textové proměnné"
 
@@ -729,6 +817,9 @@ msgstr "vlastní css třídy"
 
 msgid "data"
 msgstr "data"
+
+msgid "deactivates the field"
+msgstr "deaktivuje pole"
 
 msgid "default"
 msgstr "základní hodnota"
@@ -792,6 +883,17 @@ msgstr "při odeslání formuláře zaslat upozornění"
 
 msgid "sent at"
 msgstr "odesláno v"
+
+msgid "sets the field as optional"
+msgstr "nastavuje pole jako nepovinné"
+
+msgid "sets the field as required"
+msgstr "nastavuje pole jako povinné"
+
+msgid ""
+"sets the field value / for checkboxes and radio buttons sets the selection"
+msgstr ""
+"nastavuje hodnotu pole / u zaškrtávacích políček a přepínačů nastavuje výběr"
 
 msgid "subject"
 msgstr "předmět"

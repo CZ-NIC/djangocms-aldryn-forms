@@ -314,6 +314,11 @@ msgstr ""
 "Je-li zatrženo \"Toto pole je povinné\", tak \"Minimální výběr\" musí být "
 "minimálně 1."
 
+msgid ""
+"If the element is not an input element, the text is inserted in a span "
+"element."
+msgstr "Není-li element typu input, tak se vkládá text v elementu span."
+
 #, python-format
 msgid ""
 "Image height must be under %(max_size)s pixels. Current height is "
@@ -571,6 +576,9 @@ msgstr "Požadovaný počet znaků pro psaní."
 msgid "Save to site administration and send email"
 msgstr "Uložit do administrace webu a poslat e-mail"
 
+msgid "Script debugging can be enabled with the url parameter ?debug=true."
+msgstr "Ladění skriptu je možné si zapnout url parametrem ?debug=true."
+
 msgid "Select Field"
 msgstr "Pole Seznam hodnot"
 
@@ -806,6 +814,9 @@ msgstr "[Odeslání formuláře] %(form_name)s"
 msgid "activates the field"
 msgstr "aktivuje pole"
 
+msgid "adding classes to an element"
+msgstr "přídání tříd do elementu"
+
 msgid "available text variables"
 msgstr "dostupné textové proměnné"
 
@@ -872,6 +883,9 @@ msgstr "nová e-mailová upozornění"
 msgid "people notified"
 msgstr "uživatelé, kteří budou upozorněni"
 
+msgid "removing classes from an element"
+msgstr "odebrání tříd z elementu"
+
 msgid "reply to email"
 msgstr "odpovědět na mail"
 
@@ -919,6 +933,9 @@ msgstr "pro jméno"
 
 msgid "to user"
 msgstr "pro uživatele"
+
+msgid "trigger form submission"
+msgstr "vyvolat odeslání formuláře"
 
 msgid "used when rendering the email in html."
 msgstr "Použito pouze pro zobrazení zprávy v html módu."

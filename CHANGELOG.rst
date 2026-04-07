@@ -5,6 +5,11 @@ Changelog
 Unreleased
 ==========
 
+8.8.1 (2026-04-07)
+==================
+
+- Add support of field checkbox in field-events.js. Add actions addclasses, removeclasses, submit into field-events.js.
+
 8.8.0 (2026-04-02)
 ==================
 

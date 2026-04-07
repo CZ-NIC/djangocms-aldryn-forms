@@ -28,7 +28,13 @@
     <li>"disable" <span class="help">{% translate "deactivates the field" %}</span></li>
     <li>"required" <span class="help">{% translate "sets the field as required" %}</span></li>
     <li>"optional" <span class="help">{% translate "sets the field as optional" %}</span></li>
-    <li>{"set": "value"} <span class="help">{% translate "sets the field value / for checkboxes and radio buttons sets the selection" %}</span></li>
+    <li>{"set": "value"} <span class="help">
+        {% translate "sets the field value / for checkboxes and radio buttons sets the selection" %}
+        {% translate "If the element is not an input element, the text is inserted in a span element." %}
+    </span></li>
+    <li>{"addclasses": ["name", ...]} <span class="help">{% translate "adding classes to an element" %}</span></li>
+    <li>{"removeclasses": ["name", ...]} <span class="help">{% translate "removing classes from an element" %}</span></li>
+    <li>"submit" <span class="help">{% translate "trigger form submission" %}</span></li>
 </ul>
 <p>
 {% translate "The field name can also include the field value. This is necessary for radio buttons or a group of checkboxes. The field value is given in square brackets." %}
@@ -80,8 +86,7 @@ The <code>agreement</code> checkbox is checked with the value <code>yes</code>.
 <pre>
 const data = {
     send_to: {
-        change:
-        {
+        change: {
             custom_email: [
                 {confirmation_method: ["enable", "required", {set: "notarized_letter"}]},
                 {"agreement[yes]": [{set: true}]},
@@ -90,6 +95,12 @@ const data = {
                 {confirmation_method: ["disable", "optional"]},
                 {"agreement[yes]": [{set: false}]},
             ]
+        }
+    },
+    "policy[confirm]": {
+        change: {
+            true: {"message": [{set: "Thank you."}]},
+            false: {"message": [{set: "Please, check the checkbox."}]},
         }
     }
 }
@@ -112,6 +123,9 @@ The <code>agreement</code> checkbox is cleared with a value of <code>yes</code>.
 JSON.stringify(JSON.parse(document.querySelector("[data-init-field-state]").dataset.initFieldState), null, 2)
 JSON.stringify(JSON.parse(document.querySelector("[data-add-field-events]").dataset.addFieldEvents), null, 2)
 </pre>
+</p>
+<p>
+    {% translate "Script debugging can be enabled with the url parameter ?debug=true." %}
 </p>
     </details>
 </fieldset>

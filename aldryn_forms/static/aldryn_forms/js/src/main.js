@@ -7,12 +7,13 @@ import {
     sendData,
     toggleSubmitButton
 } from './form'
-import {addEventsToFormFields, initFormFields} from './field-events'
+import {addEventsToFormFields, initDebugMode, initFormFields} from './field-events'
 
 
 document.addEventListener('DOMContentLoaded', () => {
     enableFieldUploadDragAndDrop()
     enableSubmitFromByFetch()
+    initDebugMode()
     addEventsToFormFields()
     initFormFields()
 

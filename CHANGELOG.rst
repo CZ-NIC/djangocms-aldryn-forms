@@ -5,6 +5,8 @@ Changelog
 Unreleased
 ==========
 
+- Fix widget_value in AldrynModelMultipleChoiceField.
+
 8.8.1 (2026-04-07)
 ==================
 

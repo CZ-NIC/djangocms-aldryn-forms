@@ -988,7 +988,7 @@ class BooleanField(Field):
 class AldrynModelChoiceIterator(forms.models.ModelChoiceIterator):
     """Aldryn ModelChoiceIterator."""
 
-    def choice(self, obj):
+    def choice(self, obj: models.Option) -> Tuple[forms.models.ModelChoiceIteratorValue, str]:
         value = obj if obj.widget_value is None else obj.widget_value
         return (
             forms.models.ModelChoiceIteratorValue(self.field.prepare_value(value), obj),
@@ -1071,6 +1071,13 @@ class SelectField(WidgetValueMixin, Field):
 class AldrynModelMultipleChoiceField(forms.ModelMultipleChoiceField):
     """Aldryn ModelMultipleChoiceField."""
     iterator = AldrynModelChoiceIterator
+
+    def _check_values(self, value):
+        for item in value:
+            if not item.isdigit():
+                self.to_field_name = "widget_value"
+                break
+        return super()._check_values(value)
 
 
 class MultipleSelectField(SelectField):

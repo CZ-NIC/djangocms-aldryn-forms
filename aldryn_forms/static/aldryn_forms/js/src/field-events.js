@@ -77,6 +77,12 @@ const performActions = (form, field, actions) => {
     }
 }
 
+const getSelector = (name) => {
+    const match = name.match(/(\w+)\[(\w+)\]/)
+    const selector = match ? `[name=${match[1]}][value=${match[2]}]` : `[name=${name}]`
+    return selector
+}
+
 const processCommandForFields = (form, process) => {
     for (const statement of process) {
         Object.entries(statement).forEach(([field_name, actions]) => {
@@ -87,7 +93,7 @@ const processCommandForFields = (form, process) => {
     }
 }
 
-const addEvent = (form, field, event_name, fields) => {
+const addEvent = (form, field, fields, event_name) => {
     if (debug) {
         console.log(`Set event "${event_name}" to field "${field.name}"`)
     }
@@ -107,17 +113,36 @@ const addEvent = (form, field, event_name, fields) => {
     })
 }
 
+const processWhenValueEquals = (form, fields, field) => {
+    Object.entries(fields).forEach(([field_value, process]) => {
+        if (field_value === field.value) {
+            processCommandForFields(form, process)
+        }
+    })
+}
+
+
+const processEvent = (form, field, fields) => {
+    if (debug) {
+        console.log(`Process field "${field.name}"`)
+    }
+    if (field.type === 'checkbox' || field.type === 'radio') {
+        if (field.checked) {
+            processWhenValueEquals(form, fields, field)
+        }
+    } else {
+        processWhenValueEquals(form, fields, field)
+    }
+}
+
+
 const camelCase = (text) => {
     return text.replace(/-(\w)/g, (_, char) => char.toUpperCase())
 }
 
-const getSelector = (name) => {
-    const match = name.match(/(\w+)\[(\w+)\]/)
-    const selector = match ? `[name=${match[1]}][value=${match[2]}]` : `[name=${name}]`
-    return selector
-}
-
-const processConfig = (selector, fnc) => {
+const processConfig = (fnc) => {
+    // DEPENDENCY: Must be same as `field_rules = instance.form_attributes.get('data-field-rules')` in cms_plugins.py.
+    const selector = 'field-rules'
     for (const form of document.querySelectorAll(`[data-${selector}]`)) {
         const config = parseConfig(form.dataset[camelCase(selector)])
         if (!config) {
@@ -131,16 +156,12 @@ const processConfig = (selector, fnc) => {
                 if (debug) {
                     console.log(`Set field "${name}"`)
                 }
-                fnc(form, field, params)
+                Object.entries(params).forEach(([command, fields]) => {
+                    fnc(form, field, fields, command)
+                })
             }
         })
     }
-}
-
-const addEventForFields = (form, field, params) => {
-    Object.entries(params).forEach(([command, fields]) => {
-        addEvent(form, field, command, fields)
-    })
 }
 
 export const initDebugMode = () => {
@@ -151,5 +172,5 @@ export const initDebugMode = () => {
     }
 }
 
-export const initFormFields = () => processConfig('init-field-state', performActions)
-export const addEventsToFormFields = () => processConfig('add-field-events', addEventForFields)
+export const addEventsToFormFields = () => processConfig(addEvent)
+export const initFormFields = () => processConfig(processEvent)

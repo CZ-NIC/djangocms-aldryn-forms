@@ -5,6 +5,10 @@ Changelog
 Unreleased
 ==========
 
+8.8.2 (2026-04-14)
+==================
+
+- Use only field-rules attribute. Apply field-rules to post process.
 - Fix widget_value in AldrynModelMultipleChoiceField.
 
 8.8.1 (2026-04-07)

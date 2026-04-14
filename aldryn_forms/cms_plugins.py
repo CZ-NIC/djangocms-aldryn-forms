@@ -1,3 +1,4 @@
+import json
 import logging
 import re
 import smtplib
@@ -12,6 +13,8 @@ from django.contrib.admin import TabularInline
 from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator
 from django.db.models import query
+from django.forms.fields import Field as DjangoField
+from django.forms.widgets import CheckboxInput, RadioSelect
 from django.http import HttpRequest
 from django.template.loader import select_template
 from django.utils.safestring import mark_safe
@@ -138,6 +141,9 @@ class FormPlugin(FieldContainer):
                 if input_name in form.fields:
                     form.fields[input_name].files = form.files.getlist(input_name)
 
+        if request.POST.get('form_plugin_id') == str(instance.id):
+            self.set_fields_required_or_optional(request, instance, form)
+
         if request.POST.get('form_plugin_id') == str(instance.id) and form.is_valid():
             if self.ident_field_name:
                 form.cleaned_data[self.ident_field_name] = request.POST.get(self.ident_field_name, "")[:MAX_IDENT_SIZE]
@@ -193,6 +199,55 @@ class FormPlugin(FieldContainer):
             ('AldrynDynamicForm', (FormSubmissionBaseForm,), fields)
         )
         return formClass
+
+    @staticmethod
+    def is_checked_field_type(field: Union[DjangoField, None]) -> bool:
+        """Is checked field type."""
+        if field is None:
+            return False
+        return isinstance(field.widget, (CheckboxInput, RadioSelect))
+
+    @staticmethod
+    def get_field_name_and_value(name: str) -> Tuple[str, Union[str, None]]:
+        """Get field name and value."""
+        match = re.match(r"(\w+)\[(\w+)\]", name)
+        if match:
+            return match.groups()
+        return name, None
+
+    def set_fields_required_or_optional(
+        self, request: HttpRequest, instance: models.FormPlugin, form: FormSubmissionBaseForm
+    ) -> None:
+        """Set field rules."""
+        # DEPENDENCY: Must be same as `const selector = 'field-rules'` in js/src/field-events.js.
+        field_rules = instance.form_attributes.get('data-field-rules')
+        if not field_rules:
+            return
+        try:
+            data = json.loads(field_rules)
+        except json.JSONDecodeError:
+            return
+        for field_name_and_value, events in data.items():
+            base_field_name, only_value = self.get_field_name_and_value(field_name_and_value)
+            base_field_value = request.POST.get(base_field_name)
+            for event, rules in events.items():
+                for name, field_and_commands in rules.items():
+                    if self.is_checked_field_type(form.fields.get(base_field_name)):
+                        if only_value is not None:
+                            value_equals = (name == "true") == (base_field_value == only_value)
+                        else:
+                            value_equals = ((name == "true") == bool(base_field_value) or (name == base_field_value))
+                    else:
+                        value_equals = name == base_field_value
+                    if value_equals:
+                        for rule in field_and_commands:
+                            for field_name, commands in rule.items():
+                                if field_name not in form.fields:
+                                    continue
+                                if "required" in commands:
+                                    form.fields[field_name].required = True
+                                elif "optional" in commands:
+                                    form.fields[field_name].required = False
 
     def get_form_fields(self, instance: models.FormPlugin, request: HttpRequest) -> Dict:
         form_fields = {}

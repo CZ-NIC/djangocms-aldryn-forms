@@ -32,6 +32,10 @@ const performActions = (form, field, actions) => {
                 field.required = true
             } else if (action === 'optional') {
                 field.required = false
+            } else if (action === 'hide') {
+                field.style.display = 'none'
+            } else if (action === 'show') {
+                field.style.display = ''
             } else if (action === 'submit') {
                 form.requestSubmit()
             } else {
@@ -78,6 +82,9 @@ const performActions = (form, field, actions) => {
 }
 
 const getSelector = (name) => {
+    if (name.includes('.')) {
+        return name
+    }
     const match = name.match(/(\w+)\[(\w+)\]/)
     const selector = match ? `[name=${match[1]}][value=${match[2]}]` : `[name=${name}]`
     return selector

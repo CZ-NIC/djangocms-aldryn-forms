@@ -40,11 +40,14 @@
     </span></li>
     <li>{"addclasses": ["name", ...]} <span class="help">{% translate "adding classes to an element" %}</span></li>
     <li>{"removeclasses": ["name", ...]} <span class="help">{% translate "removing classes from an element" %}</span></li>
+    <li>"show" <span class="help">{% translate "display element" %}</span></li>
+    <li>"hide" <span class="help">{% translate "hide element" %}</span></li>
     <li>"submit" <span class="help">{% translate "trigger form submission" %}</span></li>
 </ul>
 <p>
 {% translate "The field name can also include the field value. This is necessary for radio buttons or a group of checkboxes. The field value is given in square brackets." %}
 {% blocktranslate %}For example, <code>agreement[yes]</code> sets the field &lt;input type="radio" name="agreement" value="yes"&gt;.{% endblocktranslate %}
+{% translate "If there is a dot in the name, the entered expression is searched directly and not the value of the name attribute." %}
 </p>
 
 <p>
@@ -56,10 +59,12 @@ const data = {
             custom_email: [
                 {confirmation_method: ["enable", "required", {set: "notarized_letter"}]},
                 {"agreement[yes]": [{set: true}]},
+                {"div.message": ["hide"]},
             ],
             email_in_registry: [
                 {confirmation_method: ["disable", "optional"]},
                 {"agreement[yes]": [{set: false}]},
+                {"div.message": ["show"]},
             ]
         }
     },

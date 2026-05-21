@@ -319,6 +319,13 @@ msgid ""
 "element."
 msgstr "Není-li element typu input, tak se vkládá text v elementu span."
 
+msgid ""
+"If there is a dot in the name, the entered expression is searched directly "
+"and not the value of the name attribute."
+msgstr ""
+"Pokud je v názvu přítomna tečka, tak se vyhledává přímo zadaný výraz a ne "
+"hodnota atributu name."
+
 #, python-format
 msgid ""
 "Image height must be under %(max_size)s pixels. Current height is "
@@ -816,6 +823,9 @@ msgstr "deaktivuje pole"
 msgid "default"
 msgstr "základní hodnota"
 
+msgid "display element"
+msgstr "zobrazit element"
+
 msgid "email body (html)"
 msgstr "tělo zprávy (html)"
 
@@ -848,6 +858,9 @@ msgstr "z e-mailu"
 
 msgid "from name"
 msgstr "od jména"
+
+msgid "hide element"
+msgstr "skrýt element"
 
 msgid "https://example.com or #anchor"
 msgstr "https://example.com nebo #kotva"

@@ -5,6 +5,11 @@ Changelog
 Unreleased
 ==========
 
+8.9.0 (2026-05-21)
+==================
+
+- Add show/hide action into field-events.js.
+
 8.8.2 (2026-04-14)
 ==================
 

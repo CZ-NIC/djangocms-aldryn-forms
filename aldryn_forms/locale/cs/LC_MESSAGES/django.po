@@ -320,11 +320,12 @@ msgid ""
 msgstr "Není-li element typu input, tak se vkládá text v elementu span."
 
 msgid ""
-"If there is a dot in the name, the entered expression is searched directly "
-"and not the value of the name attribute."
+"If there is a dot in the name or a space at the beginning (which is "
+"removed), the entered expression is searched directly and not the value of "
+"the name attribute."
 msgstr ""
-"Pokud je v názvu přítomna tečka, tak se vyhledává přímo zadaný výraz a ne "
-"hodnota atributu name."
+"Pokud je v názvu přítomna tečka nebo je na začátku mezera (kerá se "
+"odstraní), tak se vyhledává přímo zadaný výraz a ne hodnota atributu name."
 
 #, python-format
 msgid ""

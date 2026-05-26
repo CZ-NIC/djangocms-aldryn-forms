@@ -5,6 +5,11 @@ Changelog
 Unreleased
 ==========
 
+8.9.1 (2026-05-26)
+==================
+
+- A space at the beginning of the value defines the entire selector in the script field-events.js.
+
 8.9.0 (2026-05-21)
 ==================
 

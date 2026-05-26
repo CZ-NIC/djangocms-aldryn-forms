@@ -82,6 +82,9 @@ const performActions = (form, field, actions) => {
 }
 
 const getSelector = (name) => {
+    if (name[0] === ' ') {
+        return name.slice(1)
+    }
     if (name.includes('.')) {
         return name
     }

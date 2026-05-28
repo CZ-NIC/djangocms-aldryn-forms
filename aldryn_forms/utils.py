@@ -106,6 +106,9 @@ def get_nested_plugins(parent_plugin, include_self=False):
                 found_plugins.extend(plugin.plugin.get_descendants())
             else:
                 found_plugins.extend(plugin.get_descendants())
+            bound_plugin = plugin.get_bound_plugin()
+            if hasattr(bound_plugin, 'alias') and bound_plugin.alias:
+                found_plugins.extend(bound_plugin.alias.get_plugins())
         else:
             found_plugins.extend(get_nested_plugins(plugin, include_self=True))
 

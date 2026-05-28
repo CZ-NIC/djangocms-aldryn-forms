@@ -5,6 +5,12 @@ Changelog
 Unreleased
 ==========
 
+8.9.2 (2026-05-28)
+==================
+
+- Fix render field outside of the form.
+- Fix alias plugins.
+
 8.9.1 (2026-05-26)
 ==================
 

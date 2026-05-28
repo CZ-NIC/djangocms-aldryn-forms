@@ -3,6 +3,7 @@ include README.rst
 include pyproject.toml
 include setup.py
 include setup.cfg
+prune tests
 recursive-include aldryn_forms/locale *
 recursive-include aldryn_forms/static *
 recursive-include aldryn_forms/templates *

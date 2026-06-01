@@ -5,6 +5,11 @@ Changelog
 Unreleased
 ==========
 
+8.9.3 (2026-06-01)
+==================
+
+- Fix send webhook for all action types.
+
 8.9.2 (2026-05-28)
 ==================
 

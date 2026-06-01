@@ -3,6 +3,7 @@ import logging
 import re
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
+from django.conf import settings
 from django.db.models import ManyToManyField
 from django.utils.module_loading import import_string
 
@@ -21,10 +22,11 @@ logger = logging.getLogger(__name__)
 
 def send_to_webhook(url: str, method: str, data: dataType) -> requests.Response:
     """Send data to URL as POST."""
+    timeout = getattr(settings, "ALDRYN_FORMS_WEBHOOK_TIMEOUT", 6)
     if method == "JSON":
-        response = requests.post(url, json.dumps(data), headers={"Content-Type": "application/json"})
+        response = requests.post(url, json.dumps(data), headers={"Content-Type": "application/json"}, timeout=timeout)
     else:
-        response = requests.post(url, data)
+        response = requests.post(url, data, timeout=timeout)
     response.raise_for_status()
     return response
 

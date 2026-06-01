@@ -65,6 +65,7 @@ class EmailAction(BaseAction):
             recipients = cmsplugin.send_notifications(instance, form)
             logger.info(f'Sent email notifications to {len(recipients)} recipients.')
             site = Site.objects.first()
+            form.instance.set_form_data(form)
             trigger_webhooks(instance.webhooks, form.instance, site.domain)
         cmsplugin.send_success_message(instance, request)
 
@@ -81,3 +82,8 @@ class NoAction(BaseAction):
     ) -> None:
         form_id = form.form_plugin.id
         logger.info(f'Not persisting data for "{form_id}" since action_backend is set to "none"')
+        if not form.instance.honeypot_filled:
+            site = Site.objects.first()
+            form.instance.set_form_data(form)
+            trigger_webhooks(instance.webhooks, form.instance, site.domain)
+        cmsplugin.send_success_message(instance, request)

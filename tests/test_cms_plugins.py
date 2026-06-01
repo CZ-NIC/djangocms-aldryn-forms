@@ -215,10 +215,13 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
         self.assertEqual(FormSubmission.objects.count(), 0)
         self._check_mailbox()
         self.log_handler.check(
-            ('aldryn_forms.action_backends', 'INFO', 'Sent email notifications to 1 recipients.'),
+            ('aldryn_forms.action_backends', 'INFO',
+            'Sent email notifications to 1 recipients.'),
             ('aldryn_forms.api.webhook', 'DEBUG',
             "{'hostname': 'example.com', 'name': 'Contact us', 'language': 'en', "
-            "'sent_at': None, 'form_recipients': [], 'form_data': []}"),
+            "'sent_at': None, 'form_recipients': [], 'form_data': [{'name': 'name', "
+            "'label': 'Name', 'field_occurrence': 1, 'value': 'Tester', 'plugin_type': "
+            "'TextField'}]}")
         )
 
     def test_form_submission_no_action_webhook(self):
@@ -228,7 +231,8 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
         form_plugin = FormPlugin.objects.last()
         form_plugin.webhooks.add(self.webhook)
         data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester"}
-        with responses.RequestsMock():
+        with responses.RequestsMock() as rsps:
+            rsps.add(responses.POST, self.url, body=json.dumps([{"status": "OK"}]))
             response = self.client.post(self.page.get_absolute_url('en'), data)
 
         self.assertEqual(response.status_code, 200)
@@ -236,7 +240,12 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
         self.assertEqual(len(mail.outbox), 0)
         self.log_handler.check(
             ('aldryn_forms.action_backends', 'INFO',
-             f'Not persisting data for "{form_plugin.pk}" since action_backend is set to "none"'),
+            f'Not persisting data for "{form_plugin.pk}" since action_backend is set to "none"'),
+            ('aldryn_forms.api.webhook', 'DEBUG',
+            "{'hostname': 'example.com', 'name': 'Contact us', 'language': 'en', "
+            "'sent_at': None, 'form_recipients': [], 'form_data': [{'name': 'name', "
+            "'label': 'Name', 'field_occurrence': 1, 'value': 'Tester', 'plugin_type': "
+            "'TextField'}]}")
         )
 
     @override_settings(ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION=30)
@@ -295,7 +304,8 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
         form_plugin = FormPlugin.objects.last()
         form_plugin.webhooks.add(self.webhook)
         data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester"}
-        with responses.RequestsMock():
+        with responses.RequestsMock() as rsps:
+            rsps.add(responses.POST, self.url, body=json.dumps([{"status": "OK"}]))
             response = self.client.post(self.page.get_absolute_url('en'), data)
 
         self.assertEqual(response.status_code, 200)
@@ -304,7 +314,12 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
         self.assertEqual(len(mail.outbox), 0)
         self.log_handler.check(
             ('aldryn_forms.action_backends', 'INFO',
-             f'Not persisting data for "{form_plugin.pk}" since action_backend is set to "none"'),
+            f'Not persisting data for "{form_plugin.pk}" since action_backend is set to "none"'),
+            ('aldryn_forms.api.webhook', 'DEBUG',
+            "{'hostname': 'example.com', 'name': 'Contact us', 'language': 'en', "
+            "'sent_at': None, 'form_recipients': [], 'form_data': [{'name': 'name', "
+            "'label': 'Name', 'field_occurrence': 1, 'value': 'Tester', 'plugin_type': "
+            "'TextField'}]}")
         )
 
     def test_honeypot_field_not_filled(self):
@@ -522,7 +537,8 @@ class EmailNotificationFormPluginTestCase(DataMixin, CMSTestCase):
         form_plugin = FormPlugin.objects.last()
         form_plugin.webhooks.add(self.webhook)
         data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester"}
-        with responses.RequestsMock():
+        with responses.RequestsMock() as rsps:
+            rsps.add(responses.POST, self.url, body=json.dumps([{"status": "OK"}]))
             response = self.client.post(self.page.get_absolute_url('en'), data)
 
         self.assertEqual(response.status_code, 200)
@@ -531,6 +547,11 @@ class EmailNotificationFormPluginTestCase(DataMixin, CMSTestCase):
         self.log_handler.check(
             ('aldryn_forms.action_backends', 'INFO',
              f'Not persisting data for "{form_plugin.pk}" since action_backend is set to "none"'),
+            ('aldryn_forms.api.webhook', 'DEBUG',
+            "{'hostname': 'example.com', 'name': 'Contact us', 'language': 'en', "
+            "'sent_at': None, 'form_recipients': [], 'form_data': [{'name': 'name', "
+            "'label': 'Name', 'field_occurrence': 1, 'value': 'Tester', 'plugin_type': "
+            "'TextField'}]}")
         )
 
 

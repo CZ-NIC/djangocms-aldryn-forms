@@ -287,7 +287,7 @@ class BaseFormPlugin(CMSPlugin):
             for form_field in form_fields:
                 self._form_field_key_cache[form_field.plugin_instance.pk] = form_field.name
 
-        return self._form_field_key_cache[field.pk]
+        return self._form_field_key_cache.get(field.pk, field.name)
 
     def get_form_fields_as_choices(self):
         fields = self.get_form_fields()

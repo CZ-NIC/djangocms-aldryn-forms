@@ -1,0 +1,44 @@
+{% extends "admin/change_form.html" %}
+
+{% block extrastyle %}{{ block.super }}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/default.min.css">
+{% endblock %}
+
+{% block extrahead %}{{ block.super }}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/python.min.js"></script>
+    <script>hljs.highlightAll();</script>
+{% endblock %}
+
+{% block content %}
+    {{ block.super }}
+
+<div class="examples">
+
+<h3>Sample code for processing a condition.</h3>
+
+<div>settings.py:</div>
+
+<pre><code class="language-python">
+ALDRYN_FORMS_CONDITIONS = [
+    ("myapp.aldryn_forms_conditions.CustomCondition", "My custom conditions"),
+]
+</code></pre>
+
+<div>myapp.aldryn_forms_conditions.py:</div>
+
+<pre><code class="language-python">
+from aldryn_forms.models import Condition
+from django.http import HttpRequest
+
+
+class CustomCondition:
+
+    def run(self, request: HttpRequest, instance: Condition) -&gt; bool:
+        """Verify the condition."""
+        return  # ... your code
+</code></pre>
+
+</div>
+
+{% endblock %}

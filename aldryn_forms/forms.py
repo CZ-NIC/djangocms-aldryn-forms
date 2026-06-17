@@ -330,6 +330,9 @@ class FormSubmissionBaseForm(forms.Form):
                             self._add_error(_("This email is unavailable."), serialized_field.name)
         return self.cleaned_data
 
+    def _post_clean(self):
+        self._instance.run_post_clean(self)
+
     def generate_post_ident(self) -> str:
         """Generate new post_ident."""
         return self.initial_post_ident if self.initial_post_ident else get_random_string(MAX_IDENT_SIZE)
@@ -375,6 +378,12 @@ class ExtandableErrorForm(forms.ModelForm):
 class FormPluginForm(ExtandableErrorForm):
     action_backend = forms.ChoiceField(
         choices=action_backend_choices(),
+        label=_('Action backend')
+    )
+    validation = forms.ChoiceField(
+        choices=[("", "")] + getattr(settings, "ALDRYN_FORMS_VALIDATIONS", []),
+        label=_("Form validation"),
+        required=False
     )
 
     def __init__(self, *args, **kwargs):
@@ -587,3 +596,11 @@ class URLFieldForm(TextFieldForm):
         super().__init__(*args, **kwargs)
         for name in ("list", "pattern", "size"):
             self.fields[name].required = False
+
+
+class ConditionForm(forms.ModelForm):
+
+    name = forms.ChoiceField(
+        choices=[("", "")] + getattr(settings, "ALDRYN_FORMS_CONDITIONS", []),
+        label=_("Condition name")
+    )

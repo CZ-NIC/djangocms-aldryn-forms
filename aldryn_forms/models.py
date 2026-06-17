@@ -8,7 +8,10 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.functions import Coalesce
+from django.forms import Form
+from django.http import HttpRequest
 from django.utils.functional import cached_property
+from django.utils.module_loading import import_string
 from django.utils.translation import gettext_lazy as _
 
 from cms.models.pluginmodel import CMSPlugin
@@ -161,6 +164,12 @@ class BaseFormPlugin(CMSPlugin):
     )
     webhooks = models.ManyToManyField(Webhook, blank=True)
 
+    validation = models.CharField(
+        verbose_name=_('Form validation'),
+        max_length=255,
+        default='',
+    )
+
     form_attributes = AttributesField(
         verbose_name=_('Attributes'),
         blank=True,
@@ -299,7 +308,7 @@ class BaseFormPlugin(CMSPlugin):
         from .utils import get_nested_plugins
 
         if self.child_plugin_instances is None:
-            descendants = get_nested_plugins(self)
+            descendants = get_nested_plugins(self, self._request)
             # Set parent_id to None in order to
             # fool the build_plugin_tree function.
             # This is sadly necessary to avoid getting all nodes
@@ -315,11 +324,20 @@ class BaseFormPlugin(CMSPlugin):
             self.parent_id = parent_id
 
         if self._form_elements is None:
-            children = get_nested_plugins(self)
+            children = get_nested_plugins(self, self._request)
             children_instances = downcast_plugins(children)
             self._form_elements = [
                 p for p in children_instances if is_form_element(p)]
         return self._form_elements
+
+    def run_post_clean(self, form: Form) -> None:
+        """Run post clean of form."""
+        if self.validation:
+            try:
+                fnc = import_string(self.validation)
+                fnc(self, form)
+            except ImportError:
+                pass
 
 
 class FormPlugin(BaseFormPlugin):
@@ -818,3 +836,23 @@ class SubmittedToBeSent(FormSubmissionBase):
         ordering = ['-sent_at']
         verbose_name = _('Submitted form to be sent')
         verbose_name_plural = _('Submitted forms to be sent')
+
+
+class Condition(CMSPlugin):
+    """Condition for conditionally included content."""
+
+    name  = models.CharField(_("Name"), max_length=255, default="")
+
+    def __str__(self):
+        return self.name
+
+    def is_condition_true(self, request: HttpRequest) -> bool:
+        """Check if the condition is true."""
+        result = False
+        if self.name:
+            try:
+                klass = import_string(self.name)
+                result = klass().run(request=request, instance=self)
+            except ImportError:
+                pass
+        return result

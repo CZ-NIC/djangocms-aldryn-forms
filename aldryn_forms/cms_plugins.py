@@ -34,8 +34,8 @@ from PIL import Image
 from . import models
 from .constants import ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION, ALDRYN_FORMS_POST_IDENT_NAME, MAX_IDENT_SIZE
 from .forms import (
-    BooleanFieldForm, CaptchaFieldForm, DateFieldForm, DateTimeFieldForm, EmailFieldForm, FileFieldForm, FormPluginForm,
-    FormSubmissionBaseForm, HiddenFieldForm, ImageFieldForm, MultipleSelectFieldForm, RadioFieldForm,
+    BooleanFieldForm, CaptchaFieldForm, ConditionForm, DateFieldForm, DateTimeFieldForm, EmailFieldForm, FileFieldForm,
+    FormPluginForm, FormSubmissionBaseForm, HiddenFieldForm, ImageFieldForm, MultipleSelectFieldForm, RadioFieldForm,
     RestrictedFileField, RestrictedImageField, RestrictedMultipleFilesField, SelectFieldForm, TextAreaFieldForm,
     TextFieldForm, TimeFieldForm, URLFieldForm,
 )
@@ -83,6 +83,7 @@ class FormPlugin(FieldContainer):
             'classes': ('collapse',),
             'fields': (
                 'form_template',
+                'validation',
                 'error_message',
                 'success_message',
                 'recipients',
@@ -127,10 +128,12 @@ class FormPlugin(FieldContainer):
         if processed_form is not None:
             return processed_form  # Form was already processed by middleware HandleHttpPost.
 
+        instance._request = request  # Required by Condition plugin.
         form_class = self.get_form_class(instance, request)
         form_kwargs = self.get_form_kwargs(instance, request)
         form = form_class(**form_kwargs)  # django.forms.widgets.AldrynDynamicForm
         form.ident_field_name = self.ident_field_name
+        form._instance = instance  # Required by run_post_clean in form._post_clean.
 
         processed_forms_dict[instance.pk] = form
         setattr(request, PROCESSED_FORM, processed_forms_dict)
@@ -512,8 +515,10 @@ class Field(FormElement):
 
         if form and hasattr(form, 'form_plugin'):
             form_plugin = form.form_plugin
+            form_plugin._context = context
             field_name = form_plugin.get_form_field_name(field=instance)
-            if not form[field_name].is_hidden:
+            # TODO: Fix empty field_name.
+            if field_name and not form[field_name].is_hidden:
                 # Do not render hidden fields because they are rendered in template aldryn_forms/form.html
                 # in section {% for field in form.hidden_fields %}
                 context['field'] = form[field_name]
@@ -1287,6 +1292,23 @@ class HideContentWhenPostPlugin(CMSPluginBase):
     def render(self, context, instance, placeholder):
         context = super().render(context, instance, placeholder)
         context['display_content'] = context['request'].method != "POST"
+        return context
+
+
+@plugin_pool.register_plugin
+class ConditionPlugin(CMSPluginBase):
+    module = _('Forms')
+    name = _("Conditionally included content")
+    model = models.Condition
+    form = ConditionForm
+    render_template = "aldryn_forms/conditionally_included_content.html"
+    change_form_template = "admin/aldryn_forms/condition/change_form.html"
+    cache = False
+    allow_children = True
+
+    def render(self, context, instance, placeholder):
+        context = super().render(context, instance, placeholder)
+        context['display_content'] = instance.is_condition_true(context["request"])
         return context
 
 

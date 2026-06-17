@@ -1,0 +1,14 @@
+{% load cms_tags %}
+<span class="conditionaly-included-content {% if user.is_authenticated and request.toolbar.edit_mode_active %}content-draft{% else %}content-published{% endif %}">
+    {% if user.is_authenticated and request.toolbar.edit_mode_active %}
+        {% for plugin in instance.child_plugin_instances %}
+            {% with forloop as parentloop %}{% render_plugin plugin %}{% endwith %}
+        {% endfor %}
+    {% else %}
+        {% if display_content %}
+            {% for plugin in instance.child_plugin_instances %}
+                {% with forloop as parentloop %}{% render_plugin plugin %}{% endwith %}
+            {% endfor %}
+        {% endif %}
+    {% endif %}
+</span>

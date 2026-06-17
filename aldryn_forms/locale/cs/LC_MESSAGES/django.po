@@ -84,6 +84,12 @@ msgstr "CMS stránka"
 msgid "Captcha Field"
 msgstr "Pole Captcha"
 
+msgid "Condition name"
+msgstr "Název podmínky"
+
+msgid "Conditionally included content"
+msgstr "Podmínečně vložený obsah"
+
 msgid "Continue"
 msgstr "Pokračovat"
 
@@ -282,6 +288,9 @@ msgstr "Odeslání formulářů"
 
 msgid "Form types"
 msgstr "Typy formulářů"
+
+msgid "Form validation"
+msgstr "Validace formuláře"
 
 msgid "Form with Ident field"
 msgstr "Formulář s Ident polem"

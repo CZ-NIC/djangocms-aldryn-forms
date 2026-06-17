@@ -11,7 +11,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ImproperlyConfigured
 from django.forms.forms import NON_FIELD_ERRORS
-from django.http import Http404
+from django.http import Http404, HttpRequest
 from django.template import Context, Template
 from django.test import RequestFactory
 from django.urls import Resolver404, resolve
@@ -30,7 +30,6 @@ try:
     from constance import config as constance_config
 except ModuleNotFoundError:
     constance_config = None
-
 
 from .action_backends_base import BaseAction
 from .compat import build_plugin_tree
@@ -87,11 +86,12 @@ def action_backend_choices(*args, **kwargs):
     return sorted(choices, key=lambda x: x[1])
 
 
-def get_nested_plugins(parent_plugin, include_self=False):
+def get_nested_plugins(parent_plugin: CMSPlugin, request: HttpRequest, include_self: bool = False) -> List[CMSPlugin]:
     """
     Returns a flat list of plugins from parent_plugin. Replace AliasPlugin by descendants.
     """
     AliasPlugin = plugin_pool.get_plugin("Alias")
+    ConditionPlugin = plugin_pool.get_plugin("ConditionPlugin")
 
     found_plugins = []
 
@@ -101,6 +101,10 @@ def get_nested_plugins(parent_plugin, include_self=False):
     child_plugins = parent_plugin.get_children()
 
     for plugin in child_plugins:
+        if issubclass(plugin.get_plugin_class(), ConditionPlugin):
+            instance = plugin.get_bound_plugin()
+            if not instance.is_condition_true(request):
+                continue
         if issubclass(plugin.get_plugin_class(), AliasPlugin):
             if hasattr(plugin, "plugin"):
                 found_plugins.extend(plugin.plugin.get_descendants())
@@ -110,7 +114,7 @@ def get_nested_plugins(parent_plugin, include_self=False):
             if hasattr(bound_plugin, 'alias') and bound_plugin.alias:
                 found_plugins.extend(bound_plugin.alias.get_plugins())
         else:
-            found_plugins.extend(get_nested_plugins(plugin, include_self=True))
+            found_plugins.extend(get_nested_plugins(plugin, request, include_self=True))
 
     return found_plugins
 

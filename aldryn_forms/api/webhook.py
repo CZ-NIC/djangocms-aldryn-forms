@@ -11,6 +11,8 @@ import jq
 import requests
 from requests.exceptions import RequestException
 
+from ..utils import get_webhook_debug_url
+
 
 dataType = Dict[str, Any]
 
@@ -22,6 +24,10 @@ logger = logging.getLogger(__name__)
 
 def send_to_webhook(url: str, method: str, data: dataType) -> requests.Response:
     """Send data to URL as POST."""
+    debug_url = get_webhook_debug_url()
+    print("!!! debug_url:", debug_url)
+    if debug_url is not None:
+        url = debug_url
     timeout = getattr(settings, "ALDRYN_FORMS_WEBHOOK_TIMEOUT", 6)
     if method == "JSON":
         response = requests.post(url, json.dumps(data), headers={"Content-Type": "application/json"}, timeout=timeout)

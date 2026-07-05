@@ -5,6 +5,7 @@ from django.template.loader import render_to_string
 from tablib import Dataset
 
 from ..models import FormSubmission, Webhook
+from ..utils import get_webhook_debug_link
 from .base import BaseFormSubmissionAdmin
 from .forms import WebhookAdminForm
 from .views import FormExportWizardView
@@ -41,6 +42,7 @@ class WebhookAdmin(admin.ModelAdmin):
         if extra_context is None:
             extra_context = {}
         extra_context["SITE_API_ROOT"] = getattr(settings, "SITE_API_ROOT", "")
+        extra_context["DEBUG_WEBHOOK_LINK"] = get_webhook_debug_link()
         return super().changeform_view(request, object_id, form_url, extra_context)
 
 

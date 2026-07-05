@@ -1,4 +1,5 @@
 {% extends "admin/change_form.html" %}
+{% load i18n %}
 
 {% block extrastyle %}
     {{ block.super }}
@@ -30,10 +31,24 @@
         .examples table td:nth-child(2) {
             text-align: right;
         }
+        .debug-webhook .messagelist {
+            position: static;
+        }
     </style>
 {% endblock %}
 
 {% block content %}
+    {% if DEBUG_WEBHOOK_LINK %}
+    <div class="debug-webhook">
+        <ul class="messagelist">
+            <li class="info">
+            {% blocktranslate with url=DEBUG_WEBHOOK_LINK.0 label=DEBUG_WEBHOOK_LINK.1 trimmed %}
+                Caution! Testing is enabled. The URL <a href="{{ url }}" target="_top">{{ label }}</a> is used instead of the <strong>Webhook URL</strong>.
+            {% endblocktranslate %}
+            </li>
+        </ul>
+    </div>
+    {% endif %}
     {{ block.super }}
 
 <div class="examples">

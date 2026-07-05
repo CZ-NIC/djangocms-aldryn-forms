@@ -46,7 +46,7 @@
             {% if DEBUG_WEBHOOK_ADMIN_URL %}
                 <li class="info">
                 {% blocktranslate with url=DEBUG_WEBHOOK_ADMIN_URL label=DEBUG_WEBHOOK_ADMIN_URL trimmed %}
-                    Caution! Testing is enabled. The URL <a href="{{ url }}" target="_top">{{ label }}</a> is used instead of the <strong>Webhook URL</strong>.
+                    Caution! A redirect is set up in Constance. The URL <a href="{{ url }}" target="_top">{{ label }}</a> is used instead of the <strong>Webhook URL</strong>.
                 {% endblocktranslate %}
                 </li>
             {% else %}

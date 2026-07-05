@@ -86,12 +86,12 @@ msgstr "Pole Captcha"
 
 #, python-format
 msgid ""
-"Caution! Testing is enabled. The URL <a href=\"%(url)s\" "
+"Caution! A redirect is set up in Constance. The URL <a href=\"%(url)s\" "
 "target=\"_top\">%(label)s</a> is used instead of the <strong>Webhook URL</"
 "strong>."
 msgstr ""
-"Pozor! Je zapnuto testování. Místo <strong>Webhook URL</strong> je použito "
-"URL <a href=\"%(url)s\" target=\"_top\">%(label)s</a>."
+"Pozor! V Constance je nastaveno přesměrování. Místo <strong>Webhook URL</"
+"strong> je použito URL <a href=\"%(url)s\" target=\"_top\">%(label)s</a>."
 
 msgid "Continue"
 msgstr "Pokračovat"

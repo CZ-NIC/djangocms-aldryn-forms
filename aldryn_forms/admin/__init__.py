@@ -43,6 +43,7 @@ class WebhookAdmin(admin.ModelAdmin):
             extra_context = {}
         extra_context["SITE_API_ROOT"] = getattr(settings, "SITE_API_ROOT", "")
         extra_context["DEBUG_WEBHOOK_ADMIN_URL"] = get_webhook_debug_admin_url()
+        extra_context["DJANGO_DEBUG"] = settings.DEBUG
         return super().changeform_view(request, object_id, form_url, extra_context)
 
 

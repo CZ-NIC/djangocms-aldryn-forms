@@ -22,11 +22,15 @@ if TYPE_CHECKING:  # pragma: no cover
 logger = logging.getLogger(__name__)
 
 
-def send_to_webhook(url: str, method: str, data: dataType) -> requests.Response:
+def send_to_webhook(url: str, method: str, data: dataType) -> Optional[requests.Response]:
     """Send data to URL as POST."""
     debug_url = get_webhook_debug_client_url()
     if debug_url:
         url = debug_url
+    elif settings.DEBUG:
+        logger.debug("Send webhook is disabled in DEBUG mode. "
+                     "Enable it in Constance by key ALDRYN_FORMS_DEBUG_WEBHOOK_URL.")
+        return None
     timeout = getattr(settings, "ALDRYN_FORMS_WEBHOOK_TIMEOUT", 6)
     if method == "JSON":
         response = requests.post(url, json.dumps(data), headers={"Content-Type": "application/json"}, timeout=timeout)

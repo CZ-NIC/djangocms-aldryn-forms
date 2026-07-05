@@ -2,15 +2,13 @@ import logging
 import os
 import re
 import smtplib
-import uuid
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, Dict, ItemsView, List, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, ItemsView, List, Optional
 from urllib.parse import urlparse
 
 from django import forms
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.cache import cache
 from django.core.exceptions import ImproperlyConfigured
 from django.forms.forms import NON_FIELD_ERRORS
 from django.http import Http404
@@ -269,48 +267,16 @@ def prepare_attachments(urls: Sequence) -> list[tuple[str, bytes, str]]:
     return attachments
 
 
-WEBHOOK_DEBUG_ORIGIN = "https://webhook.site/"
-
-def build_webhook_admin_url(private: str, public: str) -> str:
-    """Build webhook url."""
-    return f"{WEBHOOK_DEBUG_ORIGIN}#!/view/{private}/{public}/1"
-
-
-def build_webhook_url(private: str) -> str:
-    """Build webhook url."""
-    return f"{WEBHOOK_DEBUG_ORIGIN}{private}/"
-
-
-def get_webhook_debug_private_public_keys() -> Optional[Tuple[str, str]]:
-    """Get webhook debug private and public keys."""
-    if settings.DEBUG:
-        is_debug = True
-    else:
-        try:
-            is_debug = settings.ALDRYN_FORMS_DEBUG_WEBHOOK
-        except AttributeError:
-            return None
-    if not is_debug:
-        return None
-    key = "ALDRYN_FORMS_DEBUG_WEBHOOK"
-    data = cache.get(key)
-    if data is None:
-        data = str(uuid.uuid4()), str(uuid.uuid4())
-        cache.set(key, data)
-    return data
-
-
-def get_webhook_debug_link() -> Optional[Tuple[str, str]]:
-    """Get webhook debug url and label."""
-    keys = get_webhook_debug_private_public_keys()
-    if keys is None:
-        return None
-    return build_webhook_admin_url(*keys), WEBHOOK_DEBUG_ORIGIN
-
-
-def get_webhook_debug_url() -> Optional[str]:
+def get_webhook_debug_url(key) -> Optional[str]:
     """Get webhook debug url."""
-    keys = get_webhook_debug_private_public_keys()
-    if keys is None:
-        return None
-    return build_webhook_url(keys[0])
+    return None if constance_config is None else getattr(constance_config, key, None)
+
+
+def get_webhook_debug_admin_url() -> Optional[str]:
+    """Get webhook debug admin url."""
+    return get_webhook_debug_url("ALDRYN_FORMS_DEBUG_WEBHOOK_ADMIN_URL")
+
+
+def get_webhook_debug_client_url() -> Optional[str]:
+    """Get webhook debug url."""
+    return get_webhook_debug_url("ALDRYN_FORMS_DEBUG_WEBHOOK_URL")

@@ -43,7 +43,7 @@ from .helpers import get_user_name
 from .models import FieldPluginBase, FormField, SerializedFormField, SubmittedToBeSent
 from .signals import form_post_save, form_pre_save
 from .sizefield.utils import filesizeformat
-from .utils import get_action_backends, send_email
+from .utils import get_action_backends, get_form_anchor, get_post_form, send_email
 from .validators import MaxChoicesValidator, MinChoicesValidator, is_valid_recipient
 
 
@@ -85,6 +85,8 @@ class FormPlugin(FieldContainer):
                 'form_template',
                 'error_message',
                 'success_message',
+                'message_on_form',
+                'hide_form_after_redirection',
                 'recipients',
                 'action_backend',
                 'webhooks',
@@ -99,10 +101,23 @@ class FormPlugin(FieldContainer):
         request = context['request']
 
         form = self.process_form(instance, request)
+        context['form_anchor'] = form_anchor = get_form_anchor(instance.pk)
+        if request.session.get(form_anchor):
+            del request.session[form_anchor]
+            context['display_message_on_form'] = True
+
+        form_post = request.session.get(get_post_form(instance.pk))
+        if form_post:
+            del request.session[get_post_form(instance.pk)]
+            context['form_post'] = form_post
 
         if request.POST.get('form_plugin_id') == str(instance.id) and form.is_valid():
             context['post_success'] = True
             context['form_success_url'] = self.get_success_url(instance, form.instance.post_ident)
+            if instance.message_on_form:
+                # Do not use Django messages. Add an anchor to scroll the page to the form report.
+                context['form_success_url'] += "#" + form_anchor
+
         context['form'] = form
         return context
 
@@ -143,6 +158,9 @@ class FormPlugin(FieldContainer):
 
         if request.POST.get('form_plugin_id') == str(instance.id):
             self.set_fields_required_or_optional(request, instance, form)
+
+        if request.POST.get('form_plugin_id') == str(instance.id):
+            request.session[get_post_form(instance.pk)] = True
 
         if request.POST.get('form_plugin_id') == str(instance.id) and form.is_valid():
             if self.ident_field_name:
@@ -290,6 +308,8 @@ class FormPlugin(FieldContainer):
         Sends a success message to the request user
         using django's contrib.messages app.
         """
+        if instance.message_on_form:
+            return  # Do not use Django messages.
         if instance.success_message:
             message = markdown.markdown(instance.success_message)
             if request.META.get('HTTP_X_REQUESTED_WITH') == "XMLHttpRequest":

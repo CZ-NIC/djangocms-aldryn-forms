@@ -321,6 +321,9 @@ msgstr "Skryté pole"
 msgid "Hide content after submitting a form"
 msgstr "Skrýt obsah po odeslání formuláře"
 
+msgid "Hide the form after redirection."
+msgstr "Po přesměrování skrýt formulář."
+
 msgid "Honeypot Field"
 msgstr "Honeypot pole"
 
@@ -636,6 +639,9 @@ msgstr "Nastavit je to spam"
 
 msgid "Set not to spam"
 msgstr "Nastavit není to spam"
+
+msgid "Show the message on the form."
+msgstr "Hlášení zobrazit u formuláře."
 
 msgid "Size"
 msgstr "Velikost"

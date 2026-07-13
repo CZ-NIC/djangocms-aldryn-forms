@@ -5,6 +5,7 @@ Changelog
 Unreleased
 ==========
 
+- Add form fields message_on_form and hide_form_after_redirection.
 - Unification of the message "Please wait. Submitting form..." in form.js.
 - Disable sending webhook in DEBUG mode. Added webhook testing via Constance.
 

@@ -151,6 +151,8 @@ class EmailNotificationForm(FormPlugin):
                 'form_template',
                 'error_message',
                 'success_message',
+                'message_on_form',
+                'hide_form_after_redirection',
                 'custom_classes',
                 'action_backend',
             )

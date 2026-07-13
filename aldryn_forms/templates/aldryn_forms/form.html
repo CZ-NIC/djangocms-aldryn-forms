@@ -4,6 +4,18 @@
     <script src="{% static "aldryn_forms/js/main.js" %}"></script>
 {% endaddtoblock %}
 
+<div class="aldryn-from-message-frame" id="{{ form_anchor }}">
+    {% if display_message_on_form and instance.message_on_form %}
+        <div class="cms-form-success-message{% if instance.success_message %} markdown{% endif %}">
+            {% if instance.success_message %}
+                {{ instance.success_message|markdown }}
+            {% else %}
+                <p>{% blocktranslate %}Thank you for submitting your information.{% endblocktranslate %}</p>
+            {% endif %}
+        </div>
+    {% endif%}
+</div>
+
 <form method="post"
     id="cms-form"
     {% if form.is_multipart %}enctype="multipart/form-data"{% endif %}
@@ -32,15 +44,18 @@
             {% endif %}
         </div>
     {% else %}
-        {% csrf_token %}
-        {% for plugin in instance.child_plugin_instances %}
-            {% render_plugin plugin %}
-        {% endfor %}
-        {% for field in form.hidden_fields %}
-            {{ field }}
-        {% endfor %}
-        {% if form.ident_field_name %}
-            <input type="hidden" class="aldryn-forms-field-ident" name="{{ form.ident_field_name }}">
+        {% if display_message_on_form and instance.hide_form_after_redirection %}
+        {% else %}
+            {% csrf_token %}
+            {% for plugin in instance.child_plugin_instances %}
+                {% render_plugin plugin %}
+            {% endfor %}
+            {% for field in form.hidden_fields %}
+                {{ field }}
+            {% endfor %}
+            {% if form.ident_field_name %}
+                <input type="hidden" class="aldryn-forms-field-ident" name="{{ form.ident_field_name }}">
+            {% endif %}
         {% endif %}
     {% endif %}
 </form>
@@ -56,11 +71,11 @@
     {% endaddtoblock %}
 {% endif %}
 
-{% if post_success %}
+{% if post_success or form_post %}
     {% addtoblock "js" %}
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                document.querySelector('#cms-form').scrollIntoView();
+                document.querySelector('#{{ form_anchor }} + form').scrollIntoView();
             }, {once: true});
         </script>
     {% endaddtoblock %}

@@ -3,7 +3,7 @@ import os
 import re
 import smtplib
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, Dict, ItemsView, List
+from typing import TYPE_CHECKING, Dict, ItemsView, List, Optional
 from urllib.parse import urlparse
 
 from django import forms
@@ -265,3 +265,18 @@ def prepare_attachments(urls: Sequence) -> list[tuple[str, bytes, str]]:
             response.headers["Content-Type"]  # mimetype
         ))
     return attachments
+
+
+def get_webhook_debug_url(key) -> Optional[str]:
+    """Get webhook debug url."""
+    return None if constance_config is None else getattr(constance_config, key, None)
+
+
+def get_webhook_debug_admin_url() -> Optional[str]:
+    """Get webhook debug admin url."""
+    return get_webhook_debug_url("ALDRYN_FORMS_DEBUG_WEBHOOK_ADMIN_URL")
+
+
+def get_webhook_debug_client_url() -> Optional[str]:
+    """Get webhook debug url."""
+    return get_webhook_debug_url("ALDRYN_FORMS_DEBUG_WEBHOOK_URL")

@@ -5,6 +5,8 @@ Changelog
 Unreleased
 ==========
 
+- Disable sending webhook in DEBUG mode. Added webhook testing via Constance.
+
 8.9.3 (2026-06-01)
 ==================
 

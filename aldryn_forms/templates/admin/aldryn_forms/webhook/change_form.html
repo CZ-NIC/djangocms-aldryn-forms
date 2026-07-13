@@ -1,4 +1,5 @@
 {% extends "admin/change_form.html" %}
+{% load i18n %}
 
 {% block extrastyle %}
     {{ block.super }}
@@ -30,10 +31,47 @@
         .examples table td:nth-child(2) {
             text-align: right;
         }
+        .debug-webhook .messagelist {
+            position: static;
+        }
+        .debug-webhook .messagelist li code {
+            color: #00bbff;
+        }
     </style>
 {% endblock %}
 
 {% block content %}
+    <div class="debug-webhook">
+        <ul class="messagelist">
+            {% if DEBUG_WEBHOOK_ADMIN_URL %}
+                <li class="info">
+                {% blocktranslate with url=DEBUG_WEBHOOK_ADMIN_URL label=DEBUG_WEBHOOK_ADMIN_URL trimmed %}
+                    Caution! A redirect is set up in Constance. The URL <a href="{{ url }}" target="_top">{{ label }}</a> is used instead of the <strong>Webhook URL</strong>.
+                {% endblocktranslate %}
+                </li>
+            {% else %}
+                {% if DJANGO_DEBUG %}
+                    <li class="info">
+                        {% blocktranslate trimmed %}
+                            In <code>DEBUG</code> mode, the webhook is not sent, but only logged.
+                            Sending can be enabled in Constance by setting the
+                            <code>ALDRYN_FORMS_DEBUG_WEBHOOK_URL</code> key and the
+                            <code>ALDRYN_FORMS_DEBUG_WEBHOOK_ADMIN_URL</code> key for administering the sent data.
+                        {% endblocktranslate %}
+                    </li>
+                {% else %}
+                    <li class="info">
+                        {% blocktranslate trimmed %}
+                            For testing purposes, the webhook can be redirected in Constance by setting the
+                            <code>ALDRYN_FORMS_DEBUG_WEBHOOK_URL</code> key and the
+                            <code>ALDRYN_FORMS_DEBUG_WEBHOOK_ADMIN_URL</code> key for administering the sent data.
+                        {% endblocktranslate %}
+                    </li>
+                {% endif %}
+            {% endif %}
+        </ul>
+    </div>
+
     {{ block.super }}
 
 <div class="examples">

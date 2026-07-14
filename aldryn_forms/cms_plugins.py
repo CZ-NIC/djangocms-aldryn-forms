@@ -318,7 +318,9 @@ class FormPlugin(FieldContainer):
         using django's contrib.messages app.
         """
         if instance.message_on_form:
-            return  # Do not use Django messages.
+            return  # Do not use Django messages. These will be displayed next to the form.
+        if "aldryn_forms.middleware.handle_post.HandleHttpPost" not in settings.MIDDLEWARE:
+            return  # Do not use Django messages when middleware missing.
         if instance.success_message:
             message = markdown.markdown(instance.success_message)
             if request.META.get('HTTP_X_REQUESTED_WITH') == "XMLHttpRequest":

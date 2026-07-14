@@ -375,6 +375,7 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
         self.log_handler.check((
             'aldryn_forms.cms_plugins', 'INFO', 'Post disabled due to Honeypot "Trap" value: "Spam!"'))
 
+    @modify_settings(MIDDLEWARE={"append": "aldryn_forms.middleware.handle_post.HandleHttpPost"})
     def test_send_success_message(self):
         self.form_plugin.success_message = "Thank you."
         self.form_plugin.action_backend = 'default'
@@ -385,8 +386,29 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
         with responses.RequestsMock():
             response = self.client.post(self.page.get_absolute_url('en'), data)
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, 'http://www.google.com', fetch_redirect_response=False)
         self.assertEqual([str(msg) for msg in get_messages(response.wsgi_request)], ["<p>Thank you.</p>"])
+        self.assertQuerySetEqual(FormSubmission.objects.values_list(
+            "name", "data", "post_ident").all().order_by('pk'), [
+            ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester", '
+             '"plugin_type": "TextField"}]', None),
+        ], transform=None)
+        self._check_mailbox()
+        self.log_handler.check()
+
+    def test_send_success_message_without_middleware(self):
+        self.form_plugin.success_message = "Thank you."
+        self.form_plugin.action_backend = 'default'
+        self.form_plugin.save()
+
+        form_plugin = FormPlugin.objects.last()
+        data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester"}
+        with responses.RequestsMock():
+            response = self.client.post(self.page.get_absolute_url('en'), data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNone(getattr(response.wsgi_request, "aldryn_forms_success_message", None))
         self.assertQuerySetEqual(FormSubmission.objects.values_list(
             "name", "data", "post_ident").all().order_by('pk'), [
             ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester", '

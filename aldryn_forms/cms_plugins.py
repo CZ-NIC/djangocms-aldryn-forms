@@ -106,17 +106,21 @@ class FormPlugin(FieldContainer):
             del request.session[form_anchor]
             context['display_message_on_form'] = True
 
-        form_post = request.session.get(get_post_form(instance.pk))
-        if form_post:
-            del request.session[get_post_form(instance.pk)]
-            context['form_post'] = form_post
+        key = get_post_form(instance.pk)
+        hide_valid_form_after_redirection = request.session.get(key)
+        if hide_valid_form_after_redirection:
+            del request.session[key]
+            context['hide_valid_form_after_redirection'] = True
 
-        if request.POST.get('form_plugin_id') == str(instance.id) and form.is_valid():
-            context['post_success'] = True
-            context['form_success_url'] = self.get_success_url(instance, form.instance.post_ident)
-            if instance.message_on_form:
-                # Do not use Django messages. Add an anchor to scroll the page to the form report.
-                context['form_success_url'] += "#" + form_anchor
+        if request.POST.get('form_plugin_id') == str(instance.id):
+            if form.is_valid():
+                context['post_success'] = True
+                context['form_success_url'] = self.get_success_url(instance, form.instance.post_ident)
+                if instance.message_on_form:
+                    # Do not use Django messages. Add an anchor to scroll the page to the form report.
+                    context['form_success_url'] += "#" + form_anchor
+            else:
+                context['form_is_invalid'] = True
 
         context['form'] = form
         return context
@@ -159,9 +163,6 @@ class FormPlugin(FieldContainer):
         if request.POST.get('form_plugin_id') == str(instance.id):
             self.set_fields_required_or_optional(request, instance, form)
 
-        if request.POST.get('form_plugin_id') == str(instance.id):
-            request.session[get_post_form(instance.pk)] = True
-
         if request.POST.get('form_plugin_id') == str(instance.id) and form.is_valid():
             if self.ident_field_name:
                 form.cleaned_data[self.ident_field_name] = request.POST.get(self.ident_field_name, "")[:MAX_IDENT_SIZE]
@@ -201,6 +202,9 @@ class FormPlugin(FieldContainer):
                 form=form,
                 request=request,
             )
+            if instance.hide_form_after_redirection:
+                request.session[get_post_form(instance.pk)] = True  # Hide valid form after redirection.
+
         elif request.POST.get('form_plugin_id') == str(instance.id) and request.method == 'POST':
             # only call form_invalid if request is POST and form is not valid
             self.form_invalid(instance, request, form)

@@ -44,8 +44,7 @@
             {% endif %}
         </div>
     {% else %}
-        {% if display_message_on_form and instance.hide_form_after_redirection %}
-        {% else %}
+        {% if not hide_valid_form_after_redirection %}
             {% csrf_token %}
             {% for plugin in instance.child_plugin_instances %}
                 {% render_plugin plugin %}
@@ -71,7 +70,7 @@
     {% endaddtoblock %}
 {% endif %}
 
-{% if post_success or form_post %}
+{% if form_is_invalid %}
     {% addtoblock "js" %}
         <script>
             document.addEventListener('DOMContentLoaded', function() {

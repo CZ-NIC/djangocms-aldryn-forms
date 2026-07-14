@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from django.contrib.messages import get_messages
 from django.core import mail
 from django.test import override_settings
+from django.test.utils import modify_settings
 
 from cms.api import add_plugin, create_page
 from cms.test_utils.testcases import CMSTestCase
@@ -394,6 +395,7 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
         self._check_mailbox()
         self.log_handler.check()
 
+    @modify_settings(MIDDLEWARE={"append": "aldryn_forms.middleware.handle_post.HandleHttpPost"})
     def test_send_success_message_ajax(self):
         self.form_plugin.success_message = "Thank you."
         self.form_plugin.action_backend = 'default'
@@ -408,6 +410,28 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual([str(msg) for msg in get_messages(response.wsgi_request)], [])
         self.assertEqual(response.wsgi_request.aldryn_forms_success_message, "<p>Thank you.</p>")
+        self.assertQuerySetEqual(FormSubmission.objects.values_list(
+            "name", "data", "post_ident").all().order_by('pk'), [
+            ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester", '
+             '"plugin_type": "TextField"}]', None),
+        ], transform=None)
+        self._check_mailbox()
+        self.log_handler.check()
+
+    def test_send_success_message_ajax_without_middleware(self):
+        self.form_plugin.success_message = "Thank you."
+        self.form_plugin.action_backend = 'default'
+        self.form_plugin.save()
+
+        form_plugin = FormPlugin.objects.last()
+        data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester"}
+        headers = {"X-Requested-With": "XMLHttpRequest"}
+        with responses.RequestsMock():
+            response = self.client.post(self.page.get_absolute_url('en'), data, headers=headers)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual([str(msg) for msg in get_messages(response.wsgi_request)], [])
+        self.assertIsNone(getattr(response.wsgi_request, "aldryn_forms_success_message", None))
         self.assertQuerySetEqual(FormSubmission.objects.values_list(
             "name", "data", "post_ident").all().order_by('pk'), [
             ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester", '

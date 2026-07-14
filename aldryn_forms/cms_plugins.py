@@ -2,6 +2,7 @@ import json
 import logging
 import re
 import smtplib
+import uuid
 from typing import Any, Dict, List, Optional, Tuple, Union
 from urllib.parse import parse_qs, urlencode, urlparse
 
@@ -106,19 +107,23 @@ class FormPlugin(FieldContainer):
             del request.session[form_anchor]
             context['display_message_on_form'] = True
 
-        key = get_post_form(instance.pk)
-        hide_valid_form_after_redirection = request.session.get(key)
+        key_to_hide = get_post_form(instance.pk)
+        hide_valid_form_after_redirection = request.session.get(key_to_hide)
         if hide_valid_form_after_redirection:
-            del request.session[key]
+            del request.session[key_to_hide]
             context['hide_valid_form_after_redirection'] = True
 
         if request.POST.get('form_plugin_id') == str(instance.id):
             if form.is_valid():
                 context['post_success'] = True
-                context['form_success_url'] = self.get_success_url(instance, form.instance.post_ident)
                 if instance.message_on_form:
+                    request.session[form_anchor] = True
+                if instance.hide_form_after_redirection:
+                    request.session[key_to_hide] = True
+                context['form_success_url'] = self.get_success_url(instance, form.instance.post_ident)
+                if context['form_success_url'] and instance.message_on_form:
                     # Do not use Django messages. Add an anchor to scroll the page to the form report.
-                    context['form_success_url'] += "#" + form_anchor
+                    context['form_success_url'] += f"?redirect={uuid.uuid4()}#{form_anchor}"
             else:
                 context['form_is_invalid'] = True
 

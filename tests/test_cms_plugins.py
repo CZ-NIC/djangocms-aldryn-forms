@@ -486,6 +486,7 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
                 </a>.
             </div>""", html=True)
         self.assertIsNone(getattr(response.wsgi_request, "aldryn_forms_success_message", None))
+        self.assertEqual([str(msg) for msg in get_messages(response.wsgi_request)], [])
         self.assertQuerySetEqual(FormSubmission.objects.values_list(
             "name", "data", "post_ident").all().order_by('pk'), [
             ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester", '
@@ -509,6 +510,7 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
             response = self.client.post(path, data)
 
         self.assertRedirects(response, f'{path}#aldryn_form_{self.form_plugin.pk}')
+        self.assertEqual([str(msg) for msg in get_messages(response.wsgi_request)], [])
         self.assertIsNone(getattr(response.wsgi_request, "aldryn_forms_success_message", None))
         self.assertQuerySetEqual(FormSubmission.objects.values_list(
             "name", "data", "post_ident").all().order_by('pk'), [
@@ -537,6 +539,7 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
                         <p>Thank you.</p>
                 </div>
             </div>""", html=True)
+        self.assertEqual([str(msg) for msg in get_messages(response.wsgi_request)], [])
         self.assertIsNone(getattr(response.wsgi_request, "aldryn_forms_success_message", None))
         self.assertQuerySetEqual(FormSubmission.objects.values_list(
             "name", "data", "post_ident").all().order_by('pk'), [

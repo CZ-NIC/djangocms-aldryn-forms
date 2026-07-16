@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from django.contrib.messages import get_messages
 from django.core import mail
 from django.test import override_settings
+from django.test.utils import modify_settings
 
 from cms.api import add_plugin, create_page
 from cms.test_utils.testcases import CMSTestCase
@@ -374,6 +375,7 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
         self.log_handler.check((
             'aldryn_forms.cms_plugins', 'INFO', 'Post disabled due to Honeypot "Trap" value: "Spam!"'))
 
+    @modify_settings(MIDDLEWARE={"append": "aldryn_forms.middleware.handle_post.HandleHttpPost"})
     def test_send_success_message(self):
         self.form_plugin.success_message = "Thank you."
         self.form_plugin.action_backend = 'default'
@@ -384,7 +386,8 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
         with responses.RequestsMock():
             response = self.client.post(self.page.get_absolute_url('en'), data)
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, 'http://www.google.com', fetch_redirect_response=False)
         self.assertEqual([str(msg) for msg in get_messages(response.wsgi_request)], ["<p>Thank you.</p>"])
         self.assertQuerySetEqual(FormSubmission.objects.values_list(
             "name", "data", "post_ident").all().order_by('pk'), [
@@ -394,6 +397,27 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
         self._check_mailbox()
         self.log_handler.check()
 
+    def test_send_success_message_without_middleware(self):
+        self.form_plugin.success_message = "Thank you."
+        self.form_plugin.action_backend = 'default'
+        self.form_plugin.save()
+
+        form_plugin = FormPlugin.objects.last()
+        data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester"}
+        with responses.RequestsMock():
+            response = self.client.post(self.page.get_absolute_url('en'), data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNone(getattr(response.wsgi_request, "aldryn_forms_success_message", None))
+        self.assertQuerySetEqual(FormSubmission.objects.values_list(
+            "name", "data", "post_ident").all().order_by('pk'), [
+            ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester", '
+             '"plugin_type": "TextField"}]', None),
+        ], transform=None)
+        self._check_mailbox()
+        self.log_handler.check()
+
+    @modify_settings(MIDDLEWARE={"append": "aldryn_forms.middleware.handle_post.HandleHttpPost"})
     def test_send_success_message_ajax(self):
         self.form_plugin.success_message = "Thank you."
         self.form_plugin.action_backend = 'default'
@@ -408,6 +432,191 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual([str(msg) for msg in get_messages(response.wsgi_request)], [])
         self.assertEqual(response.wsgi_request.aldryn_forms_success_message, "<p>Thank you.</p>")
+        self.assertQuerySetEqual(FormSubmission.objects.values_list(
+            "name", "data", "post_ident").all().order_by('pk'), [
+            ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester", '
+             '"plugin_type": "TextField"}]', None),
+        ], transform=None)
+        self._check_mailbox()
+        self.log_handler.check()
+
+    def test_send_success_message_ajax_without_middleware(self):
+        self.form_plugin.success_message = "Thank you."
+        self.form_plugin.action_backend = 'default'
+        self.form_plugin.save()
+
+        form_plugin = FormPlugin.objects.last()
+        data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester"}
+        headers = {"X-Requested-With": "XMLHttpRequest"}
+        with responses.RequestsMock():
+            response = self.client.post(self.page.get_absolute_url('en'), data, headers=headers)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual([str(msg) for msg in get_messages(response.wsgi_request)], [])
+        self.assertIsNone(getattr(response.wsgi_request, "aldryn_forms_success_message", None))
+        self.assertQuerySetEqual(FormSubmission.objects.values_list(
+            "name", "data", "post_ident").all().order_by('pk'), [
+            ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester", '
+             '"plugin_type": "TextField"}]', None),
+        ], transform=None)
+        self._check_mailbox()
+        self.log_handler.check()
+
+    @patch('os.urandom')
+    def test_send_success_message_on_form_without_middleware(self, mock_urandom):
+        mock_urandom.return_value = b'\xf8\xe0\xf1N_\x88\xae\xb4\xc6\x14\x1c_\xaf}\xe8\xfd'
+        self.form_plugin.success_message = "Thank you."
+        self.form_plugin.action_backend = 'default'
+        self.form_plugin.message_on_form = True
+        self.form_plugin.redirect_to = {"internal_link": f"cms.page:{self.page.pk}"}
+        self.form_plugin.save()
+
+        form_plugin = FormPlugin.objects.last()
+        data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester"}
+        path = self.page.get_absolute_url('en')
+        with responses.RequestsMock():
+            response = self.client.post(path, data)
+
+        self.assertContains(response, f"""
+            <div class="aldryn-from-message-frame" id="aldryn_form_{self.form_plugin.pk}"></div>""", html=True)
+        self.assertContains(response, f"""
+            <div class="cms-form-success-message markdown">You will be <a
+                href="/en/test-page/?redirect=f8e0f14e-5f88-4eb4-8614-1c5faf7de8fd#aldryn_form_{self.form_plugin.pk}">
+                    redirected shortly
+                </a>.
+            </div>""", html=True)
+        self.assertIsNone(getattr(response.wsgi_request, "aldryn_forms_success_message", None))
+        self.assertEqual([str(msg) for msg in get_messages(response.wsgi_request)], [])
+        self.assertQuerySetEqual(FormSubmission.objects.values_list(
+            "name", "data", "post_ident").all().order_by('pk'), [
+            ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester", '
+             '"plugin_type": "TextField"}]', None),
+        ], transform=None)
+        self._check_mailbox()
+        self.log_handler.check()
+
+    @modify_settings(MIDDLEWARE={"append": "aldryn_forms.middleware.handle_post.HandleHttpPost"})
+    def test_send_success_message_on_form(self):
+        self.form_plugin.success_message = "Thank you."
+        self.form_plugin.action_backend = 'default'
+        self.form_plugin.message_on_form = True
+        self.form_plugin.redirect_to = {"internal_link": f"cms.page:{self.page.pk}"}
+        self.form_plugin.save()
+
+        form_plugin = FormPlugin.objects.last()
+        data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester"}
+        path = self.page.get_absolute_url('en')
+        with responses.RequestsMock():
+            response = self.client.post(path, data)
+
+        self.assertRedirects(response, f'{path}#aldryn_form_{self.form_plugin.pk}')
+        self.assertEqual([str(msg) for msg in get_messages(response.wsgi_request)], [])
+        self.assertIsNone(getattr(response.wsgi_request, "aldryn_forms_success_message", None))
+        self.assertQuerySetEqual(FormSubmission.objects.values_list(
+            "name", "data", "post_ident").all().order_by('pk'), [
+            ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester", '
+             '"plugin_type": "TextField"}]', None),
+        ], transform=None)
+        self._check_mailbox()
+        self.log_handler.check()
+
+    @modify_settings(MIDDLEWARE={"append": "aldryn_forms.middleware.handle_post.HandleHttpPost"})
+    def test_send_success_message_on_form_follow(self):
+        self.form_plugin.success_message = "Thank you."
+        self.form_plugin.action_backend = 'default'
+        self.form_plugin.message_on_form = True
+        self.form_plugin.redirect_to = {"internal_link": f"cms.page:{self.page.pk}"}
+        self.form_plugin.save()
+
+        form_plugin = FormPlugin.objects.last()
+        data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester"}
+        with responses.RequestsMock():
+            response = self.client.post(self.page.get_absolute_url('en'), data, follow=True)
+
+        self.assertContains(response, f"""
+            <div class="aldryn-from-message-frame" id="aldryn_form_{self.form_plugin.pk}">
+                <div class="cms-form-success-message markdown">
+                        <p>Thank you.</p>
+                </div>
+            </div>""", html=True)
+        self.assertEqual([str(msg) for msg in get_messages(response.wsgi_request)], [])
+        self.assertIsNone(getattr(response.wsgi_request, "aldryn_forms_success_message", None))
+        self.assertQuerySetEqual(FormSubmission.objects.values_list(
+            "name", "data", "post_ident").all().order_by('pk'), [
+            ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester", '
+             '"plugin_type": "TextField"}]', None),
+        ], transform=None)
+        self._check_mailbox()
+        self.log_handler.check()
+
+    @modify_settings(MIDDLEWARE={"append": "aldryn_forms.middleware.handle_post.HandleHttpPost"})
+    def test_hide_form_after_redirection_false(self):
+        self.form_plugin.success_message = "Thank you."
+        self.form_plugin.action_backend = 'default'
+        self.form_plugin.hide_form_after_redirection = False
+        self.form_plugin.redirect_to = {"internal_link": f"cms.page:{self.page.pk}"}
+        self.form_plugin.save()
+
+        form_plugin = FormPlugin.objects.last()
+        data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester"}
+        with responses.RequestsMock():
+            response = self.client.post(self.page.get_absolute_url('en'), data, follow=True)
+
+        self.assertContains(response, """<input type="text" name="name" id="id_name">""", html=True)
+        self.assertEqual([str(msg) for msg in get_messages(response.wsgi_request)], ['<p>Thank you.</p>'])
+        self.assertIsNone(getattr(response.wsgi_request, "aldryn_forms_success_message", None))
+        self.assertQuerySetEqual(FormSubmission.objects.values_list(
+            "name", "data", "post_ident").all().order_by('pk'), [
+            ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester", '
+             '"plugin_type": "TextField"}]', None),
+        ], transform=None)
+        self._check_mailbox()
+        self.log_handler.check()
+
+    @modify_settings(MIDDLEWARE={"append": "aldryn_forms.middleware.handle_post.HandleHttpPost"})
+    def test_hide_form_after_redirection_true(self):
+        self.form_plugin.success_message = "Thank you."
+        self.form_plugin.action_backend = 'default'
+        self.form_plugin.hide_form_after_redirection = True
+        self.form_plugin.redirect_to = {"internal_link": f"cms.page:{self.page.pk}"}
+        self.form_plugin.save()
+
+        form_plugin = FormPlugin.objects.last()
+        data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester"}
+        with responses.RequestsMock():
+            response = self.client.post(self.page.get_absolute_url('en'), data, follow=True)
+
+        self.assertNotContains(response, """<input type="text" name="name" id="id_name">""", html=True)
+        self.assertEqual([str(msg) for msg in get_messages(response.wsgi_request)], ['<p>Thank you.</p>'])
+        self.assertIsNone(getattr(response.wsgi_request, "aldryn_forms_success_message", None))
+        self.assertQuerySetEqual(FormSubmission.objects.values_list(
+            "name", "data", "post_ident").all().order_by('pk'), [
+            ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester", '
+             '"plugin_type": "TextField"}]', None),
+        ], transform=None)
+        self._check_mailbox()
+        self.log_handler.check()
+
+    def test_hide_form_after_redirection_true_without_middleware(self):
+        self.form_plugin.success_message = "Thank you."
+        self.form_plugin.action_backend = 'default'
+        self.form_plugin.hide_form_after_redirection = True
+        self.form_plugin.redirect_to = {"internal_link": f"cms.page:{self.page.pk}"}
+        self.form_plugin.save()
+
+        form_plugin = FormPlugin.objects.last()
+        data = {"language": "en", "form_plugin_id": form_plugin.pk, "name": "Tester"}
+        path = self.page.get_absolute_url('en')
+        with responses.RequestsMock():
+            response = self.client.post(path, data, follow=True)
+
+        self.assertNotContains(response, """<input type="text" name="name" id="id_name">""", html=True)
+        self.assertContains(response, f"""
+            <div class="cms-form-success-message markdown">
+                You will be <a href="{path}">redirected shortly</a>.
+            </div>""", html=True)
+        self.assertEqual([str(msg) for msg in get_messages(response.wsgi_request)], [])
+        self.assertIsNone(getattr(response.wsgi_request, "aldryn_forms_success_message", None))
         self.assertQuerySetEqual(FormSubmission.objects.values_list(
             "name", "data", "post_ident").all().order_by('pk'), [
             ('Contact us', '[{"name": "name", "label": "Name", "field_occurrence": 1, "value": "Tester", '

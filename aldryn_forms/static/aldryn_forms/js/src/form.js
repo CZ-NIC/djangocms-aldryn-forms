@@ -79,6 +79,26 @@ export function handleFormRequiredCheckbox(event) {
     }
 }
 
+function addMessageAfterendButton(button, message) {
+    button.insertAdjacentHTML('afterend', '<div class="text-danger aldryn-forms aldryn-forms-submit-msg">' + message + '</div>')
+}
+
+function displayWaitMessage(form, button) {
+    if (form) {
+        const message = form.dataset.message_wait ? form.dataset.message_wait.trim() : gettext("Please wait. Submitting form...")
+        if (message) {
+            if (button) {
+                addMessageAfterendButton(button, message)
+            } else {
+                for (const button of form.querySelectorAll('[type=submit]')) {
+                    addMessageAfterendButton(button, message)
+                }
+            }
+        }
+    }
+}
+
+
 export function disableButtonSubmit(event, display_message) {
     // Disable button submit to prevent user click more than once.
     event.target.blur()
@@ -86,11 +106,7 @@ export function disableButtonSubmit(event, display_message) {
         button.disabled = true
         button.readOnly = true
         if (display_message) {
-            const form = event.target.closest("form")
-            const message = form && form.dataset.message_wait ? form.dataset.message_wait : gettext("Please wait. Submitting form...")
-            button.insertAdjacentHTML(
-                'afterend',
-                '<div class="text-danger aldryn-forms aldryn-forms-submit-msg">' + message + '</div>')
+            displayWaitMessage(event.target.closest("form"), button)
         }
     }
 }
@@ -131,13 +147,7 @@ export function handleRequiredFields(event) {
     // Do not submit the form if any required fields are missing.
     if (requiredFieldsFulfilled) {
         // Display a message to inform the user that the form has been submitted.
-        for (const button of this.querySelectorAll('[type=submit]')) {
-            button.insertAdjacentHTML(
-                'afterend',
-                '<div class="text-danger aldryn-forms aldryn-forms-submit-msg">'
-                + gettext("Please wait. Submitting form...")
-                + '</div>')
-        }
+        displayWaitMessage(this)
     } else {
         // Some required value is not set.
         event.preventDefault()

@@ -5,6 +5,11 @@ Changelog
 Unreleased
 ==========
 
+8.10.0 (2026-07-16)
+===================
+
+- Add form fields message_on_form and hide_form_after_redirection.
+- Unification of the message "Please wait. Submitting form..." in form.js.
 - Disable sending webhook in DEBUG mode. Added webhook testing via Constance.
 
 8.9.3 (2026-06-01)

@@ -280,3 +280,13 @@ def get_webhook_debug_admin_url() -> Optional[str]:
 def get_webhook_debug_client_url() -> Optional[str]:
     """Get webhook debug url."""
     return get_webhook_debug_url("ALDRYN_FORMS_DEBUG_WEBHOOK_URL")
+
+
+def get_form_anchor(pk: int) -> str:
+    """Get form anchor."""
+    return f"aldryn_form_{pk}"
+
+
+def get_post_form(pk: int) -> str:
+    """Get post form."""
+    return f"post_aldryn_form_{pk}"

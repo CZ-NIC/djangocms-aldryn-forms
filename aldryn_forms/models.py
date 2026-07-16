@@ -135,6 +135,15 @@ class BaseFormPlugin(CMSPlugin):
         null=True,
         help_text=_('An success message that will be displayed.')
     )
+    message_on_form = models.BooleanField(
+        verbose_name=_('Show the message on the form.'),
+        default=False,
+    )
+    hide_form_after_redirection = models.BooleanField(
+        verbose_name=_('Hide the form after redirection.'),
+        default=False,
+    )
+
     redirect_to = AldrynFormsLinkField(verbose_name=_('Redirect to'), null=True, blank=True)
     custom_classes = models.CharField(
         verbose_name=_('custom css classes'), max_length=255, blank=True)

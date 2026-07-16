@@ -7,7 +7,7 @@ from django.utils.deprecation import MiddlewareMixin
 from aldryn_forms.constants import ALDRYN_FORMS_POST_IDENT_NAME
 from aldryn_forms.forms import FormSubmissionBaseForm
 from aldryn_forms.models import FormPlugin
-from aldryn_forms.utils import get_plugin_tree
+from aldryn_forms.utils import get_form_anchor, get_plugin_tree, get_post_form
 
 
 class HandleHttpPost(MiddlewareMixin):
@@ -53,6 +53,8 @@ def get_response(
         data["status"] = "SUCCESS"
         data["post_ident"] = form.cleaned_data.get(ALDRYN_FORMS_POST_IDENT_NAME)
         data["message"] = getattr(request, "aldryn_forms_success_message", "OK")
+        if form_plugin.hide_form_after_redirection:
+            request.session[get_post_form(form_plugin.pk)] = True  # Hide valid form after redirection.
     else:
         data["form"] = form.errors
 
@@ -62,6 +64,10 @@ def get_response(
     if data["status"] == "SUCCESS":
         form_plugin_instance = form_plugin.get_plugin_instance()[1]
         success_url = form_plugin_instance.get_success_url(instance=form_plugin, post_ident=data.get("post_ident"))
+        if form_plugin.message_on_form:
+            anchor = get_form_anchor(form_plugin.pk)
+            success_url += "#" + anchor
+            request.session[anchor] = True
         if success_url:
             return HttpResponseRedirect(success_url)
 

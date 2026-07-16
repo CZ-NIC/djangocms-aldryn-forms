@@ -2,6 +2,7 @@ import json
 import logging
 import re
 import smtplib
+import uuid
 from typing import Any, Dict, List, Optional, Tuple, Union
 from urllib.parse import parse_qs, urlencode, urlparse
 
@@ -43,7 +44,7 @@ from .helpers import get_user_name
 from .models import FieldPluginBase, FormField, SerializedFormField, SubmittedToBeSent
 from .signals import form_post_save, form_pre_save
 from .sizefield.utils import filesizeformat
-from .utils import get_action_backends, send_email
+from .utils import get_action_backends, get_form_anchor, get_post_form, send_email
 from .validators import MaxChoicesValidator, MinChoicesValidator, is_valid_recipient
 
 
@@ -85,6 +86,8 @@ class FormPlugin(FieldContainer):
                 'form_template',
                 'error_message',
                 'success_message',
+                'message_on_form',
+                'hide_form_after_redirection',
                 'recipients',
                 'action_backend',
                 'webhooks',
@@ -99,10 +102,31 @@ class FormPlugin(FieldContainer):
         request = context['request']
 
         form = self.process_form(instance, request)
+        context['form_anchor'] = form_anchor = get_form_anchor(instance.pk)
+        if request.session.get(form_anchor):
+            del request.session[form_anchor]
+            context['display_message_on_form'] = True
 
-        if request.POST.get('form_plugin_id') == str(instance.id) and form.is_valid():
-            context['post_success'] = True
-            context['form_success_url'] = self.get_success_url(instance, form.instance.post_ident)
+        key_to_hide = get_post_form(instance.pk)
+        hide_valid_form_after_redirection = request.session.get(key_to_hide)
+        if hide_valid_form_after_redirection:
+            del request.session[key_to_hide]
+            context['hide_valid_form_after_redirection'] = True
+
+        if request.POST.get('form_plugin_id') == str(instance.id):
+            if form.is_valid():
+                context['post_success'] = True
+                if instance.message_on_form:
+                    request.session[form_anchor] = True
+                if instance.hide_form_after_redirection:
+                    request.session[key_to_hide] = True
+                context['form_success_url'] = self.get_success_url(instance, form.instance.post_ident)
+                if context['form_success_url'] and instance.message_on_form:
+                    # Do not use Django messages. Add an anchor to scroll the page to the form report.
+                    context['form_success_url'] += f"?redirect={uuid.uuid4()}#{form_anchor}"
+            else:
+                context['form_is_invalid'] = True
+
         context['form'] = form
         return context
 
@@ -183,6 +207,9 @@ class FormPlugin(FieldContainer):
                 form=form,
                 request=request,
             )
+            if instance.hide_form_after_redirection:
+                request.session[get_post_form(instance.pk)] = True  # Hide valid form after redirection.
+
         elif request.POST.get('form_plugin_id') == str(instance.id) and request.method == 'POST':
             # only call form_invalid if request is POST and form is not valid
             self.form_invalid(instance, request, form)
@@ -290,6 +317,10 @@ class FormPlugin(FieldContainer):
         Sends a success message to the request user
         using django's contrib.messages app.
         """
+        if instance.message_on_form:
+            return  # Do not use Django messages. These will be displayed next to the form.
+        if "aldryn_forms.middleware.handle_post.HandleHttpPost" not in settings.MIDDLEWARE:
+            return  # Do not use Django messages when middleware missing.
         if instance.success_message:
             message = markdown.markdown(instance.success_message)
             if request.META.get('HTTP_X_REQUESTED_WITH') == "XMLHttpRequest":

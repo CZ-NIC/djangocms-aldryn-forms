@@ -462,7 +462,9 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
         self._check_mailbox()
         self.log_handler.check()
 
-    def test_send_success_message_on_form_without_middleware(self):
+    @patch('os.urandom')
+    def test_send_success_message_on_form_without_middleware(self, mock_urandom):
+        mock_urandom.return_value = b'\xf8\xe0\xf1N_\x88\xae\xb4\xc6\x14\x1c_\xaf}\xe8\xfd'
         self.form_plugin.success_message = "Thank you."
         self.form_plugin.action_backend = 'default'
         self.form_plugin.message_on_form = True
@@ -477,6 +479,12 @@ class FormPluginTestCase(DataMixin, CMSTestCase):
 
         self.assertContains(response, f"""
             <div class="aldryn-from-message-frame" id="aldryn_form_{self.form_plugin.pk}"></div>""", html=True)
+        self.assertContains(response, f"""
+            <div class="cms-form-success-message markdown">You will be <a
+                href="/en/test-page/?redirect=f8e0f14e-5f88-4eb4-8614-1c5faf7de8fd#aldryn_form_{self.form_plugin.pk}">
+                    redirected shortly
+                </a>.
+            </div>""", html=True)
         self.assertIsNone(getattr(response.wsgi_request, "aldryn_forms_success_message", None))
         self.assertQuerySetEqual(FormSubmission.objects.values_list(
             "name", "data", "post_ident").all().order_by('pk'), [

@@ -5,6 +5,12 @@ Changelog
 Unreleased
 ==========
 
+8.10.1 (2026-07-20)
+===================
+
+* Except OSError in send_email in utils.
+* Remove id from HTML element form in template form.html.
+
 8.10.0 (2026-07-16)
 ===================
 

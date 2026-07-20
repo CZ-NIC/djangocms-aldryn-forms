@@ -212,7 +212,7 @@ def send_email(
             reply_to=reply_to,
             attachments=attachments,
         )
-    except smtplib.SMTPException as err:
+    except (smtplib.SMTPException, OSError) as err:
         logger.error(err)
         return False
     return True

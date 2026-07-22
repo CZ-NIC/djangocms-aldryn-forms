@@ -20,7 +20,10 @@ from PIL import Image
 from .constants import ALDRYN_FORMS_MULTIPLE_SUBMISSION_DURATION, ALDRYN_FORMS_POST_IDENT_NAME, MAX_IDENT_SIZE
 from .models import FormSubmission, FormSubmissionBase, SerializedFormField
 from .sizefield.utils import filesizeformat
-from .utils import action_backend_choices, add_form_error, get_action_backends, get_serialized_fields, get_user_model
+from .utils import (
+    action_backend_choices, add_form_error, form_rules_clean, form_rules_is_valid, get_action_backends,
+    get_serialized_fields, get_user_model,
+)
 
 
 class FileSizeCheckMixin:
@@ -328,7 +331,24 @@ class FormSubmissionBaseForm(forms.Form):
                             checker.check(serialized_field.value)
                         except ValidationError:
                             self._add_error(_("This email is unavailable."), serialized_field.name)
+        if self.errors:
+            return self.cleaned_data
+        clean_fields_again = False
+        for rule in self.form_plugin.validation_rules.all():
+            if isinstance(rule.data, dict):
+                if form_rules_clean(self.request, self, rule.data):
+                    clean_fields_again = True
+        if clean_fields_again:
+            self._clean_fields()
         return self.cleaned_data
+
+    def is_valid(self):
+        if super().is_valid():
+            for rule in self.form_plugin.validation_rules.all():
+                if isinstance(rule.data, dict):
+                    form_rules_is_valid(self.request, self, rule.data)
+            return True
+        return False
 
     def generate_post_ident(self) -> str:
         """Generate new post_ident."""

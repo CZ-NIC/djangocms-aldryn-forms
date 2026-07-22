@@ -1,0 +1,100 @@
+{% extends "admin/change_form.html" %}
+{% load i18n %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/json.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/python.min.js"></script>
+    <script>hljs.highlightAll();</script>
+{% endblock %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <style>
+        .examples pre {
+            border: solid #00bbff 1px;
+            padding: 0;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-light.min.css">
+{% endblock extrastyle %}
+
+{% block content %}
+    {{ block.super }}
+
+<div class="examples">
+<h4>{% translate "Validation rules example" %}:</h4>
+
+<pre><code class="language-json">
+{
+  "description_clean": "The 'clean' part is used to check the form for validity.",
+  "description_create": "The 'create' part is used when building the form fields.",
+  "description_success": "The 'success' part is used when the form is filled out correctly.",
+  "clean": [
+      {
+          "fields": ["phone", "mobile"],
+          "value": "0",
+          "error": "This value is not allowed.",
+          "description": "For the value 0 in the 'phone' and 'mobile' fields, display the error 'This value is not allowed'."
+      }
+       {
+          "fields": ["email"],
+          "pattern": ".*\\.ru$",
+          "error": "This value is not allowed.",
+          "description": "For a value such as my@mail.ru in the 'email' field, display the error 'This value is not allowed'."
+      },
+      {
+            "fields_pattern": {"types": ["text"], "name": ".*"},
+            "pattern": ".*[Ѐ-ӿ]+",
+            "fnc": "aldryn_forms.form_validation_rules.captcha_required",
+            "description": "If the value of the input[type=text] field with any name contains a character in the [\u0400 - \u04FF] range, activate the captcha field."
+      },
+  ],
+  "create": [
+     {
+        "fnc": "aldryn_forms.form_validation_rules.enable_captcha",
+        "description": "Complement to the function captcha_required. Set captcha.fields.CaptchaField attribute required."
+     }
+  ],
+  "success": [
+      {
+         "fnc": "aldryn_forms.form_validation_rules.captcha_optional",
+         "description": "Complement to the function captcha_required and enable_captcha. Set captcha.fields.CaptchaField attribute optional."
+      }
+  ],
+  "translations": {
+      "This value is not allowed.": {
+          "cs": "Tato hodnota není povolena."
+      }
+  }
+}
+</code></pre>
+
+<h4>Python functions examples:<h4>
+
+    <pre><code class="language-python">
+from django.forms.fields import Field
+from django.http import HttpRequest
+from django.utils.translation import gettext_lazy as _
+
+from captcha.fields import CaptchaField
+
+from aldrny_forms.cms_plugins import FormPlugin
+
+
+def captcha_required(request: HttpRequest, form: FormPlugin, name: str, value: str) -&gt; None:
+    """Set captcha is required."""
+    clean_fields_again = False
+    return clean_fields_again  # True if field attribute was changed and field needs to be validated.
+
+def enable_captcha(request: HttpRequest, form: FormPlugin, form_fields: dict[str, Field], rule: dict[str, str]) -&gt; None:
+    """Enable captcha field in form."""
+
+def captcha_optional(request: HttpRequest, form: FormPlugin, rule: dict[str, str]) -&gt; None:
+    """Set captcha optional."""
+</code></pre>
+
+
+</div>
+{% endblock %}

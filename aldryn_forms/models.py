@@ -20,6 +20,7 @@ from filer.fields.folder import FilerFolderField
 
 from .compat import build_plugin_tree
 from .constants import WEBHOOK_METHODS
+from .encoders import PrettyJsonEncoder
 from .fields import AldrynFormsLinkField
 from .helpers import is_form_element
 from .sizefield.models import FileSizeField
@@ -104,6 +105,14 @@ class Webhook(models.Model):
         return self.name
 
 
+class ValidationRule(models.Model):
+    name = models.CharField(_("Name"), max_length=255, unique=True)
+    data = models.JSONField(_("Validation rules"), null=True, blank=True, encoder=PrettyJsonEncoder)
+
+    def __str__(self):
+        return self.name
+
+
 class BaseFormPlugin(CMSPlugin):
     FALLBACK_FORM_TEMPLATE = 'aldryn_forms/form.html'
     DEFAULT_FORM_TEMPLATE = getattr(
@@ -169,6 +178,7 @@ class BaseFormPlugin(CMSPlugin):
         default='default',
     )
     webhooks = models.ManyToManyField(Webhook, blank=True)
+    validation_rules = models.ManyToManyField(ValidationRule, blank=True)
 
     form_attributes = AttributesField(
         verbose_name=_('Attributes'),
@@ -207,6 +217,7 @@ class BaseFormPlugin(CMSPlugin):
     def copy_relations(self, oldinstance):
         self.recipients.set(oldinstance.recipients.all())
         self.webhooks.set(oldinstance.webhooks.all())
+        self.validation_rules.set(oldinstance.validation_rules.all())
 
     def get_submit_button(self):
         from .cms_plugins import SubmitButton
@@ -407,6 +418,13 @@ class FieldPluginBase(CMSPlugin):
         max_length=255,
         blank=True,
         help_text=_('Default value of field.')
+    )
+
+    pattern = models.CharField(
+        verbose_name=_('Pattern'),
+        max_length=255,
+        blank=True,
+        help_text=_("The pattern attribute specifies a regular expression the form control's value should match.")
     )
 
     custom_classes = models.CharField(

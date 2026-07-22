@@ -10,13 +10,16 @@ from django import forms
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ImproperlyConfigured
+from django.forms.fields import Field
 from django.forms.forms import NON_FIELD_ERRORS
-from django.http import Http404
+from django.forms.widgets import Textarea
+from django.http import Http404, HttpRequest
 from django.template import Context, Template
 from django.test import RequestFactory
 from django.urls import Resolver404, resolve
 from django.utils.module_loading import import_string
 from django.utils.translation import get_language
+from django.utils.translation import gettext_lazy as _
 
 from cms.models import CMSPlugin
 from cms.plugin_pool import plugin_pool
@@ -42,7 +45,8 @@ from .validators import is_valid_recipient
 
 
 if TYPE_CHECKING:  # pragma: no cover
-    from .models import FormSubmissionBase, Recipient, SerializedFormField
+    from .cms_plugins import FromPlugin
+    from .models import FormPlugin, FormSubmissionBase, Recipient, SerializedFormField
 
 logger = logging.getLogger(__name__)
 
@@ -290,3 +294,96 @@ def get_form_anchor(pk: int) -> str:
 def get_post_form(pk: int) -> str:
     """Get post form."""
     return f"post_aldryn_form_{pk}"
+
+
+def compile_pattern(pattern):
+    """Compile regular expression pattern."""
+    if pattern is None:
+        return None
+    try:
+        return re.compile(pattern)
+    except re.error as error:
+        logger.error(error)
+    return None
+
+
+def process_fnc(request: HttpRequest, fnc, *args) -> None | bool:
+    """Process function."""
+    try:
+        return import_string(fnc)(request, *args)
+    except Exception as error:
+        logging.error(error)
+
+
+def process_error(request: HttpRequest, form, regex, name, value, rule, translations) -> bool:
+    """Process error."""
+    if value is None:
+        return
+    value = str(value)
+    if not regex.match(value):
+        return
+    fnc = rule.get("fnc")
+    if fnc is not None:
+        return process_fnc(request, fnc, form, name, value)
+    else:
+        error = rule.get("error", _("Invalid value"))
+        language = translations.get(error, {})
+        msg = language.get(request.LANGUAGE_CODE, error)
+        form._add_error(msg, name)
+    return False
+
+
+def is_input_type(form, name, field_types) -> bool:
+    """Check if field widget is required type."""
+    if not field_types:
+        return True
+    if isinstance(form.fields[name].widget, Textarea):
+        input_type = "textarea"
+    else:
+        input_type = getattr(form.fields[name].widget, "input_type", "text")
+    return input_type in field_types
+
+
+def form_rules_clean(request: HttpRequest, form: forms.Form, rules: dict) -> None:
+    """Form rules for form.clean."""
+    clean_fields_again = False
+    translations = rules.get("translations", {})
+    for rule in rules.get("clean", []):
+        if not isinstance(rule, dict) and "fields" not in rule:
+            continue
+        for name in rule.get("fields", []):
+            value = form.cleaned_data.get(name)
+            if value is not None:
+                if regex := compile_pattern(rule.get("pattern")):
+                    if process_error(request, form, regex, name, value, rule, translations):
+                        clean_fields_again = True
+        fields_pattern = rule.get("fields_pattern")
+        if not isinstance(fields_pattern, dict):
+            continue
+        field_types = fields_pattern.get("types", [])
+        field_name = fields_pattern.get("name")
+        if not field_name:
+            continue
+        if regex_field := compile_pattern(field_name):
+            if regex := compile_pattern(rule.get("pattern")):
+                for name, value in form.cleaned_data.items():
+                    if regex_field.match(name) and is_input_type(form, name, field_types):
+                        if process_error(request, form, regex, name, value, rule, translations):
+                            clean_fields_again = True
+    return clean_fields_again
+
+
+def form_rules_build_fields(
+    request: HttpRequest, instance: "FormPlugin", form: "FromPlugin", form_fields: dict[str, Field], rules: dict
+) -> None:
+    """Form rules for plugin.get_form_fields."""
+    for rule in rules.get("create", []):
+        if "fnc" in rule:
+            process_fnc(request, rule["fnc"], form, form_fields, rule)
+
+
+def form_rules_is_valid(request: HttpRequest, form: forms.Form, rules: dict) -> None:
+    """Form rules is_valid."""
+    for rule in rules.get("success", []):
+        if "fnc" in rule:
+            process_fnc(request, rule["fnc"], form, rule)

@@ -44,7 +44,7 @@ from .helpers import get_user_name
 from .models import FieldPluginBase, FormField, SerializedFormField, SubmittedToBeSent
 from .signals import form_post_save, form_pre_save
 from .sizefield.utils import filesizeformat
-from .utils import get_action_backends, get_form_anchor, get_post_form, send_email
+from .utils import form_rules_build_fields, get_action_backends, get_form_anchor, get_post_form, send_email
 from .validators import MaxChoicesValidator, MinChoicesValidator, is_valid_recipient
 
 
@@ -91,6 +91,7 @@ class FormPlugin(FieldContainer):
                 'recipients',
                 'action_backend',
                 'webhooks',
+                'validation_rules',
                 'custom_classes',
                 'form_attributes',
             )
@@ -287,6 +288,9 @@ class FormPlugin(FieldContainer):
             form_fields[field.name]._cms_form_plugin = self
             if field.name in params:
                 form_fields[field.name].initial = params[field.name]
+        for rule in instance.validation_rules.all():
+            if isinstance(rule.data, dict):
+                form_rules_build_fields(request, instance, self, form_fields, rule.data)
         return form_fields
 
     def get_form_kwargs(self, instance, request):
@@ -451,6 +455,7 @@ class Field(FormElement):
         'attributes',
         'help_text',
         ('min_value', 'max_value',),
+        'pattern',
         'required_message',
         'custom_classes',
     ]
@@ -527,6 +532,8 @@ class Field(FormElement):
         attrs = {}
         if instance.placeholder_text:
             attrs['placeholder'] = instance.placeholder_text
+        if instance.pattern:
+            attrs['pattern'] = instance.pattern
         if instance.custom_classes:
             attrs['class'] = instance.custom_classes
         if instance.attributes:
@@ -644,6 +651,7 @@ class BaseTextField(Field):
         'validators',
         'placeholder',
         'initial_value',
+        'pattern',
     ]
 
     def get_form_field_validators(self, instance):

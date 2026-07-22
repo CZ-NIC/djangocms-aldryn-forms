@@ -4,7 +4,7 @@ from django.template.loader import render_to_string
 
 from tablib import Dataset
 
-from ..models import FormSubmission, Webhook
+from ..models import FormSubmission, Webhook, ValidationRule
 from ..utils import get_webhook_debug_admin_url
 from .base import BaseFormSubmissionAdmin
 from .forms import WebhookAdminForm
@@ -49,3 +49,4 @@ class WebhookAdmin(admin.ModelAdmin):
 
 admin.site.register(FormSubmission, FormSubmissionAdmin)
 admin.site.register(Webhook, WebhookAdmin)
+admin.site.register(ValidationRule)

@@ -281,6 +281,7 @@ class FormSubmissionBaseForm(forms.Form):
         )
         self.fields['language'].initial = language
         self.fields['form_plugin_id'].initial = self.form_plugin.pk
+        self.clean_fields_again = []
 
     def _add_error(self, message, field=NON_FIELD_ERRORS):
         try:
@@ -333,12 +334,11 @@ class FormSubmissionBaseForm(forms.Form):
                             self._add_error(_("This email is unavailable."), serialized_field.name)
         if self.errors:
             return self.cleaned_data
-        clean_fields_again = False
+        self.clean_fields_again = []
         for rule in self.form_plugin.validation_rules.all():
             if isinstance(rule.data, dict):
-                if form_rules_clean(self.request, self, rule.data):
-                    clean_fields_again = True
-        if clean_fields_again:
+                self.clean_fields_again.extend(form_rules_clean(self.request, self, rule.data))
+        if self.clean_fields_again:
             self._clean_fields()
         return self.cleaned_data
 

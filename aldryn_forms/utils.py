@@ -307,21 +307,22 @@ def compile_pattern(pattern):
     return None
 
 
-def process_fnc(request: HttpRequest, fnc, *args) -> None | bool:
+def process_fnc(request: HttpRequest, fnc, *args) -> bool | list[str] | None:
     """Process function."""
     try:
         return import_string(fnc)(request, *args)
     except Exception as error:
         logging.error(error)
+    return None
 
 
-def process_error(request: HttpRequest, form, regex, name, value, rule, translations) -> bool:
+def process_error(request: HttpRequest, form, regex, name, value, rule, translations) -> bool | list[str] | None:
     """Process error."""
     if value is None:
-        return
+        return None
     value = str(value)
     if not regex.match(value):
-        return
+        return None
     fnc = rule.get("fnc")
     if fnc is not None:
         return process_fnc(request, fnc, form, name, value)
@@ -330,7 +331,7 @@ def process_error(request: HttpRequest, form, regex, name, value, rule, translat
         language = translations.get(error, {})
         msg = language.get(request.LANGUAGE_CODE, error)
         form._add_error(msg, name)
-    return False
+    return None
 
 
 def is_input_type(form, name, field_types) -> bool:
@@ -344,9 +345,9 @@ def is_input_type(form, name, field_types) -> bool:
     return input_type in field_types
 
 
-def form_rules_clean(request: HttpRequest, form: forms.Form, rules: dict) -> None:
+def form_rules_clean(request: HttpRequest, form: forms.Form, rules: dict) -> list[str]:
     """Form rules for form.clean."""
-    clean_fields_again = False
+    clean_fields_again = []
     translations = rules.get("translations", {})
     for rule in rules.get("clean", []):
         if not isinstance(rule, dict) and "fields" not in rule:
@@ -355,8 +356,9 @@ def form_rules_clean(request: HttpRequest, form: forms.Form, rules: dict) -> Non
             value = form.cleaned_data.get(name)
             if value is not None:
                 if regex := compile_pattern(rule.get("pattern")):
-                    if process_error(request, form, regex, name, value, rule, translations):
-                        clean_fields_again = True
+                    retval = process_error(request, form, regex, name, value, rule, translations)
+                    if isinstance(retval, list):
+                        clean_fields_again.extend(retval)
         fields_pattern = rule.get("fields_pattern")
         if not isinstance(fields_pattern, dict):
             continue
@@ -368,8 +370,9 @@ def form_rules_clean(request: HttpRequest, form: forms.Form, rules: dict) -> Non
             if regex := compile_pattern(rule.get("pattern")):
                 for name, value in form.cleaned_data.items():
                     if regex_field.match(name) and is_input_type(form, name, field_types):
-                        if process_error(request, form, regex, name, value, rule, translations):
-                            clean_fields_again = True
+                        retval = process_error(request, form, regex, name, value, rule, translations)
+                        if isinstance(retval, list):
+                            clean_fields_again.extend(retval)
     return clean_fields_again
 
 

@@ -10,17 +10,17 @@ from .cms_plugins import FormPlugin
 CAPCHA_KEY = "aldryn_forms_captcha_is_required"
 
 
-def captcha_required(request: HttpRequest, form: FormPlugin, name: str, value: str) -> None:
+def captcha_required(request: HttpRequest, form: FormPlugin, name: str, value: str) -> list[str]:
     """Set captcha is required."""
     request.session[CAPCHA_KEY] = True
-    clean_fields_again = False
+    clean_fields_again = []
     for name, field in form.fields.items():
         if isinstance(field, CaptchaField):
-            clean_fields_again = True
             field.required = True
-            if hasattr(field, "fields"):
-                for child in field.fields:
-                    child.required = True
+            for child in field.fields:
+                child.required = True
+            for suffix in field.widget.widgets_names:
+                clean_fields_again.append(name + suffix)
     return clean_fields_again
 
 

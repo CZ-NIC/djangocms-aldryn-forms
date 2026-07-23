@@ -57,6 +57,7 @@ def get_response(
             request.session[get_post_form(form_plugin.pk)] = True  # Hide valid form after redirection.
     else:
         data["form"] = form.errors
+        data["clean_fields_again"] = form.clean_fields_again
 
     if request.META.get('HTTP_X_REQUESTED_WITH') == "XMLHttpRequest":
         return JsonResponse(data)

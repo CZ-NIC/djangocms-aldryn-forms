@@ -510,6 +510,14 @@ export async function sendData(form) {
         })
         const data = await response.json()
         console.log(data)
+        if (data.clean_fields_again) {
+            for (const name in data.clean_fields_again) {
+                const input = form.querySelector(`input[name="${name}"]`)
+                if (input) {
+                    input.required = true
+                }
+            }
+        }
         if (data.status === "ERROR") {
             for (const name in data.form) {
                 if (name === "__all__") {
@@ -520,7 +528,10 @@ export async function sendData(form) {
                         displayMessage(form, data.form[name], "error")
                     }
                 } else {
-                    const input = form.querySelector(`input[name="${name}"]`)
+                    let input = form.querySelector(`input[name="${name}"]`)
+                    if (!input) {
+                        input = form.querySelector(`input[name="${name}_1"]`)
+                    }
                     if (input) {
                         displayNodeMessages(input, data.form[name], "error")
                     }

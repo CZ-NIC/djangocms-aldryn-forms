@@ -320,6 +320,7 @@ class FormSubmissionBaseForm(forms.Form):
         return form_data
 
     def clean(self):
+        self.clean_fields_again = []
         if self.errors:
             return self.cleaned_data
         with self.email_availability_checker_class(settings.EMAIL_HOST) as checker:
@@ -338,8 +339,6 @@ class FormSubmissionBaseForm(forms.Form):
         for rule in self.form_plugin.validation_rules.all():
             if isinstance(rule.data, dict):
                 self.clean_fields_again.extend(form_rules_clean(self.request, self, rule.data))
-        if self.clean_fields_again:
-            self._clean_fields()
         return self.cleaned_data
 
     def is_valid(self):

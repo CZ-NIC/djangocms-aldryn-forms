@@ -12,15 +12,17 @@ CAPCHA_KEY = "aldryn_forms_captcha_is_required"
 
 def captcha_required(request: HttpRequest, form: FormPlugin, name: str, value: str) -> list[str]:
     """Set captcha is required."""
-    request.session[CAPCHA_KEY] = True
     clean_fields_again = []
-    for name, field in form.fields.items():
-        if isinstance(field, CaptchaField):
-            field.required = True
-            for child in field.fields:
-                child.required = True
-            for suffix in field.widget.widgets_names:
-                clean_fields_again.append(name + suffix)
+    if not request.session.get(CAPCHA_KEY):
+        request.session[CAPCHA_KEY] = True
+        for name, field in form.fields.items():
+            if isinstance(field, CaptchaField):
+                field.required = True
+                for child in field.fields:
+                    child.required = True
+                for suffix in field.widget.widgets_names:
+                    clean_fields_again.append(name + suffix)
+                form._add_error(_("Fill in the captcha code."), name)
     return clean_fields_again
 
 

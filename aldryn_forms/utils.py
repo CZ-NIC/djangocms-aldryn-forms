@@ -350,29 +350,29 @@ def form_rules_clean(request: HttpRequest, form: forms.Form, rules: dict) -> lis
     clean_fields_again = []
     translations = rules.get("translations", {})
     for rule in rules.get("clean", []):
-        if not isinstance(rule, dict) and "fields" not in rule:
+        if not isinstance(rule, dict):
             continue
-        for name in rule.get("fields", []):
-            value = form.cleaned_data.get(name)
-            if value is not None:
-                if regex := compile_pattern(rule.get("pattern")):
-                    retval = process_error(request, form, regex, name, value, rule, translations)
-                    if isinstance(retval, list):
-                        clean_fields_again.extend(retval)
-        fields_pattern = rule.get("fields_pattern")
-        if not isinstance(fields_pattern, dict):
-            continue
-        field_types = fields_pattern.get("types", [])
-        field_name = fields_pattern.get("name")
-        if not field_name:
-            continue
-        if regex_field := compile_pattern(field_name):
-            if regex := compile_pattern(rule.get("pattern")):
-                for name, value in form.cleaned_data.items():
-                    if regex_field.match(name) and is_input_type(form, name, field_types):
+        fields = rule.get("fields")
+        if isinstance(fields, list):
+            for name in fields:
+                value = form.cleaned_data.get(name)
+                if value is not None:
+                    if regex := compile_pattern(rule.get("pattern")):
                         retval = process_error(request, form, regex, name, value, rule, translations)
                         if isinstance(retval, list):
                             clean_fields_again.extend(retval)
+        elif isinstance(rule.get("fields_pattern"), dict):
+            field_types = rule["fields_pattern"].get("types", [])
+            field_name = rule["fields_pattern"].get("name")
+            if not field_name:
+                continue
+            if regex_field := compile_pattern(field_name):
+                if regex := compile_pattern(rule.get("pattern")):
+                    for name, value in form.cleaned_data.items():
+                        if regex_field.match(name) and is_input_type(form, name, field_types):
+                            retval = process_error(request, form, regex, name, value, rule, translations)
+                            if isinstance(retval, list):
+                                clean_fields_again.extend(retval)
     return clean_fields_again
 
 

@@ -520,7 +520,10 @@ export async function sendData(form) {
                         displayMessage(form, data.form[name], "error")
                     }
                 } else {
-                    const input = form.querySelector(`input[name="${name}"]`)
+                    let input = form.querySelector(`input[name="${name}"]`)
+                    if (!input) {
+                        input = form.querySelector(`input[name="${name}_1"]`)  // Captcha code
+                    }
                     if (input) {
                         displayNodeMessages(input, data.form[name], "error")
                     }

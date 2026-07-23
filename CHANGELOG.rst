@@ -5,6 +5,11 @@ Changelog
 Unreleased
 ==========
 
+8.10.2 (2026-07-23)
+===================
+
+* Fix querySelector for captcha code in form.js.
+
 8.10.1 (2026-07-20)
 ===================
 

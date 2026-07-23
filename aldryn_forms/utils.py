@@ -347,7 +347,7 @@ def is_input_type(form, name, field_types) -> bool:
 
 def form_rules_clean(request: HttpRequest, form: forms.Form, rules: dict) -> list[str]:
     """Form rules for form.clean."""
-    clean_fields_again = []
+    modified_fields = []
     translations = rules.get("translations", {})
     for rule in rules.get("clean", []):
         if not isinstance(rule, dict):
@@ -360,7 +360,7 @@ def form_rules_clean(request: HttpRequest, form: forms.Form, rules: dict) -> lis
                     if regex := compile_pattern(rule.get("pattern")):
                         retval = process_error(request, form, regex, name, value, rule, translations)
                         if isinstance(retval, list):
-                            clean_fields_again.extend(retval)
+                            modified_fields.extend(retval)
         elif isinstance(rule.get("fields_pattern"), dict):
             field_types = rule["fields_pattern"].get("types", [])
             field_name = rule["fields_pattern"].get("name")
@@ -372,8 +372,8 @@ def form_rules_clean(request: HttpRequest, form: forms.Form, rules: dict) -> lis
                         if regex_field.match(name) and is_input_type(form, name, field_types):
                             retval = process_error(request, form, regex, name, value, rule, translations)
                             if isinstance(retval, list):
-                                clean_fields_again.extend(retval)
-    return clean_fields_again
+                                modified_fields.extend(retval)
+    return modified_fields
 
 
 def form_rules_build_fields(

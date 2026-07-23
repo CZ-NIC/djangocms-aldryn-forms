@@ -510,11 +510,15 @@ export async function sendData(form) {
         })
         const data = await response.json()
         console.log(data)
-        if (data.clean_fields_again) {
-            for (const name of data.clean_fields_again) {
-                const input = form.querySelector(`input[name="${name}"]`)
-                if (input) {
-                    input.required = true
+        if (data.modified_fields) {
+            for (const payload of data.modified_fields) {
+                if (typeof payload === 'object' && payload.required) {
+                    for (const name of payload.required) {
+                        const input = form.querySelector(`input[name="${name}"]`)
+                        if (input) {
+                            input.required = true
+                        }
+                    }
                 }
             }
         }

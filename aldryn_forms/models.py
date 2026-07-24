@@ -353,6 +353,15 @@ class FieldsetPlugin(CMSPlugin):
         return self.legend or str(self.pk)
 
 
+def validate_pattern(value: str) -> None:
+    """Validate mattern."""
+    if value is not None:
+        try:
+            re.compile(value)
+        except re.error as error:
+            raise ValidationError(error)
+
+
 class FieldPluginBase(CMSPlugin):
     name = models.CharField(
         _('Name'),
@@ -413,6 +422,8 @@ class FieldPluginBase(CMSPlugin):
         verbose_name=_('Pattern'),
         max_length=255,
         blank=True,
+        null=True,
+        validators=[validate_pattern],
         help_text=_("The pattern attribute specifies a regular expression the form control's value should match.")
     )
 

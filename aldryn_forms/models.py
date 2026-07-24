@@ -409,6 +409,13 @@ class FieldPluginBase(CMSPlugin):
         help_text=_('Default value of field.')
     )
 
+    pattern = models.CharField(
+        verbose_name=_('Pattern'),
+        max_length=255,
+        blank=True,
+        help_text=_("The pattern attribute specifies a regular expression the form control's value should match.")
+    )
+
     custom_classes = models.CharField(
         verbose_name=_('custom css classes'), max_length=255, blank=True)
     cmsplugin_ptr = CMSPluginField(

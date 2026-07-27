@@ -353,6 +353,15 @@ class FieldsetPlugin(CMSPlugin):
         return self.legend or str(self.pk)
 
 
+def validate_pattern(value: str) -> None:
+    """Validate mattern."""
+    if value is not None:
+        try:
+            re.compile(value)
+        except re.error as error:
+            raise ValidationError(error)
+
+
 class FieldPluginBase(CMSPlugin):
     name = models.CharField(
         _('Name'),
@@ -440,6 +449,16 @@ class FieldPluginBase(CMSPlugin):
 
 
 class FieldPlugin(FieldPluginBase):
+
+    pattern = models.CharField(
+        verbose_name=_('Pattern'),
+        max_length=255,
+        blank=True,
+        null=True,
+        validators=[validate_pattern],
+        help_text=_("A regular expression to match for the value. It must be a valid JavaScript regular expression.")
+    )
+
     def copy_relations(self, oldinstance):
         for option in oldinstance.option_set.all():
             option.pk = None  # copy on save
@@ -475,6 +494,14 @@ class EmailFieldPlugin(FieldPluginBase):
         default='',
         help_text=_('Additional body text used when email notifications '
                     'are active.')
+    )
+    pattern = models.CharField(
+        verbose_name=_('Pattern'),
+        max_length=255,
+        blank=True,
+        null=True,
+        validators=[validate_pattern],
+        help_text=_("A regular expression to match for the value. It must be a valid JavaScript regular expression.")
     )
 
     def get_parent_form(self):
@@ -635,9 +662,12 @@ class URLFieldPlugin(FieldPluginBase):
                     'The next (optional) words are a description for the url.'))
     pattern = models.CharField(
         verbose_name=_('Pattern'),
-        blank=None, null=True,
         max_length=255,
-        help_text=_('A regular expression to match for the value. It must be a valid JavaScript regular expression.'))
+        blank=True,
+        null=True,
+        validators=[validate_pattern],
+        help_text=_("A regular expression to match for the value. It must be a valid JavaScript regular expression.")
+    )
     readonly = models.BooleanField(
         verbose_name=_('Read only'),
         blank=None, null=True,

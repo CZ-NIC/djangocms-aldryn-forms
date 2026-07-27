@@ -328,6 +328,13 @@ class FormSubmissionBaseForm(forms.Form):
                             checker.check(serialized_field.value)
                         except ValidationError:
                             self._add_error(_("This email is unavailable."), serialized_field.name)
+                if field.plugin_instance.pattern is not None:
+                    pattern = f"^{field.plugin_instance.pattern}$"
+                    serialized_field = plugin.serialize_field(self, field)
+                    if not re.match(pattern, serialized_field.value):
+                        msg = field.plugin_instance.required_message if field.plugin_instance.required_message \
+                            else _("Please enter a valid value.")
+                        self._add_error(msg, serialized_field.name)
         return self.cleaned_data
 
     def generate_post_ident(self) -> str:

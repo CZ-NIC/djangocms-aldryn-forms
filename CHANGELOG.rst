@@ -5,6 +5,11 @@ Changelog
 Unreleased
 ==========
 
+8.11.0 (2026-07-27)
+===================
+
+* Add attribute pattern into TextField and EmailField.
+
 8.10.2 (2026-07-23)
 ===================
 

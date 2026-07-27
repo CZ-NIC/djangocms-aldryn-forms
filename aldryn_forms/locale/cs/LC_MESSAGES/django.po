@@ -525,6 +525,9 @@ msgid_plural "Please correct the errors below."
 msgstr[0] "Opravte chybu níže."
 msgstr[1] "Opravte chyby níže."
 
+msgid "Please enter a valid value."
+msgstr "Vložte platnou hodnotu."
+
 msgid "Please provide CMS page for redirect."
 msgstr "Nastavte stránku CMS pro přesměrování."
 

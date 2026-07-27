@@ -451,6 +451,7 @@ class Field(FormElement):
         'attributes',
         'help_text',
         ('min_value', 'max_value',),
+        'pattern',
         'required_message',
         'custom_classes',
     ]
@@ -527,6 +528,8 @@ class Field(FormElement):
         attrs = {}
         if instance.placeholder_text:
             attrs['placeholder'] = instance.placeholder_text
+        if instance.pattern:
+            attrs['pattern'] = instance.pattern
         if instance.custom_classes:
             attrs['class'] = instance.custom_classes
         if instance.attributes:

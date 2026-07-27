@@ -14,6 +14,8 @@ from cms.test_utils.testcases import CMSTestCase
 
 from aldryn_forms.models import FormPlugin, FormSubmission, SubmittedToBeSent
 
+NOT_SUBMITTED = 'The form could not be submitted. Please check that all form fields are filled in correctly.'
+
 
 class SubmitFormViewTest(CMSTestCase):
 
@@ -525,3 +527,88 @@ class SubmitFormViewTest(CMSTestCase):
              '"plugin_type": "EmailField"}]',)
         ], transform=tuple)
         self.assertEqual(len(mail.outbox), 0)
+
+    def _create_form_for_test_pattern(self, required_message):
+        page = create_page(
+            "form",
+            "test_page.html",
+            "en",
+            apphook="FormsApp",
+        )
+        placeholder = page.get_placeholders("en").get(slot="content")
+        form_plugin = add_plugin(
+            placeholder,
+            "FormPlugin",
+            "en",
+            action_backend="default",
+            redirect_to={"internal_link": f"cms.page:{page.pk}"}
+        )
+        add_plugin(
+            placeholder,
+            "TextField",
+            "en",
+            name="name",
+            required=True,
+            pattern="[A-Za-z]+",
+            required_message=required_message,
+            target=form_plugin,
+            label="Submit",
+        )
+        add_plugin(
+            placeholder,
+            "EmailField",
+            "en",
+            name="email",
+            pattern="[a-z]+@[a-z.]+",
+            required_message=required_message,
+            required=True,
+            target=form_plugin,
+            label="Submit",
+        )
+        return page, form_plugin
+
+    def test_fields_attribute_pattern(self):
+        page, form_plugin = self._create_form_for_test_pattern("Please enter a valid value.")
+        response = self.client.post(
+            page.get_absolute_url("en"),
+            {
+                "form_plugin_id": form_plugin.pk,
+                "name": "Tom",
+                "email": "test@test.foo",
+            },
+        )
+        self.assertRedirects(response, "/en/form/")
+
+    def test_fields_attribute_pattern_invalid_input(self):
+        page, form_plugin = self._create_form_for_test_pattern("Please enter a valid value.")
+        response = self.client.post(
+            page.get_absolute_url("en"),
+            {
+                "form_plugin_id": form_plugin.pk,
+                "name": "Tom 42",
+                "email": "test42@test.foo",
+            },
+        )
+        self.assertContains(response, "Please enter a valid value.")
+        self.assertEqual(response.context['form'].errors, {
+            'name': ['Please enter a valid value.'],
+            'email': ['Please enter a valid value.'],
+            '__all__': [NOT_SUBMITTED]
+        })
+
+    def test_fields_attribute_pattern_custom_error(self):
+        page, form_plugin = self._create_form_for_test_pattern("Do not enter numbers.")
+        response = self.client.post(
+            page.get_absolute_url("en"),
+            {
+                "form_plugin_id": form_plugin.pk,
+                "name": "Tom 42",
+                "email": "test42@test.foo",
+            },
+        )
+        self.assertContains(response, "Do not enter numbers.")
+        self.assertEqual(response.context['form'].errors, {
+            'name': ['Do not enter numbers.'],
+            'email': ['Do not enter numbers.'],
+            '__all__': [NOT_SUBMITTED]
+        })

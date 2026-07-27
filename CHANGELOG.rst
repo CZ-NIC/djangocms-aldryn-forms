@@ -5,6 +5,11 @@ Changelog
 Unreleased
 ==========
 
+8.11.1 (2026-07-27)
+===================
+
+* Fix get pattern in class Field.get_form_field_widget_attrs.
+
 8.11.0 (2026-07-27)
 ===================
 

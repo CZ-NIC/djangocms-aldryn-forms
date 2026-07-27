@@ -528,7 +528,7 @@ class Field(FormElement):
         attrs = {}
         if instance.placeholder_text:
             attrs['placeholder'] = instance.placeholder_text
-        if instance.pattern:
+        if getattr(instance, "pattern", None):
             attrs['pattern'] = instance.pattern
         if instance.custom_classes:
             attrs['class'] = instance.custom_classes

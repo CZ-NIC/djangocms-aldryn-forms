@@ -766,13 +766,6 @@ msgstr "Metoda není typu POST."
 msgid "The number of uploaded files exceeded the set limit of %(limit)s."
 msgstr "Počet nahraných souborů překročil stanovený limit %(limit)s."
 
-msgid ""
-"The pattern attribute specifies a regular expression the form control's "
-"value should match."
-msgstr ""
-"Atribut pattern definuje regulární výraz, se kterým se musí hodnota pole "
-"shodovat."
-
 #, python-format
 msgid "The total file size has exceeded the specified limit %(size)s."
 msgstr "Celková velikost souborů přesáhla stanovený limit %(size)s."

@@ -2,7 +2,7 @@ import json
 
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
-from django.test import TestCase
+from django.test import SimpleTestCase, TestCase
 
 from cms.api import add_plugin
 from cms.models import Placeholder
@@ -10,7 +10,8 @@ from cms.models import Placeholder
 from filer.models import Folder
 
 from aldryn_forms.models import (
-    FileUploadFieldPlugin, FormSubmission, ImageUploadFieldPlugin, MultipleFilesUploadFieldPlugin, Option, URLFieldPlugin
+    FieldPlugin, FileUploadFieldPlugin, FormSubmission, ImageUploadFieldPlugin, MultipleFilesUploadFieldPlugin, Option,
+    URLFieldPlugin,
 )
 
 
@@ -213,3 +214,18 @@ class URLFieldPluginTest(TestCase):
             ["https://example.com/1/", None],
             ["https://example.com/2/", "Second example"],
         ])
+
+
+class FieldPatternTest(SimpleTestCase):
+
+    def test_no_pattern(self):
+        field = FieldPlugin()
+        field.full_clean()
+        self.assertIsInstance(field, FieldPlugin)
+        self.assertIsNone(field.pattern)
+
+    def test_invalid_pattern(self):
+        field = FieldPlugin(pattern="*.")
+        with self.assertRaisesMessage(ValidationError, "{'pattern': ['nothing to repeat at position 0']}"):
+            field.full_clean()
+        self.assertIsInstance(field, FieldPlugin)

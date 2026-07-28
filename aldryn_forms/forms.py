@@ -328,7 +328,7 @@ class FormSubmissionBaseForm(forms.Form):
                             checker.check(serialized_field.value)
                         except ValidationError:
                             self._add_error(_("This email is unavailable."), serialized_field.name)
-                if field.plugin_instance.pattern is not None:
+                if getattr(field.plugin_instance, "pattern", None) is not None:
                     pattern = f"^{field.plugin_instance.pattern}$"
                     serialized_field = plugin.serialize_field(self, field)
                     if not re.match(pattern, serialized_field.value):

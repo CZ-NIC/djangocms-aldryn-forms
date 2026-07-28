@@ -5,6 +5,11 @@ Changelog
 Unreleased
 ==========
 
+8.11.2 (2026-07-28)
+===================
+
+* Fix pattern in FormSubmissionBaseForm.clean.
+
 8.11.1 (2026-07-27)
 ===================
 
